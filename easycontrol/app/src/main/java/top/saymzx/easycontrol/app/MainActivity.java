@@ -38,7 +38,7 @@ public class MainActivity extends Activity {
     mainActivity = ActivityMainBinding.inflate(this.getLayoutInflater());
     setContentView(mainActivity.getRoot());
     // 检测激活
-    checkActive();
+//    checkActive();
     // 设置设备列表适配器
     deviceListAdapter = new DeviceListAdapter(this);
     mainActivity.devicesList.setAdapter(deviceListAdapter);
@@ -68,9 +68,9 @@ public class MainActivity extends Activity {
   }
 
   // 检测激活
-  private void checkActive() {
-    if (!AppData.setting.getIsActive()) startActivity(new Intent(this, ActiveActivity.class));
-  }
+//  private void checkActive() {
+//    if (!AppData.setting.getIsActive()) startActivity(new Intent(this, ActiveActivity.class));
+//  }
 
   // 检查权限
   private void checkPermission() {

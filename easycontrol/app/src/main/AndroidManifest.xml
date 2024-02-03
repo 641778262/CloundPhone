@@ -37,6 +37,7 @@
       android:exported="false" />
     <activity
       android:name=".client.view.FullActivity"
+      android:launchMode="singleTop"
       android:exported="false"
       android:hardwareAccelerated="true" />
     <activity

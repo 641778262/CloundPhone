@@ -11,7 +11,6 @@ import android.widget.Toast;
 import top.saymzx.easycontrol.app.databinding.ActivityActiveBinding;
 import top.saymzx.easycontrol.app.databinding.ItemLoadingBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
-import top.saymzx.easycontrol.app.helper.ActiveHelper;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 import top.saymzx.easycontrol.app.helper.ViewTools;
 
@@ -44,15 +43,15 @@ public class ActiveActivity extends Activity {
       Pair<View, WindowManager.LayoutParams> loading = ViewTools.createLoading(this);
       AppData.windowManager.addView(loading.first, loading.second);
       new Thread(() -> {
-        boolean isOk = ActiveHelper.checkOk(activeKey);
+//        boolean isOk = ActiveHelper.checkOk(activeKey);
         AppData.windowManager.removeView(loading.first);
         AppData.uiHandler.post(() -> {
-          if (isOk) {
+//          if (isOk) {
             finish();
             AppData.setting.setIsActive(true);
             Toast.makeText(this, getString(R.string.active_button_success), Toast.LENGTH_SHORT).show();
             PublicTools.startUrl(this, "https://gitee.com/mingzhixianweb/easycontrol/blob/master/HOW_TO_USE.md");
-          } else Toast.makeText(this, getString(R.string.active_button_error), Toast.LENGTH_SHORT).show();
+//          } else Toast.makeText(this, getString(R.string.active_button_error), Toast.LENGTH_SHORT).show();
         });
       }).start();
     });

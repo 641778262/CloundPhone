@@ -1,6 +1,7 @@
 package top.saymzx.easycontrol.app.client.view;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.hardware.Sensor;
@@ -22,6 +23,7 @@ import top.saymzx.easycontrol.app.client.ControlPacket;
 import top.saymzx.easycontrol.app.databinding.ActivityFullBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
+import top.saymzx.easycontrol.app.helper.DeviceListAdapter;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 import top.saymzx.easycontrol.app.helper.ViewTools;
 
@@ -77,7 +79,8 @@ public class FullActivity extends Activity implements SensorEventListener {
 
   @Override
   public void onBackPressed() {
-    Toast.makeText(this, getString(R.string.error_refused_back), Toast.LENGTH_SHORT).show();
+//    Toast.makeText(this, getString(R.string.error_refused_back), Toast.LENGTH_SHORT).show();
+//    hide();
   }
 
   private void updateMaxSize(int w, int h) {
@@ -87,7 +90,6 @@ public class FullActivity extends Activity implements SensorEventListener {
     byteBuffer.flip();
     ClientController.handleControll(device.uuid, "updateMaxSize", byteBuffer);
   }
-
   public void hide() {
     try {
       fullActivity.textureViewLayout.removeView(ClientController.getTextureView(device.uuid));
@@ -96,6 +98,29 @@ public class FullActivity extends Activity implements SensorEventListener {
       finish();
     } catch (Exception ignored) {
     }
+  }
+
+  @Override
+  protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+    ViewTools.setLocale(this);
+    fullActivity = ActivityFullBinding.inflate(this.getLayoutInflater());
+    setContentView(fullActivity.getRoot());
+    device = ClientController.getDevice(getIntent().getStringExtra("uuid"));
+    ClientController.setFullView(device.uuid, this);
+    // 初始化
+    fullActivity.barView.setVisibility(View.GONE);
+    setNavBarHide(AppData.setting.getDefaultShowNavBar());
+    autoRotate = AppData.setting.getAutoRotate();
+    fullActivity.buttonAutoRotate.setImageResource(autoRotate ? R.drawable.un_rotate : R.drawable.rotate);
+    // 按键监听
+    setButtonListener();
+    setKeyEvent();
+    // 更新textureView
+    fullActivity.textureViewLayout.addView(ClientController.getTextureView(device.uuid), 0);
+    fullActivity.textureViewLayout.post(() -> updateMaxSize(fullActivity.textureViewLayout.getMeasuredWidth(), fullActivity.textureViewLayout.getMeasuredHeight()));
+    // 页面自动旋转
+    AppData.sensorManager.registerListener(this, AppData.sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
   }
 
   // 获取去除底部操作栏后的屏幕大小，用于修改分辨率使用

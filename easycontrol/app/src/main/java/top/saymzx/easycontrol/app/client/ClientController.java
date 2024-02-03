@@ -3,17 +3,25 @@ package top.saymzx.easycontrol.app.client;
 import static android.content.ClipDescription.MIMETYPE_TEXT_PLAIN;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ClipData;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.SurfaceTexture;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Pair;
 import android.view.Display;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.ViewGroup;
+import android.widget.ScrollView;
 
 import androidx.annotation.NonNull;
 
@@ -25,9 +33,11 @@ import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.client.view.FullActivity;
 import top.saymzx.easycontrol.app.client.view.MiniView;
 import top.saymzx.easycontrol.app.client.view.SmallView;
+import top.saymzx.easycontrol.app.databinding.ModuleDialogBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
 import top.saymzx.easycontrol.app.entity.MyInterface;
+import top.saymzx.easycontrol.app.helper.DeviceListAdapter;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class ClientController implements TextureView.SurfaceTextureListener {
@@ -40,8 +50,8 @@ public class ClientController implements TextureView.SurfaceTextureListener {
   public final TextureView textureView = new TextureView(AppData.applicationContext);
   private SurfaceTexture surfaceTexture;
 
-  private final SmallView smallView;
-  private final MiniView miniView;
+//  private final SmallView smallView;
+//  private final MiniView miniView;
   private FullActivity fullView;
 
   private Pair<Integer, Integer> videoSize;
@@ -50,22 +60,24 @@ public class ClientController implements TextureView.SurfaceTextureListener {
 
   private final HandlerThread handlerThread = new HandlerThread("easycontrol_controler");
   private final Handler handler;
+  private boolean handleException;
 
   public ClientController(Device device, ClientStream clientStream, MyInterface.MyFunctionBoolean handle) {
     allController.put(device.uuid, this);
     this.device = device;
     this.clientStream = clientStream;
     this.handle = handle;
-    smallView = new SmallView(device);
-    miniView = new MiniView(device);
+//    smallView = new SmallView(device);
+//    miniView = new MiniView(device);
     setTouchListener();
     textureView.setSurfaceTextureListener(this);
     handlerThread.start();
     handler = new Handler(handlerThread.getLooper());
     // 启动界面
-    handleControll(device.uuid, device.defaultFull ? "changeToFull" : "changeToSmall", null);
+//    handleControll(device.uuid, device.defaultFull ? "changeToFull" : "changeToSmall", null);
+    handleControll(device.uuid, "changeToFull", null);
   }
-
+  //处理按键操作
   public static void handleControll(String uuid, String action, ByteBuffer byteBuffer) {
     ClientController clientController = allController.get(uuid);
     if (clientController == null) return;
@@ -89,11 +101,55 @@ public class ClientController implements TextureView.SurfaceTextureListener {
         else if (action.equals("updateMaxSize")) clientController.updateMaxSize(byteBuffer);
         else if (action.equals("updateVideoSize")) clientController.updateVideoSize(byteBuffer);
       } catch (Exception ignored) {
-        clientController.close(AppData.applicationContext.getString(R.string.error_stream_closed));
+            if(clientController.handleException) {
+              return;
+            }
+            clientController.handleException = true;
+            if(isConnected(AppData.applicationContext)) {
+                Device remainDevice = clientController.device;
+                if(remainDevice != null) {
+                  clientController.close(AppData.applicationContext.getString(R.string.error_stream_closed));
+                  DeviceListAdapter.startDevice(remainDevice);
+                }
+            } else {
+              AlertDialog.Builder builder =
+                      new AlertDialog.Builder(clientController.fullView).setMessage("检查到当前网络异常，请检查网络后重新连接")
+                              .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                  dialog.dismiss();
+                                }
+                              }).setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                  dialog.dismiss();
+                                  clientController.close(AppData.applicationContext.getString(R.string.error_stream_closed));
+                                  Device remainDevice = clientController.device;
+                                  if(remainDevice != null) {
+                                    DeviceListAdapter.startDevice(remainDevice);
+                                  }
+
+                                }
+                              });
+              builder.setCancelable(true);
+
+              Dialog dialog = builder.create();
+              dialog.setCanceledOnTouchOutside(false);
+              dialog.show();
+            }
       }
     });
   }
 
+    private static boolean isConnected(Context context) {
+        if (context == null) {
+            return true;
+        }
+        ConnectivityManager cm = (ConnectivityManager) context
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = cm.getActiveNetworkInfo();
+        return info != null && info.isConnectedOrConnecting();
+    }
   public static void setFullView(String uuid, FullActivity fullView) {
     ClientController clientController = allController.get(uuid);
     if (clientController == null) return;
@@ -131,18 +187,18 @@ public class ClientController implements TextureView.SurfaceTextureListener {
   private void changeToSmall() throws Exception {
     hide();
     if (device.setResolution) clientStream.writeToMain(ControlPacket.createChangeSizeEvent(SmallView.getResolution()));
-    AppData.uiHandler.post(smallView::show);
+//    AppData.uiHandler.post(smallView::show);
   }
 
   private void changeToMini() {
     hide();
-    AppData.uiHandler.post(miniView::show);
+//    AppData.uiHandler.post(miniView::show);
   }
 
   private void hide() {
-    if (fullView != null) AppData.uiHandler.post(fullView::hide);
-    AppData.uiHandler.post(smallView::hide);
-    AppData.uiHandler.post(miniView::hide);
+//    if (fullView != null) AppData.uiHandler.post(fullView::hide);
+//    AppData.uiHandler.post(smallView::hide);
+//    AppData.uiHandler.post(miniView::hide);
   }
 
   private void close(String error) {
@@ -188,7 +244,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
 
   // 检查画面是否超出
   private void checkSizeAndSite() {
-    smallView.checkSizeAndSite();
+//    smallView.checkSizeAndSite();
   }
 
   // 设置视频区域触摸监听
