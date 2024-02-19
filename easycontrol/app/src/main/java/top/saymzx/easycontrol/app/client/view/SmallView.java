@@ -52,7 +52,7 @@ public class SmallView extends ViewOutlineProvider {
     this.device = device;
     smallViewParams.gravity = Gravity.START | Gravity.TOP;
     // 设置默认导航栏状态
-    setNavBarHide(AppData.setting.getDefaultShowNavBar());
+    setNavBarHide(AppData.setting.getShowNavBarOnConnect());
     // 设置监听控制
     setFloatVideoListener();
     setReSizeListener();
@@ -94,10 +94,10 @@ public class SmallView extends ViewOutlineProvider {
   // 设置焦点监听
   @SuppressLint("ClickableViewAccessibility")
   private void setFloatVideoListener() {
-    boolean defaultMiniOnOutside = AppData.setting.getAutoMiniOnOutside();
+    boolean smallToMiniOnOutside = AppData.setting.getSmallToMiniOnOutside();
     smallView.getRoot().setOnTouchHandle(event -> {
       if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
-        if (defaultMiniOnOutside) ClientController.handleControll(device.uuid, "changeToMini", null);
+        if (smallToMiniOnOutside) ClientController.handleControll(device.uuid, "changeToMini", ByteBuffer.wrap("changeToSmall".getBytes()));
         else if (smallViewParams.flags != LayoutParamsFlagNoFocus) {
           smallView.editText.clearFocus();
           smallViewParams.flags = LayoutParamsFlagNoFocus;
@@ -249,18 +249,18 @@ public class SmallView extends ViewOutlineProvider {
     int startX = smallViewParams.x;
     int startY = smallViewParams.y;
     // 检测到大小超出
-    if (width > screenMaxWidth || height > screenMaxHeight) {
+    if (width > screenMaxWidth + 200 || height > screenMaxHeight + 200) {
       int maxLength = Math.min(screenMaxWidth, screenMaxHeight);
       updateMaxSize(maxLength, maxLength);
-      updateSite(50, statusBarHeight + 10);
+      updateSite(50, statusBarHeight);
       return;
     }
     // 检测到位置超出过多
     int halfWidth = (int) (width * 0.5);
-    if (startX < -1 * halfWidth) updateSite(50, startY);
-    if (startX > screenSize.widthPixels - halfWidth) updateSite(screenSize.widthPixels - width - 50, startY);
-    if (startY < statusBarHeight / 2) updateSite(startX, statusBarHeight / 2);
-    if (startY > screenSize.heightPixels - 100) updateSite(startX, screenSize.heightPixels - height - 100);
+    if (startX < -1 * halfWidth) updateSite(-1 * halfWidth + 50, startY);
+    if (startX > screenSize.widthPixels - halfWidth) updateSite(screenSize.widthPixels - halfWidth - 50, startY);
+    if (startY < statusBarHeight / 2) updateSite(startX, statusBarHeight);
+    if (startY > screenSize.heightPixels - 100) updateSite(startX, screenSize.heightPixels - 200);
   }
 
   @Override

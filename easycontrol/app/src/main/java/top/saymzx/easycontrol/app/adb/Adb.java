@@ -1,7 +1,6 @@
 package top.saymzx.easycontrol.app.adb;
 
 import android.hardware.usb.UsbDevice;
-import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,7 +62,7 @@ public class Adb {
         wait();
       }
       bufferStream = openStreams.get(localId);
-    } while (bufferStream == null);
+    } while (!isClose && bufferStream == null);
     openStreams.remove(localId);
     return bufferStream;
   }
@@ -191,7 +190,7 @@ public class Adb {
       }
 
       @Override
-      public void flush(BufferStream bufferStream) throws Exception {
+      public void flush(BufferStream bufferStream) {
         writeToChannel(AdbProtocol.generateOkay(localId, remoteId));
       }
 
@@ -209,6 +208,9 @@ public class Adb {
     handleInThread.interrupt();
     for (Object bufferStream : connectionStreams.values().toArray()) ((BufferStream) bufferStream).close();
     channel.close();
+    synchronized (this) {
+      notifyAll();
+    }
   }
 
 }

@@ -28,13 +28,18 @@
 - [点击此处查看](https://gitee.com/mingzhixianweb/easycontrol/releases)
 
 ## 激活
-代码是开源的，但本人打包的安装包需要激活才可使用，激活的步骤请参考[此页面](https://gitee.com/mingzhixianweb/easycontrol/blob/master/DONATE.md)
+代码是开源的，但官方打包的安装包需要激活才可使用，激活的步骤请参考[此页面](https://gitee.com/mingzhixianweb/easycontrol/blob/master/DONATE.md)
 
 ## 截图
 <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/main.webp" width="200px">
 <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/small.webp" width="200px">
 <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/mini.webp" width="200px">
 <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/full.webp" width="200px">
+
+## 构建
+如果您想要自己构建，请注意以下几项
+- 请遵循本项目的开源协议
+- 我去除了官方打包加入的激活模块相关的代码文件，所以会有报错，请自行注释掉报错代码即可
 
 ## 反馈
 

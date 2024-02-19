@@ -3,7 +3,6 @@ package top.saymzx.easycontrol.app.client;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.util.Log;
 
 import java.nio.ByteBuffer;
 
@@ -11,6 +10,7 @@ import top.saymzx.easycontrol.app.client.decode.AudioDecode;
 import top.saymzx.easycontrol.app.client.decode.VideoDecode;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
+import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class ClientPlayer {
   private boolean isClose = false;
@@ -52,15 +52,16 @@ public class ClientPlayer {
             else audioDecode = new AudioDecode(useOpus, audioFrame, playHandler);
             break;
           case CLIPBOARD_EVENT:
-            clientController.setClipBoard(new String(clientStream.readByteArrayFromMain(clientStream.readIntFromMain()).array()));
+            ClientController.handleControll(device.uuid, "setClipBoard", clientStream.readByteArrayFromMain(clientStream.readIntFromMain()));
             break;
           case CHANGE_SIZE_EVENT:
-            ByteBuffer byteBuffer = clientStream.readByteArrayFromMain(8);
-            ClientController.handleControll(device.uuid, "updateVideoSize", byteBuffer);
+            ClientController.handleControll(device.uuid, "updateVideoSize", clientStream.readByteArrayFromMain(8));
             break;
         }
       }
-    } catch (Exception ignored) {
+    } catch (InterruptedException ignored) {
+    } catch (Exception e) {
+      PublicTools.logToast("player", e.toString(), false);
     } finally {
       if (audioDecode != null) audioDecode.release();
     }
@@ -82,7 +83,7 @@ public class ClientPlayer {
 
   private void otherService() {
     if (!isClose) {
-      clientController.checkClipBoard();
+      ClientController.handleControll(device.uuid, "checkClipBoard", null);
       ClientController.handleControll(device.uuid, "keepAlive", null);
       ClientController.handleControll(device.uuid, "checkSizeAndSite", null);
       AppData.uiHandler.postDelayed(this::otherService, 2000);

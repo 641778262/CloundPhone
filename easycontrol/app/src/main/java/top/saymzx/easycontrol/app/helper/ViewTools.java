@@ -24,7 +24,7 @@ import android.widget.ScrollView;
 import java.util.Locale;
 
 import top.saymzx.easycontrol.app.R;
-import top.saymzx.easycontrol.app.databinding.ItemAddDeviceBinding;
+import top.saymzx.easycontrol.app.databinding.ItemDeviceDetailBinding;
 import top.saymzx.easycontrol.app.databinding.ItemLoadingBinding;
 import top.saymzx.easycontrol.app.databinding.ItemSpinnerBinding;
 import top.saymzx.easycontrol.app.databinding.ItemSwitchBinding;
@@ -38,14 +38,20 @@ public class ViewTools {
   // 设置全面屏
   public static void setFullScreen(Activity context) {
     // 全屏显示
-    context.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-      View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
-      View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-      View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+    context.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+    context.getWindow().getDecorView().setSystemUiVisibility(
       View.SYSTEM_UI_FLAG_FULLSCREEN |
-      View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     // 设置异形屏
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) context.getWindow().getAttributes().layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+      WindowManager.LayoutParams lp = context.getWindow().getAttributes();
+      lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+      context.getWindow().setAttributes(lp);
+    }
   }
 
   // 设置语言
@@ -85,12 +91,12 @@ public class ViewTools {
   }
 
   // 创建新建设备弹窗
-  public static Dialog createAddDeviceView(
+  public static Dialog createDeviceDetailView(
     Context context,
     Device device,
     DeviceListAdapter deviceListAdapter
   ) {
-    ItemAddDeviceBinding itemAddDeviceBinding = ItemAddDeviceBinding.inflate(LayoutInflater.from(context));
+    ItemDeviceDetailBinding itemAddDeviceBinding = ItemDeviceDetailBinding.inflate(LayoutInflater.from(context));
     Dialog dialog = createDialog(context, true, itemAddDeviceBinding.getRoot());
     // 设置值
     itemAddDeviceBinding.name.setText(device.name);
@@ -147,14 +153,6 @@ public class ViewTools {
       if (setDefault) AppData.setting.setDefaultUseH265(isChecked);
       else device.useH265 = isChecked;
     }).getRoot());
-    fatherLayout.addView(createSwitchCard(context, context.getString(R.string.option_use_opus), context.getString(R.string.option_use_opus_detail), setDefault ? AppData.setting.getDefaultUseOpus() : device.useOpus, isChecked -> {
-      if (setDefault) AppData.setting.setDefaultUseOpus(isChecked);
-      else device.useOpus = isChecked;
-    }).getRoot());
-    fatherLayout.addView(createSwitchCard(context, context.getString(R.string.option_default_full), context.getString(R.string.option_default_full_detail), setDefault ? AppData.setting.getDefaultFull() : device.defaultFull, isChecked -> {
-      if (setDefault) AppData.setting.setDefaultFull(isChecked);
-      else device.defaultFull = isChecked;
-    }).getRoot());
     fatherLayout.addView(createSwitchCard(context, context.getString(R.string.option_set_resolution), context.getString(R.string.option_set_resolution_detail), setDefault ? AppData.setting.getDefaultSetResolution() : device.setResolution, isChecked -> {
       if (setDefault) AppData.setting.setDefaultSetResolution(isChecked);
       else device.setResolution = isChecked;
@@ -168,7 +166,7 @@ public class ViewTools {
       WindowManager.LayoutParams.WRAP_CONTENT,
       WindowManager.LayoutParams.WRAP_CONTENT,
       Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY : WindowManager.LayoutParams.TYPE_PHONE,
-      WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+      WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
       PixelFormat.TRANSLUCENT
     );
     loadingViewParams.gravity = Gravity.CENTER;
