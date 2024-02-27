@@ -5,9 +5,11 @@ import static android.content.ClipDescription.MIMETYPE_TEXT_PLAIN;
 import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.SurfaceTexture;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -40,8 +42,8 @@ public class ClientController implements TextureView.SurfaceTextureListener {
   public final TextureView textureView = new TextureView(AppData.applicationContext);
   private SurfaceTexture surfaceTexture;
 
-  private final SmallView smallView;
-  private final MiniView miniView;
+//  private final SmallView smallView;
+//  private final MiniView miniView;
   private FullActivity fullView;
 
   private Pair<Integer, Integer> videoSize;
@@ -56,8 +58,8 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     this.device = device;
     this.clientStream = clientStream;
     this.handle = handle;
-    smallView = new SmallView(device);
-    miniView = new MiniView(device);
+//    smallView = new SmallView(device);
+//    miniView = new MiniView(device);
     setTouchListener();
     textureView.setSurfaceTextureListener(this);
     handlerThread.start();
@@ -146,20 +148,20 @@ public class ClientController implements TextureView.SurfaceTextureListener {
 
   private synchronized void changeToSmall() throws Exception {
     hide();
-    AppData.uiHandler.post(smallView::show);
-    if (device.setResolution) clientStream.writeToMain(ControlPacket.createChangeSizeEvent(SmallView.getResolution()));
+//    AppData.uiHandler.post(smallView::show);
+//    if (device.setResolution) clientStream.writeToMain(ControlPacket.createChangeSizeEvent(SmallView.getResolution()));
   }
 
   private synchronized void changeToMini(ByteBuffer byteBuffer) {
     hide();
-    AppData.uiHandler.post(() -> miniView.show(byteBuffer));
+//    AppData.uiHandler.post(() -> miniView.show(byteBuffer));
   }
 
   private synchronized void hide() {
     if (fullView != null) AppData.uiHandler.post(fullView::hide);
     fullView = null;
-    AppData.uiHandler.post(smallView::hide);
-    AppData.uiHandler.post(miniView::hide);
+//    AppData.uiHandler.post(smallView::hide);
+//    AppData.uiHandler.post(miniView::hide);
   }
 
   private void close(String error) {
@@ -210,12 +212,22 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     layoutParams.width = surfaceSize.first;
     layoutParams.height = surfaceSize.second;
     textureView.setLayoutParams(layoutParams);
+    if (fullView != null) {
+      if (layoutParams.width >= layoutParams.height) {
+        if (fullView.getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+            fullView.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+      } else {
+        if (fullView.getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
+            fullView.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
+      }
+    }
   }
-
   // 检查画面是否超出
   private void checkSizeAndSite() {
     // 碎碎念，感谢 波瑠卡 的关爱，今天一家四口一起去医院进年货去了，每人提了一袋子(´；ω；`)
-    AppData.uiHandler.post(smallView::checkSizeAndSite);
+//    AppData.uiHandler.post(smallView::checkSizeAndSite);
   }
 
   // 设置视频区域触摸监听

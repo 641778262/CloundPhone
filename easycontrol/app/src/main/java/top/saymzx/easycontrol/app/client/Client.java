@@ -46,8 +46,12 @@ public class Client {
 
   public void release() {
     AppData.dbHelper.update(device);
-    clientPlayer.close();
-    clientStream.close();
+    if(clientPlayer != null) {
+      clientPlayer.close();
+    }
+    if(clientStream != null) {
+      clientStream.close();
+    }
   }
 
 }

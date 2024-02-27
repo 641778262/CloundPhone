@@ -32,8 +32,11 @@ public class FullActivity extends Activity implements SensorEventListener {
   private boolean autoRotate;
   private boolean light = true;
 
+  private long lastBackPressTime;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
     ViewTools.setFullScreen(this);
     fullActivity = ActivityFullBinding.inflate(this.getLayoutInflater());
     setContentView(fullActivity.getRoot());
@@ -53,7 +56,6 @@ public class FullActivity extends Activity implements SensorEventListener {
     fullActivity.textureViewLayout.post(() -> updateMaxSize(fullActivity.textureViewLayout.getMeasuredWidth(), fullActivity.textureViewLayout.getMeasuredHeight()));
     // 页面自动旋转
     AppData.sensorManager.registerListener(this, AppData.sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
-    super.onCreate(savedInstanceState);
   }
 
   @Override
@@ -140,32 +142,28 @@ public class FullActivity extends Activity implements SensorEventListener {
 
   private void changeBarView() {
     boolean toShowView = fullActivity.barView.getVisibility() == View.GONE;
-    boolean isLandscape = lastOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE || lastOrientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+    boolean isLandscape = getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE || getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
     ViewTools.viewAnim(fullActivity.barView, toShowView, 0, PublicTools.dp2px(40f) * (isLandscape ? -1 : 1), (isStart -> {
       if (isStart && toShowView) fullActivity.barView.setVisibility(View.VISIBLE);
       else if (!isStart && !toShowView) fullActivity.barView.setVisibility(View.GONE);
     }));
   }
 
-  private int lastOrientation = -1;
-
   @Override
   public void onSensorChanged(SensorEvent sensorEvent) {
-    if (!autoRotate || Sensor.TYPE_ACCELEROMETER != sensorEvent.sensor.getType()) return;
+    if (!autoRotate || Sensor.TYPE_ACCELEROMETER != sensorEvent.sensor.getType()
+            || fullActivity.textureViewLayout.getMeasuredWidth() < fullActivity.textureViewLayout.getMeasuredHeight()) return;
     float[] values = sensorEvent.values;
     float x = values[0];
     float y = values[1];
-    int newOrientation = lastOrientation;
-
-    if (x > -3 && x < 3 && y >= 4.5) newOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-    else if (y > -3 && y < 3 && x >= 4.5) newOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+    int newOrientation = getRequestedOrientation();
+    if (y > -3 && y < 3 && x >= 4.5) newOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
     else if (y > -3 && y < 3 && x <= -4.5) newOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-    else if (x > -3 && x < 3 && y <= -4.5) newOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
 
-    if (lastOrientation != newOrientation) {
-      lastOrientation = newOrientation;
+    if (getRequestedOrientation() != newOrientation) {
       setRequestedOrientation(newOrientation);
     }
+
   }
 
   @Override
@@ -175,14 +173,35 @@ public class FullActivity extends Activity implements SensorEventListener {
 
   // 设置键盘监听
   private void setKeyEvent() {
-    fullActivity.editText.requestFocus();
-    fullActivity.editText.setInputType(InputType.TYPE_NULL);
-    fullActivity.editText.setOnKeyListener((v, keyCode, event) -> {
-      if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode != KeyEvent.KEYCODE_VOLUME_UP && keyCode != KeyEvent.KEYCODE_VOLUME_DOWN) {
-        ClientController.handleControll(device.uuid, "writeByteBuffer", ControlPacket.createKeyEvent(event.getKeyCode(), event.getMetaState()));
-        return true;
+//    fullActivity.editText.requestFocus();
+//    fullActivity.editText.setInputType(InputType.TYPE_NULL);
+//    fullActivity.editText.setOnKeyListener((v, keyCode, event) -> {
+//      if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode != KeyEvent.KEYCODE_VOLUME_UP && keyCode != KeyEvent.KEYCODE_VOLUME_DOWN) {
+//        Log.d("test","keyCode=="+keyCode);
+//        ClientController.handleControll(device.uuid, "writeByteBuffer", ControlPacket.createKeyEvent(event.getKeyCode(), event.getMetaState()));
+//        return true;
+//      }
+//      return false;
+//    });
+  }
+
+  @Override
+  public boolean onKeyDown(int keyCode, KeyEvent event) {
+    int action = event.getAction();
+
+    if(action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_BACK) {
+      if(System.currentTimeMillis() - lastBackPressTime < 2000) {
+        ClientController.handleControll(device.uuid, "close", null);
+      } else {
+        lastBackPressTime = System.currentTimeMillis();
+        Toast.makeText(getApplicationContext(),"再按一次退出云手机", Toast.LENGTH_SHORT).show();
       }
-      return false;
-    });
+      return true;
+    }
+    if (action == KeyEvent.ACTION_DOWN && keyCode != KeyEvent.KEYCODE_VOLUME_UP && keyCode != KeyEvent.KEYCODE_VOLUME_DOWN) {
+      ClientController.handleControll(device.uuid, "writeByteBuffer", ControlPacket.createKeyEvent(event.getKeyCode(), event.getMetaState()));
+      return true;
+    }
+    return super.onKeyDown(keyCode, event);
   }
 }
