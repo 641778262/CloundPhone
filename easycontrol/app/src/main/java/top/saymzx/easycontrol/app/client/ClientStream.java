@@ -84,7 +84,7 @@ public class ClientStream {
     }
     shell = adb.getShell();
     shell.write(ByteBuffer.wrap(("app_process -Djava.class.path=" + serverName + " / top.saymzx.easycontrol.server.Server"
-      + " isAudio=" + (device.isAudio ? 1 : 0) + " maxSize=" + device.maxSize
+      + " isAudio=1" + " maxSize=" + device.maxSize
       + " maxFps=" + device.maxFps
       + " maxVideoBit=" + device.maxVideoBit
       + " keepAwake=" + (device.keepWakeOnRunning ? 1 : 0)

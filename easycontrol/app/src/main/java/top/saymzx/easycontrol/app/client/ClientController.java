@@ -46,7 +46,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
 //  private final MiniView miniView;
   private FullActivity fullView;
 
-  private Pair<Integer, Integer> videoSize = new Pair<>(720,1280);
+  private Pair<Integer, Integer> videoSize = new Pair<>(720,1280);//简单处理下黑屏问题
   private Pair<Integer, Integer> maxSize;
   private Pair<Integer, Integer> surfaceSize;
 
