@@ -11,6 +11,7 @@ import android.view.WindowManager;
 
 import top.saymzx.easycontrol.app.MainActivity;
 import top.saymzx.easycontrol.app.adb.AdbKeyPair;
+import top.saymzx.easycontrol.app.helper.AppSettings;
 import top.saymzx.easycontrol.app.helper.DbHelper;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 
@@ -39,6 +40,7 @@ public class AppData {
   public static void init(MainActivity m) {
     mainActivity = m;
     applicationContext = m.getApplicationContext();
+    AppSettings.initAppSettings();
     uiHandler = new android.os.Handler(m.getMainLooper());
     dbHelper = new DbHelper(applicationContext);
     clipBoard = (ClipboardManager) applicationContext.getSystemService(Context.CLIPBOARD_SERVICE);

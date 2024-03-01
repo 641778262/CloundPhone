@@ -46,7 +46,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
 //  private final MiniView miniView;
   private FullActivity fullView;
 
-  private Pair<Integer, Integer> videoSize;
+  private Pair<Integer, Integer> videoSize = new Pair<>(720,1280);
   private Pair<Integer, Integer> maxSize;
   private Pair<Integer, Integer> surfaceSize;
 
@@ -65,7 +65,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     handlerThread.start();
     handler = new Handler(handlerThread.getLooper());
     // 启动界面
-    handleControll(device.uuid, device.changeToFullOnConnect ? "changeToFull" : "changeToSmall", null);
+    handleControll(device.uuid, /*device.changeToFullOnConnect ? */"changeToFull" /*: "changeToSmall"*/, null);
     // 运行启动时操作
     if (device.customResolutionOnConnect) handleControll(device.uuid, "writeByteBuffer", ControlPacket.createChangeResolutionEvent(device.customResolutionWidth, device.customResolutionHeight));
     if (device.wakeOnConnect) handleControll(device.uuid, "buttonWake", null);
@@ -102,6 +102,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
       else if (action.equals("updateVideoSize")) clientController.updateVideoSize(byteBuffer);
       else if (action.equals("runShell")) clientController.runShell(byteBuffer);
       else if (action.equals("setClipBoard")) clientController.setClipBoard(byteBuffer);
+
     } catch (Exception ignored) {
       clientController.close(AppData.applicationContext.getString(R.string.toast_stream_closed));
     }

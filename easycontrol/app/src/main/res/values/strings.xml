@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+  <string name="device_cloud_phone">云手机</string>
+  <string name="device_resolution">清晰度</string>
+  <string name="device_resolution_super">超清\n720p</string>
+  <string name="device_resolution_high">高清\n540p</string>
+  <string name="device_resolution_common">普清\n360p</string>
+  <string name="device_resolution_auto">智能\n自动选择</string>
+  <string name="device_voice_on">开启声音</string>
+  <string name="device_voice_off">关闭声音</string>
+  <string name="device_show_keys">显示虚拟按键</string>
+  <string name="device_hide_keys">隐藏虚拟按键</string>
+  <string name="device_reboot">重启设备</string>
+  <string name="device_exit">退出设备</string>
+
+
+
   <string name="app_name">易控</string>
   <string name="app_name_dev">易控测试版</string>
 
