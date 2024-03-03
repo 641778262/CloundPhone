@@ -58,7 +58,7 @@ public class MainActivity extends Activity {
   // 启动步骤
   private void startApp() {
     // 检测激活
-    checkActive();
+//    checkActive();
     // 设置设备列表适配器
     DeviceListAdapter deviceListAdapter = new DeviceListAdapter(this);
     activityMainBinding.devicesList.setAdapter(deviceListAdapter);
