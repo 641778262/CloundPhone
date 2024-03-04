@@ -10,12 +10,17 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import java.nio.ByteBuffer;
 
@@ -37,8 +42,20 @@ public class FullActivity extends Activity implements SensorEventListener {
   private ActivityFullBinding activityFullBinding;
   private boolean autoRotate;
   private boolean light = true;
-
   private long lastBackPressTime;
+
+  private static final int MSG_CHECK_TOUCH_TIME = 1001;
+  private static final long CHECK_TOUCH_TIME_INTERVAL = 5*1000;
+  private final Handler mHandler = new Handler(Looper.getMainLooper()){
+      @Override
+      public void handleMessage(@NonNull Message msg) {
+          if(AppSettings.showTimeOutDialog()) {
+
+          } else {
+              sendEmptyMessageDelayed(MSG_CHECK_TOUCH_TIME,CHECK_TOUCH_TIME_INTERVAL);
+          }
+      }
+  };
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +79,7 @@ public class FullActivity extends Activity implements SensorEventListener {
     activityFullBinding.textureViewLayout.post(this::updateMaxSize);
     // 页面自动旋转
     AppData.sensorManager.registerListener(this, AppData.sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+    mHandler.sendEmptyMessageDelayed(MSG_CHECK_TOUCH_TIME,CHECK_TOUCH_TIME_INTERVAL);
   }
 
   @Override
@@ -99,6 +117,7 @@ public class FullActivity extends Activity implements SensorEventListener {
       activityFullBinding.textureViewLayout.removeView(ClientController.getTextureView(device.uuid));
       finish();
     } catch (Exception ignored) {
+        ignored.printStackTrace();
     }
   }
 
@@ -207,6 +226,13 @@ public class FullActivity extends Activity implements SensorEventListener {
     }
     return super.onKeyDown(keyCode, event);
   }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mHandler.removeCallbacksAndMessages(null);
+    }
+
     private PopupWindow showPopupWindow() {
         View view = View.inflate(this, R.layout.popup_setting, null);
         view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
@@ -250,6 +276,7 @@ public class FullActivity extends Activity implements SensorEventListener {
                     case R.id.tv_reboot:
                         break;
                     case R.id.tv_exit:
+                        popupWindow.dismiss();
                         ClientController.handleControll(device.uuid, "close", null);
                         break;
                     case R.id.iv_home:
@@ -275,5 +302,11 @@ public class FullActivity extends Activity implements SensorEventListener {
 
         popupWindow.showAtLocation(getWindow().getDecorView(), Gravity.CENTER, 0, 0);
         return popupWindow;
+    }
+
+    public void showNoHandleTimeOut() {
+      if(AppSettings.showTimeOutDialog()) {
+
+      }
     }
 }

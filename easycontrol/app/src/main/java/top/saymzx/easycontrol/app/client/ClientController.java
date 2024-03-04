@@ -3,7 +3,10 @@ package top.saymzx.easycontrol.app.client;
 import static android.content.ClipDescription.MIMETYPE_TEXT_PLAIN;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ClipData;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.SurfaceTexture;
@@ -25,11 +28,11 @@ import java.util.Objects;
 
 import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.client.view.FullActivity;
-import top.saymzx.easycontrol.app.client.view.MiniView;
-import top.saymzx.easycontrol.app.client.view.SmallView;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
 import top.saymzx.easycontrol.app.entity.MyInterface;
+import top.saymzx.easycontrol.app.helper.AppSettings;
+import top.saymzx.easycontrol.app.helper.DeviceTools;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class ClientController implements TextureView.SurfaceTextureListener {
@@ -37,14 +40,17 @@ public class ClientController implements TextureView.SurfaceTextureListener {
 
   private boolean isClose = false;
   private final Device device;
-  private final ClientStream clientStream;
-  private final MyInterface.MyFunctionBoolean handle;
+  private ClientStream clientStream;
+  private MyInterface.MyFunctionBoolean handle;//TextureView是否准备就绪
   public final TextureView textureView = new TextureView(AppData.applicationContext);
   private SurfaceTexture surfaceTexture;
 
+  public boolean handleException;
+  public boolean autoReConnect;//断开连接后有网的情况下自动连接
+
 //  private final SmallView smallView;
 //  private final MiniView miniView;
-  private FullActivity fullView;
+  public FullActivity fullView;
 
   private Pair<Integer, Integer> videoSize = new Pair<>(720,1280);//简单处理下黑屏问题
   private Pair<Integer, Integer> maxSize;
@@ -70,6 +76,13 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     if (device.customResolutionOnConnect) handleControll(device.uuid, "writeByteBuffer", ControlPacket.createChangeResolutionEvent(device.customResolutionWidth, device.customResolutionHeight));
     if (device.wakeOnConnect) handleControll(device.uuid, "buttonWake", null);
     if (device.lightOffOnConnect) handler.postDelayed(() -> handleControll(device.uuid, "buttonLightOff", null), 2000);
+  }
+
+  public void setClientStream(ClientStream clientStream,MyInterface.MyFunctionBoolean handle) {
+    this.clientStream = clientStream;
+    this.handle = handle;
+    handle.run(true);
+    AppSettings.resetLastTouchTime();
   }
 
   public static void handleControll(String uuid, String action, ByteBuffer byteBuffer) {
@@ -102,9 +115,10 @@ public class ClientController implements TextureView.SurfaceTextureListener {
       else if (action.equals("updateVideoSize")) clientController.updateVideoSize(byteBuffer);
       else if (action.equals("runShell")) clientController.runShell(byteBuffer);
       else if (action.equals("setClipBoard")) clientController.setClipBoard(byteBuffer);
-
     } catch (Exception ignored) {
-      clientController.close(AppData.applicationContext.getString(R.string.toast_stream_closed));
+      ignored.printStackTrace();
+      tryReConnect(clientController);
+//      clientController.close(AppData.applicationContext.getString(R.string.toast_stream_closed));
     }
   }
 
@@ -158,6 +172,51 @@ public class ClientController implements TextureView.SurfaceTextureListener {
 //    AppData.uiHandler.post(miniView::hide);
   }
 
+  //连接断开重连
+  private static void tryReConnect(ClientController clientController) {
+    clientController.handle.run(false);//主动断开连接
+    if(clientController.isClose) {
+      return;
+    }
+    if(clientController.handleException) {
+      return;
+    }
+    clientController.handleException = true;
+    if(DeviceTools.isConnected() && !clientController.autoReConnect) {//自动重连
+      clientController.autoReConnect = true;
+      new Client(clientController.device,null,clientController);
+    } else {
+      showConnectDialog(clientController);
+    }
+  }
+
+  public static void showConnectDialog(ClientController clientController) {
+    try {
+      clientController.autoReConnect = false;
+      AlertDialog.Builder builder = new AlertDialog.Builder(clientController.fullView)
+              .setMessage(DeviceTools.isConnected()?R.string.connect_net_tips:R.string.connect_net_error)
+              .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                  dialog.dismiss();
+                }
+              }).setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                  dialog.dismiss();
+                  new Client(clientController.device,null,clientController);
+                }
+              });
+      builder.setCancelable(true);
+
+      Dialog dialog = builder.create();
+      dialog.setCanceledOnTouchOutside(false);
+      dialog.show();
+    }catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
   private void close(String error) {
     if (isClose) return;
     isClose = true;
@@ -166,7 +225,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     if (device.lockOnClose) handleControll(device.uuid, "buttonLock", null);
       // 开启了自动锁定，就没必要发送打开背光了
     else if (device.lightOnClose) handleControll(device.uuid, "buttonLight", null);
-    if (error != null && device.isNetworkDevice() && device.reconnectOnClose) new Client(device);
+//    if (error != null && device.isNetworkDevice() && device.reconnectOnClose) new Client(device,null);
     // 打印日志
     if (error != null) PublicTools.logToast("controller", error, true);
     handlerThread.interrupt();
@@ -229,8 +288,9 @@ public class ClientController implements TextureView.SurfaceTextureListener {
   @SuppressLint("ClickableViewAccessibility")
   private void setTouchListener() {
     textureView.setOnTouchListener((view, event) -> {
-      if (surfaceSize == null) return true;
+      if (surfaceSize == null || !AppSettings.sConnected) return true;
       int action = event.getActionMasked();
+      AppSettings.resetLastTouchTime();
       if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN) {
         int i = event.getActionIndex();
         pointerDownTime[i] = event.getEventTime();

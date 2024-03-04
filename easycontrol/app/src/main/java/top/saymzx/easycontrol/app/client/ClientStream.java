@@ -1,6 +1,7 @@
 package top.saymzx.easycontrol.app.client;
 
 import android.hardware.usb.UsbDevice;
+import android.util.Log;
 import android.util.Pair;
 
 import java.io.DataInputStream;
@@ -45,9 +46,12 @@ public class ClientStream {
       try {
         Thread.sleep(10 * 1000);
         PublicTools.logToast("stream", AppData.applicationContext.getString(R.string.toast_timeout), true);
-        handle.run(false);
+        AppData.uiHandler.post(() -> {
+          handle.run(false);
+        });
         if (connectThread != null) connectThread.interrupt();
       } catch (InterruptedException ignored) {
+        ignored.printStackTrace();
       }
     });
     // 连接
@@ -58,10 +62,14 @@ public class ClientStream {
         adb = connectADB(address, usbDevice);
         startServer(device);
         connectServer(address);
-        handle.run(true);
+        AppData.uiHandler.post(() -> {
+          handle.run(true);
+        });
       } catch (Exception e) {
         PublicTools.logToast("stream", e.toString(), true);
-        handle.run(false);
+        AppData.uiHandler.post(() -> {
+          handle.run(false);
+        });
       } finally {
         timeOutThread.interrupt();
       }
@@ -115,9 +123,13 @@ public class ClientStream {
           connectDirect = true;
           return;
         } catch (Exception ignored) {
+          ignored.printStackTrace();
           // 此处检查是因为代码是靠连接错误约束时间的，但有些设备为了安全，在端口没有开启的情况下不会回复reset错误，而是不回复，导致无法检测错误，无法约束时间
           // 如果超时，直接跳出循环
-          if (System.currentTimeMillis() - startTime >= 5000) reTry = 60;
+          if (System.currentTimeMillis() - startTime >= 5000) {
+            reTry = 60;
+            break;
+          }
           Thread.sleep(50);
         }
       }
@@ -130,6 +142,7 @@ public class ClientStream {
         if (videoBufferStream == null) videoBufferStream = adb.tcpForward(25166);
         return;
       } catch (Exception ignored) {
+        ignored.printStackTrace();
         Thread.sleep(50);
       }
     }
@@ -197,17 +210,65 @@ public class ClientStream {
     if (isClose) return;
     isClose = true;
     if (shell != null) PublicTools.logToast("server", new String(shell.readByteArrayBeforeClose().array()), false);
-    if (connectDirect) {
+
+    if(mainOutputStream != null) {
       try {
         mainOutputStream.close();
-        videoDataInputStream.close();
-        mainDataInputStream.close();
-        mainSocket.close();
-        videoSocket.close();
-      } catch (Exception ignored) {
+        mainOutputStream = null;
+      }catch (Exception e){
+        e.printStackTrace();
       }
     }
-    if (adb != null) adb.close();
+    if(videoDataInputStream != null) {
+      try {
+        videoDataInputStream.close();
+        videoDataInputStream = null;
+      }catch (Exception e){
+        e.printStackTrace();
+      }
+    }
+    if(mainDataInputStream != null) {
+      try {
+        mainDataInputStream.close();
+        mainDataInputStream = null;
+      }catch (Exception e){
+        e.printStackTrace();
+      }
+    }
+    if(mainSocket != null) {
+      try {
+        mainSocket.close();
+        mainSocket = null;
+      }catch (Exception e){
+        e.printStackTrace();
+      }
+    }
+    if(videoSocket != null) {
+      try {
+        videoSocket.close();
+        videoSocket = null;
+      }catch (Exception e){
+        e.printStackTrace();
+      }
+    }
+    if(mainBufferStream != null) {
+      mainBufferStream.close();
+    }
+    if(videoBufferStream != null) {
+      videoBufferStream.close();
+    }
+    try {
+      if(shell != null) {
+        shell.close();
+      }
+      if (adb != null) {
+        adb.close();
+      }
+    }catch (Exception e) {
+      e.printStackTrace();
+    }
+
+
   }
 
   public static void runOnceCmd(Device device, UsbDevice usbDevice, String cmd, MyInterface.MyFunctionBoolean handle) {
@@ -220,6 +281,7 @@ public class ClientStream {
         adb.close();
         handle.run(true);
       } catch (Exception ignored) {
+        ignored.printStackTrace();
         handle.run(false);
       }
     }).start();
@@ -235,6 +297,7 @@ public class ClientStream {
         adb.close();
         handle.run(output.contains("restarting"));
       } catch (Exception ignored) {
+        ignored.printStackTrace();
         handle.run(false);
       }
     }).start();

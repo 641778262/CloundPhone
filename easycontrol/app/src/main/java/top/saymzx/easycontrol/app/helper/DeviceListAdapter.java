@@ -137,8 +137,8 @@ public class DeviceListAdapter extends BaseAdapter {
     if (device.isLinkDevice()) {
       UsbDevice usbDevice = linkDevices.get(device.uuid);
       if (usbDevice == null) return;
-      new Client(device, usbDevice);
-    } else new Client(device);
+      new Client(device, usbDevice,null);
+    } else new Client(device,null);
   }
 
   public void startDefaultDevice() {

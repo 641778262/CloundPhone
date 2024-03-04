@@ -88,8 +88,9 @@ public class ViewTools {
   }
 
   // 创建Client加载框
-  public static Pair<View, WindowManager.LayoutParams> createLoading(Context context) {
+  public static Pair<View, WindowManager.LayoutParams> createConnectLoading(Context context,boolean reConnect) {
     ItemLoadingBinding loadingView = ItemLoadingBinding.inflate(LayoutInflater.from(context));
+    loadingView.tvMessage.setText(reConnect?R.string.connect_retry:R.string.connect_progressing);
     WindowManager.LayoutParams loadingViewParams = new WindowManager.LayoutParams(
       WindowManager.LayoutParams.WRAP_CONTENT,
       WindowManager.LayoutParams.WRAP_CONTENT,

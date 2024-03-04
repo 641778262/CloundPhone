@@ -123,7 +123,7 @@ public class MainActivity extends Activity {
 
   // 扫描局域网地址
   private void scanAddress() {
-    Pair<View, WindowManager.LayoutParams> loading = ViewTools.createLoading(this);
+    Pair<View, WindowManager.LayoutParams> loading = ViewTools.createConnectLoading(this,false);
     AppData.windowManager.addView(loading.first, loading.second);
     new Thread(() -> {
       ArrayList<String> scannedAddresses = PublicTools.scanAddress();

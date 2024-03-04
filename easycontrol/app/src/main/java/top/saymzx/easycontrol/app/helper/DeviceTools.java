@@ -1,5 +1,8 @@
 package top.saymzx.easycontrol.app.helper;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.DisplayMetrics;
 
 import top.saymzx.easycontrol.app.entity.AppData;
@@ -20,4 +23,12 @@ public class DeviceTools {
         DisplayMetrics dm = AppData.applicationContext.getResources().getDisplayMetrics();
         return dm.widthPixels;
     }
+
+    public static boolean isConnected() {
+        ConnectivityManager cm = (ConnectivityManager) AppData.applicationContext
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = cm.getActiveNetworkInfo();
+        return info != null && info.isConnectedOrConnecting();
+    }
+
 }

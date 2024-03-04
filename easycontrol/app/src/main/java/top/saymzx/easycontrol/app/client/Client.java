@@ -1,12 +1,15 @@
 package top.saymzx.easycontrol.app.client;
 
+import android.content.Context;
 import android.hardware.usb.UsbDevice;
+import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.view.WindowManager;
 
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
+import top.saymzx.easycontrol.app.helper.AppSettings;
 import top.saymzx.easycontrol.app.helper.ViewTools;
 
 public class Client {
@@ -16,31 +19,70 @@ public class Client {
   private ClientPlayer clientPlayer = null;
   private final Device device;
 
-  public Client(Device device) {
-    this(device, null);
+  public Client(Device device,ClientController existClientController) {
+    this(device, null,existClientController);
   }
 
-  public Client(Device device, UsbDevice usbDevice) {
+  public Client(Device device, UsbDevice usbDevice,ClientController existClientController) {
     this.device = device;
     // 已经存在设备连接
-    if (ClientController.getDevice(device.uuid) != null) return;
-    Pair<View, WindowManager.LayoutParams> loading = ViewTools.createLoading(AppData.applicationContext);
-    AppData.windowManager.addView(loading.first, loading.second);
+    if (ClientController.getDevice(device.uuid) != null && existClientController == null) return;
+    boolean retry = existClientController != null && !existClientController.autoReConnect;//主动点提示框重新连接
+    Context context = AppData.applicationContext;
+    if(existClientController != null && existClientController.fullView != null) {
+      context = existClientController.fullView;
+    }
+    Pair<View, WindowManager.LayoutParams> loading = null;
+//    if(existClientController == null || !existClientController.autoReConnect){//第一次连接或者非自动连接
+      loading = ViewTools.createConnectLoading(context,retry);
+      AppData.windowManager.addView(loading.first, loading.second);
+//    }
+    final Pair<View, WindowManager.LayoutParams> loadingPair = loading;
+
     // 连接
-    clientStream = new ClientStream(device, usbDevice, bool -> {
-      if (bool) {
-        // 控制器
-        clientController = new ClientController(device, clientStream, str -> {
-          if (str) {
-            // 播放器
-            clientPlayer = new ClientPlayer(device, clientStream, clientController);
-          } else release();
-        });
+    clientStream = new ClientStream(device, usbDevice, connected -> {
+      if(existClientController != null) {
+        existClientController.handleException = false;
       }
       try {
-        AppData.windowManager.removeView(loading.first);
+        if(loadingPair != null) {
+          AppData.windowManager.removeView(loadingPair.first);
+        }
       } catch (Exception ignored) {
+        ignored.printStackTrace();
       }
+      AppSettings.sConnected = connected;
+      AppData.uiHandler.post(() -> {
+
+      });
+      if (connected) {//连接成功
+        // 控制器
+        if(existClientController == null) {
+          clientController = new ClientController(device, clientStream, ready -> {
+            if (ready) {//TextureView准备就绪可以播放
+              // 播放器
+              clientPlayer = new ClientPlayer(device, clientStream, clientController);
+            } else {//退出连接界面或者重连时主动释放上一次连接资源
+              release();
+            }
+          });
+        } else {
+          clientController = existClientController;
+          clientController.setClientStream(clientStream,ready -> {
+            if (ready) {//TextureView准备就绪可以播放
+              // 播放器
+              clientPlayer = new ClientPlayer(device, clientStream, clientController);
+            } else {//退出连接界面或者重连时主动释放上一次连接资源
+              release();
+            }
+          });
+        }
+      } else {
+        if(existClientController != null) {//处理失败情况
+          ClientController.showConnectDialog(existClientController);
+        }
+      }
+
     });
   }
 
@@ -48,9 +90,11 @@ public class Client {
     AppData.dbHelper.update(device);
     if(clientPlayer != null) {
       clientPlayer.close();
+      clientPlayer = null;
     }
     if(clientStream != null) {
       clientStream.close();
+      clientStream = null;
     }
   }
 
