@@ -16,6 +16,8 @@ import android.os.Message;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,7 +29,6 @@ import java.nio.ByteBuffer;
 import com.feihu.cp.R;
 import com.feihu.cp.client.ClientController;
 import com.feihu.cp.client.ControlPacket;
-import com.feihu.cp.databinding.ActivityFullBinding;
 import com.feihu.cp.entity.AppData;
 import com.feihu.cp.entity.Device;
 import com.feihu.cp.helper.AppSettings;
@@ -39,44 +40,47 @@ import com.feihu.cp.helper.ViewTools;
 public class FullActivity extends Activity implements SensorEventListener {
   private boolean isClose = false;
   private Device device;
-  private ActivityFullBinding activityFullBinding;
   private boolean autoRotate;
   private boolean light = true;
   private long lastBackPressTime;
 
+  private ViewGroup textureViewLayout;
+  private View barView;
+
   private static final int MSG_CHECK_TOUCH_TIME = 1001;
   private static final long CHECK_TOUCH_TIME_INTERVAL = 5*1000;
   private final Handler mHandler = new Handler(Looper.getMainLooper()){
-      @Override
-      public void handleMessage(@NonNull Message msg) {
-          if(AppSettings.showTimeOutDialog()) {
+    @Override
+    public void handleMessage(@NonNull Message msg) {
+      if(AppSettings.showTimeOutDialog()) {
 
-          } else {
-              sendEmptyMessageDelayed(MSG_CHECK_TOUCH_TIME,CHECK_TOUCH_TIME_INTERVAL);
-          }
+      } else {
+        sendEmptyMessageDelayed(MSG_CHECK_TOUCH_TIME,CHECK_TOUCH_TIME_INTERVAL);
       }
+    }
   };
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     ViewTools.setFullScreen(this);
-    activityFullBinding = ActivityFullBinding.inflate(this.getLayoutInflater());
-    setContentView(activityFullBinding.getRoot());
+    setContentView(R.layout.activity_full);
+    textureViewLayout = findViewById(R.id.texture_view_layout);
+    barView = findViewById(R.id.bar_view);
     device = ClientController.getDevice(getIntent().getStringExtra("uuid"));
     if (device == null) return;
     ClientController.setFullView(device.uuid, this);
     // 初始化
-    activityFullBinding.barView.setVisibility(View.GONE);
+    barView.setVisibility(View.GONE);
     setNavBarHide(AppSettings.showVirtualKeys());
     autoRotate = AppData.setting.getAutoRotate();
-    activityFullBinding.buttonAutoRotate.setImageResource(autoRotate ? R.drawable.un_rotate : R.drawable.rotate);
+    ((ImageView)findViewById(R.id.button_auto_rotate)).setImageResource(autoRotate ? R.drawable.un_rotate : R.drawable.rotate);
     // 按键监听
     setButtonListener();
     setKeyEvent();
     // 更新textureView
-    activityFullBinding.textureViewLayout.addView(ClientController.getTextureView(device.uuid), 0);
-    activityFullBinding.textureViewLayout.post(this::updateMaxSize);
+    textureViewLayout.addView(ClientController.getTextureView(device.uuid), 0);
+    textureViewLayout.post(this::updateMaxSize);
     // 页面自动旋转
     AppData.sensorManager.registerListener(this, AppData.sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
     mHandler.sendEmptyMessageDelayed(MSG_CHECK_TOUCH_TIME,CHECK_TOUCH_TIME_INTERVAL);
@@ -85,14 +89,14 @@ public class FullActivity extends Activity implements SensorEventListener {
   @Override
   protected void onPause() {
     AppData.sensorManager.unregisterListener(this);
-    if (isChangingConfigurations()) activityFullBinding.textureViewLayout.removeView(ClientController.getTextureView(device.uuid));
+    if (isChangingConfigurations()) textureViewLayout.removeView(ClientController.getTextureView(device.uuid));
 //    else if (!isClose) ClientController.handleControll(device.uuid, device.fullToMiniOnRunning ? "changeToMini" : "changeToSmall", ByteBuffer.wrap("changeToFull".getBytes()));
     super.onPause();
   }
 
   @Override
   public void onMultiWindowModeChanged(boolean isInMultiWindowMode, Configuration newConfig) {
-    activityFullBinding.textureViewLayout.post(this::updateMaxSize);
+    textureViewLayout.post(this::updateMaxSize);
     super.onMultiWindowModeChanged(isInMultiWindowMode, newConfig);
   }
 
@@ -101,8 +105,8 @@ public class FullActivity extends Activity implements SensorEventListener {
   }
 
   private void updateMaxSize() {
-    int width = activityFullBinding.textureViewLayout.getMeasuredWidth();
-    int height = activityFullBinding.textureViewLayout.getMeasuredHeight();
+    int width = textureViewLayout.getMeasuredWidth();
+    int height = textureViewLayout.getMeasuredHeight();
     ByteBuffer byteBuffer = ByteBuffer.allocate(8);
     byteBuffer.putInt(width);
     byteBuffer.putInt(height);
@@ -114,68 +118,68 @@ public class FullActivity extends Activity implements SensorEventListener {
   public void hide() {
     try {
       isClose = true;
-      activityFullBinding.textureViewLayout.removeView(ClientController.getTextureView(device.uuid));
+      textureViewLayout.removeView(ClientController.getTextureView(device.uuid));
       finish();
     } catch (Exception ignored) {
-        ignored.printStackTrace();
+      ignored.printStackTrace();
     }
   }
 
   // 设置按钮监听
   private void setButtonListener() {
-    activityFullBinding.buttonRotate.setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonRotate", null));
-    activityFullBinding.buttonBack.setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonBack", null));
-    activityFullBinding.buttonHome.setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonHome", null));
-    activityFullBinding.buttonSwitch.setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonSwitch", null));
-    activityFullBinding.buttonNavBar.setOnClickListener(v -> {
-      setNavBarHide(activityFullBinding.navBar.getVisibility() == View.GONE);
+    findViewById(R.id.button_rotate).setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonRotate", null));
+    findViewById(R.id.button_back).setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonBack", null));
+    findViewById(R.id.button_home).setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonHome", null));
+    findViewById(R.id.button_switch).setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonSwitch", null));
+    findViewById(R.id.button_nav_bar).setOnClickListener(v -> {
+      setNavBarHide(findViewById(R.id.nav_bar).getVisibility() == View.GONE);
       changeBarView();
     });
-    activityFullBinding.buttonMini.setOnClickListener(v -> ClientController.handleControll(device.uuid, "changeToMini", null));
-    activityFullBinding.buttonSmall.setOnClickListener(v -> ClientController.handleControll(device.uuid, "changeToSmall", null));
-    activityFullBinding.buttonClose.setOnClickListener(v -> ClientController.handleControll(device.uuid, "close", null));
-    activityFullBinding.buttonLight.setOnClickListener(v -> {
+    findViewById(R.id.button_mini).setOnClickListener(v -> ClientController.handleControll(device.uuid, "changeToMini", null));
+    findViewById(R.id.button_small).setOnClickListener(v -> ClientController.handleControll(device.uuid, "changeToSmall", null));
+    findViewById(R.id.button_close).setOnClickListener(v -> ClientController.handleControll(device.uuid, "close", null));
+    findViewById(R.id.button_light).setOnClickListener(v -> {
       light = !light;
-      activityFullBinding.buttonLight.setImageResource(light ? R.drawable.lightbulb_off : R.drawable.lightbulb);
+      ((ImageView)findViewById(R.id.button_light)).setImageResource(light ? R.drawable.lightbulb_off : R.drawable.lightbulb);
       ClientController.handleControll(device.uuid, light ? "buttonLight" : "buttonLightOff", null);
       changeBarView();
     });
-    activityFullBinding.buttonPower.setOnClickListener(v -> {
+    findViewById(R.id.button_power).setOnClickListener(v -> {
       ClientController.handleControll(device.uuid, "buttonPower", null);
       changeBarView();
     });
-    activityFullBinding.buttonMore.setOnClickListener(v -> changeBarView());
-    activityFullBinding.buttonAutoRotate.setOnClickListener(v -> {
+    findViewById(R.id.button_more).setOnClickListener(v -> changeBarView());
+    findViewById(R.id.button_auto_rotate).setOnClickListener(v -> {
       autoRotate = !autoRotate;
       AppData.setting.setAutoRotate(autoRotate);
-      activityFullBinding.buttonAutoRotate.setImageResource(autoRotate ? R.drawable.un_rotate : R.drawable.rotate);
+      ((ImageView)findViewById(R.id.button_auto_rotate)).setImageResource(autoRotate ? R.drawable.un_rotate : R.drawable.rotate);
       changeBarView();
     });
-      activityFullBinding.buttonSetting.setOnClickListener(v -> {
-          showPopupWindow();
-      });
+    findViewById(R.id.button_setting).setOnClickListener(v -> {
+      showPopupWindow();
+    });
   }
 
   // 导航栏隐藏
   private void setNavBarHide(boolean isShow) {
-    activityFullBinding.navBar.setVisibility(isShow ? View.VISIBLE : View.GONE);
-    activityFullBinding.buttonNavBar.setImageResource(isShow ? R.drawable.not_equal : R.drawable.equals);
-    activityFullBinding.textureViewLayout.post(this::updateMaxSize);
+    findViewById(R.id.nav_bar).setVisibility(isShow ? View.VISIBLE : View.GONE);
+    ((ImageView)findViewById(R.id.button_nav_bar)).setImageResource(isShow ? R.drawable.not_equal : R.drawable.equals);
+    textureViewLayout.post(this::updateMaxSize);
   }
 
   private void changeBarView() {
-    boolean toShowView = activityFullBinding.barView.getVisibility() == View.GONE;
+    boolean toShowView = barView.getVisibility() == View.GONE;
     boolean isLandscape = getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE || getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-    ViewTools.viewAnim(activityFullBinding.barView, toShowView, 0, PublicTools.dp2px(40f) * (isLandscape ? -1 : 1), (isStart -> {
-      if (isStart && toShowView) activityFullBinding.barView.setVisibility(View.VISIBLE);
-      else if (!isStart && !toShowView) activityFullBinding.barView.setVisibility(View.GONE);
+    ViewTools.viewAnim(barView, toShowView, 0, PublicTools.dp2px(40f) * (isLandscape ? -1 : 1), (isStart -> {
+      if (isStart && toShowView) barView.setVisibility(View.VISIBLE);
+      else if (!isStart && !toShowView) barView.setVisibility(View.GONE);
     }));
   }
 
   @Override
   public void onSensorChanged(SensorEvent sensorEvent) {
     if (!autoRotate || Sensor.TYPE_ACCELEROMETER != sensorEvent.sensor.getType()
-            || activityFullBinding.textureViewLayout.getMeasuredWidth() < activityFullBinding.textureViewLayout.getMeasuredHeight()) return;
+            || textureViewLayout.getMeasuredWidth() < textureViewLayout.getMeasuredHeight()) return;
     float[] values = sensorEvent.values;
     float x = values[0];
     float y = values[1];
@@ -227,80 +231,80 @@ public class FullActivity extends Activity implements SensorEventListener {
     return super.onKeyDown(keyCode, event);
   }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mHandler.removeCallbacksAndMessages(null);
-    }
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    mHandler.removeCallbacksAndMessages(null);
+  }
 
-    private PopupWindow showPopupWindow() {
-        View view = View.inflate(this, R.layout.popup_setting, null);
-        view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-        boolean isLandscape = getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                || getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-        int width = isLandscape ? DeviceTools.getScreenWidth() * 3 / 5 : DeviceTools.getScreenWidth() * 5 / 6;
-        final PopupWindow popupWindow = new PopupWindow(view, width, view
-                .getMeasuredHeight(), true);
-        popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        popupWindow.setOutsideTouchable(true);
-        popupWindow.setTouchable(true);
-        TextView voiceTv = view.findViewById(R.id.tv_voice);
-        voiceTv.setText(AppSettings.showVoice() ? R.string.device_voice_off : R.string.device_voice_on);
-        TextView keyTv = view.findViewById(R.id.tv_key);
-        keyTv.setText(AppSettings.showVirtualKeys() ? R.string.device_hide_keys : R.string.device_show_keys);
-      CustomOnClickListener listener = new CustomOnClickListener() {
-        @Override
-        public void onClickView(View view) {
-          int viewId = view.getId();
-          if(viewId == R.id.tv_voice) {
-            if(AppSettings.showVoice()) {
-              AppSettings.setShowVoice(false);
-              voiceTv.setText(R.string.device_voice_on);
-            } else {
-              AppSettings.setShowVoice(true);
-              voiceTv.setText(R.string.device_voice_off);
-            }
-          } else if(viewId == R.id.tv_key) {
-            if(AppSettings.showVirtualKeys()) {
-              AppSettings.setShowVirtualKeys(false);
-              keyTv.setText(R.string.device_show_keys);
-              setNavBarHide(false);
-            } else {
-              AppSettings.setShowVirtualKeys(true);
-              keyTv.setText(R.string.device_hide_keys);
-              setNavBarHide(true);
-
-            }
-          } else if(viewId == R.id.tv_reboot) {
-
-          } else if(viewId == R.id.tv_exit) {
-            popupWindow.dismiss();
-            ClientController.handleControll(device.uuid, "close", null);
-          } else if(viewId == R.id.iv_home) {
-            ClientController.handleControll(device.uuid, "buttonHome", null);
-          } else if(viewId == R.id.iv_switch) {
-            ClientController.handleControll(device.uuid, "buttonSwitch", null);
-          } else if(viewId == R.id.iv_back) {
-            ClientController.handleControll(device.uuid, "buttonBack", null);
+  private PopupWindow showPopupWindow() {
+    View view = View.inflate(this, R.layout.popup_setting, null);
+    view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+    boolean isLandscape = getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            || getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+    int width = isLandscape ? DeviceTools.getScreenWidth() * 3 / 5 : DeviceTools.getScreenWidth() * 5 / 6;
+    final PopupWindow popupWindow = new PopupWindow(view, width, view
+            .getMeasuredHeight(), true);
+    popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+    popupWindow.setOutsideTouchable(true);
+    popupWindow.setTouchable(true);
+    TextView voiceTv = view.findViewById(R.id.tv_voice);
+    voiceTv.setText(AppSettings.showVoice() ? R.string.device_voice_off : R.string.device_voice_on);
+    TextView keyTv = view.findViewById(R.id.tv_key);
+    keyTv.setText(AppSettings.showVirtualKeys() ? R.string.device_hide_keys : R.string.device_show_keys);
+    CustomOnClickListener listener = new CustomOnClickListener() {
+      @Override
+      public void onClickView(View view) {
+        int viewId = view.getId();
+        if(viewId == R.id.tv_voice) {
+          if(AppSettings.showVoice()) {
+            AppSettings.setShowVoice(false);
+            voiceTv.setText(R.string.device_voice_on);
+          } else {
+            AppSettings.setShowVoice(true);
+            voiceTv.setText(R.string.device_voice_off);
           }
+        } else if(viewId == R.id.tv_key) {
+          if(AppSettings.showVirtualKeys()) {
+            AppSettings.setShowVirtualKeys(false);
+            keyTv.setText(R.string.device_show_keys);
+            setNavBarHide(false);
+          } else {
+            AppSettings.setShowVirtualKeys(true);
+            keyTv.setText(R.string.device_hide_keys);
+            setNavBarHide(true);
+
+          }
+        } else if(viewId == R.id.tv_reboot) {
+
+        } else if(viewId == R.id.tv_exit) {
+          popupWindow.dismiss();
+          ClientController.handleControll(device.uuid, "close", null);
+        } else if(viewId == R.id.iv_home) {
+          ClientController.handleControll(device.uuid, "buttonHome", null);
+        } else if(viewId == R.id.iv_switch) {
+          ClientController.handleControll(device.uuid, "buttonSwitch", null);
+        } else if(viewId == R.id.iv_back) {
+          ClientController.handleControll(device.uuid, "buttonBack", null);
         }
-      };
-
-        voiceTv.setOnClickListener(listener);
-        keyTv.setOnClickListener(listener);
-        view.findViewById(R.id.tv_reboot).setOnClickListener(listener);
-        view.findViewById(R.id.tv_exit).setOnClickListener(listener);
-        view.findViewById(R.id.iv_home).setOnClickListener(listener);
-        view.findViewById(R.id.iv_switch).setOnClickListener(listener);
-        view.findViewById(R.id.iv_back).setOnClickListener(listener);
-
-        popupWindow.showAtLocation(getWindow().getDecorView(), Gravity.CENTER, 0, 0);
-        return popupWindow;
-    }
-
-    public void showNoHandleTimeOut() {
-      if(AppSettings.showTimeOutDialog()) {
-
       }
+    };
+
+    voiceTv.setOnClickListener(listener);
+    keyTv.setOnClickListener(listener);
+    view.findViewById(R.id.tv_reboot).setOnClickListener(listener);
+    view.findViewById(R.id.tv_exit).setOnClickListener(listener);
+    view.findViewById(R.id.iv_home).setOnClickListener(listener);
+    view.findViewById(R.id.iv_switch).setOnClickListener(listener);
+    view.findViewById(R.id.iv_back).setOnClickListener(listener);
+
+    popupWindow.showAtLocation(getWindow().getDecorView(), Gravity.CENTER, 0, 0);
+    return popupWindow;
+  }
+
+  public void showNoHandleTimeOut() {
+    if(AppSettings.showTimeOutDialog()) {
+
     }
+  }
 }

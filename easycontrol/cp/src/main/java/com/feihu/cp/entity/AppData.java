@@ -9,7 +9,6 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.view.WindowManager;
 
-import com.feihu.cp.MainActivity;
 import com.feihu.cp.adb.AdbKeyPair;
 import com.feihu.cp.helper.AppSettings;
 import com.feihu.cp.helper.DbHelper;

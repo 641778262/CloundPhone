@@ -19,15 +19,12 @@ import android.view.animation.OvershootInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ScrollView;
+import android.widget.TextView;
 
 import java.util.Locale;
 
 import com.feihu.cp.R;
-import com.feihu.cp.databinding.ItemLoadingBinding;
-import com.feihu.cp.databinding.ItemSpinnerBinding;
-import com.feihu.cp.databinding.ItemSwitchBinding;
-import com.feihu.cp.databinding.ItemTextBinding;
-import com.feihu.cp.databinding.ModuleDialogBinding;
+
 import com.feihu.cp.entity.AppData;
 import com.feihu.cp.entity.MyInterface;
 
@@ -75,22 +72,23 @@ public class ViewTools {
   }
 
   // 创建弹窗
-  public static Dialog createDialog(Context context, boolean canCancel, View view) {
-    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-    builder.setCancelable(canCancel);
-    ScrollView dialogView = ModuleDialogBinding.inflate(LayoutInflater.from(context)).getRoot();
-    dialogView.addView(view);
-    builder.setView(dialogView);
-    Dialog dialog = builder.create();
-    dialog.setCanceledOnTouchOutside(canCancel);
-    dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-    return dialog;
-  }
+//  public static Dialog createDialog(Context context, boolean canCancel, View view) {
+//    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+//    builder.setCancelable(canCancel);
+//    ScrollView dialogView = ModuleDialogBinding.inflate(LayoutInflater.from(context)).getRoot();
+//    dialogView.addView(view);
+//    builder.setView(dialogView);
+//    Dialog dialog = builder.create();
+//    dialog.setCanceledOnTouchOutside(canCancel);
+//    dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+//    return dialog;
+//  }
 
   // 创建Client加载框
   public static Pair<View, WindowManager.LayoutParams> createConnectLoading(Context context,boolean reConnect) {
-    ItemLoadingBinding loadingView = ItemLoadingBinding.inflate(LayoutInflater.from(context));
-    loadingView.tvMessage.setText(reConnect?R.string.connect_retry:R.string.connect_progressing);
+    View loadingView = View.inflate(context,R.layout.item_loading,null);
+    TextView tvMessage = loadingView.findViewById(R.id.tv_message);
+    tvMessage.setText(reConnect?R.string.connect_retry:R.string.connect_progressing);
     WindowManager.LayoutParams loadingViewParams = new WindowManager.LayoutParams(
       WindowManager.LayoutParams.WRAP_CONTENT,
       WindowManager.LayoutParams.WRAP_CONTENT,
@@ -99,64 +97,64 @@ public class ViewTools {
       PixelFormat.TRANSLUCENT
     );
     loadingViewParams.gravity = Gravity.CENTER;
-    return new Pair<>(loadingView.getRoot(), loadingViewParams);
+    return new Pair<>(loadingView, loadingViewParams);
   }
 
-  // 创建纯文本卡片
-  public static ItemTextBinding createTextCard(
-    Context context,
-    String text,
-    MyInterface.MyFunction function
-  ) {
-    ItemTextBinding textView = ItemTextBinding.inflate(LayoutInflater.from(context));
-    textView.text.setText(text);
-    if (function != null) textView.getRoot().setOnClickListener(v -> function.run());
-    return textView;
-  }
-
-  // 创建开关卡片
-  public static ItemSwitchBinding createSwitchCard(
-    Context context,
-    String text,
-    String textDetail,
-    boolean config,
-    MyInterface.MyFunctionBoolean function
-  ) {
-    ItemSwitchBinding switchView = ItemSwitchBinding.inflate(LayoutInflater.from(context));
-    switchView.itemText.setText(text);
-    switchView.itemDetail.setText(textDetail);
-    switchView.itemSwitch.setChecked(config);
-    if (function != null) switchView.itemSwitch.setOnCheckedChangeListener((buttonView, checked) -> function.run(checked));
-    return switchView;
-  }
-
-  // 创建列表卡片
-  public static ItemSpinnerBinding createSpinnerCard(
-    Context context,
-    String text,
-    String textDetail,
-    String config,
-    ArrayAdapter<String> adapter,
-    MyInterface.MyFunctionString function
-  ) {
-    ItemSpinnerBinding spinnerView = ItemSpinnerBinding.inflate(LayoutInflater.from(context));
-    spinnerView.itemText.setText(text);
-    spinnerView.itemDetail.setText(textDetail);
-    spinnerView.itemSpinner.setAdapter(adapter);
-    spinnerView.itemSpinner.setSelection(adapter.getPosition(config));
-    spinnerView.itemSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-      @Override
-      public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        if (function != null)
-          function.run(spinnerView.itemSpinner.getSelectedItem().toString());
-      }
-
-      @Override
-      public void onNothingSelected(AdapterView<?> parent) {
-      }
-    });
-    return spinnerView;
-  }
+//  // 创建纯文本卡片
+//  public static ItemTextBinding createTextCard(
+//    Context context,
+//    String text,
+//    MyInterface.MyFunction function
+//  ) {
+//    ItemTextBinding textView = ItemTextBinding.inflate(LayoutInflater.from(context));
+//    textView.text.setText(text);
+//    if (function != null) textView.getRoot().setOnClickListener(v -> function.run());
+//    return textView;
+//  }
+//
+//  // 创建开关卡片
+//  public static ItemSwitchBinding createSwitchCard(
+//    Context context,
+//    String text,
+//    String textDetail,
+//    boolean config,
+//    MyInterface.MyFunctionBoolean function
+//  ) {
+//    ItemSwitchBinding switchView = ItemSwitchBinding.inflate(LayoutInflater.from(context));
+//    switchView.itemText.setText(text);
+//    switchView.itemDetail.setText(textDetail);
+//    switchView.itemSwitch.setChecked(config);
+//    if (function != null) switchView.itemSwitch.setOnCheckedChangeListener((buttonView, checked) -> function.run(checked));
+//    return switchView;
+//  }
+//
+//  // 创建列表卡片
+//  public static ItemSpinnerBinding createSpinnerCard(
+//    Context context,
+//    String text,
+//    String textDetail,
+//    String config,
+//    ArrayAdapter<String> adapter,
+//    MyInterface.MyFunctionString function
+//  ) {
+//    ItemSpinnerBinding spinnerView = ItemSpinnerBinding.inflate(LayoutInflater.from(context));
+//    spinnerView.itemText.setText(text);
+//    spinnerView.itemDetail.setText(textDetail);
+//    spinnerView.itemSpinner.setAdapter(adapter);
+//    spinnerView.itemSpinner.setSelection(adapter.getPosition(config));
+//    spinnerView.itemSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//      @Override
+//      public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//        if (function != null)
+//          function.run(spinnerView.itemSpinner.getSelectedItem().toString());
+//      }
+//
+//      @Override
+//      public void onNothingSelected(AdapterView<?> parent) {
+//      }
+//    });
+//    return spinnerView;
+//  }
 
   // 更改View的形态
   public static void viewAnim(View view, boolean toShowView, int translationX, int translationY, MyInterface.MyFunctionBoolean action) {
