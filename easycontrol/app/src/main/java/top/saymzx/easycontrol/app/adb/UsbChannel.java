@@ -98,6 +98,7 @@ public class UsbChannel implements AdbChannel {
         }
       }
     } catch (IOException ignored) {
+      ignored.printStackTrace();
       sourceBuffer.close();
     }
   }
@@ -142,6 +143,7 @@ public class UsbChannel implements AdbChannel {
       usbConnection.releaseInterface(usbInterface);
       usbConnection.close();
     } catch (Exception ignored) {
+      ignored.printStackTrace();
     }
   }
 

@@ -27,6 +27,7 @@ public class VideoDecode {
       try {
         mediaCodec.releaseOutputBuffer(outIndex, bufferInfo.presentationTimeUs);
       } catch (IllegalStateException ignored) {
+        ignored.printStackTrace();
       }
     }
 
@@ -48,6 +49,7 @@ public class VideoDecode {
       decodec.stop();
       decodec.release();
     } catch (Exception ignored) {
+      ignored.printStackTrace();
     }
   }
 

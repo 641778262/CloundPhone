@@ -38,6 +38,7 @@ public class AudioDecode {
         audioTrack.write(buffer, bufferInfo.size, AudioTrack.WRITE_NON_BLOCKING);
         decodec.releaseOutputBuffer(outIndex, false);
       } catch (IllegalStateException ignored) {
+        ignored.printStackTrace();
       }
     }
 
@@ -67,6 +68,7 @@ public class AudioDecode {
       audioTrack.release();
       loudnessEnhancer.release();
     } catch (Exception ignored) {
+      ignored.printStackTrace();
     }
   }
 
@@ -78,6 +80,7 @@ public class AudioDecode {
       decodec.getInputBuffer(inIndex).put(data);
       decodec.queueInputBuffer(inIndex, 0, data.capacity(), 0, 0);
     } catch (IllegalStateException ignored) {
+      ignored.printStackTrace();
     }
   }
 

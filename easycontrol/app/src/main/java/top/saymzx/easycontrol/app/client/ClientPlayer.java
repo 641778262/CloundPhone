@@ -63,7 +63,9 @@ public class ClientPlayer {
         }
       }
     } catch (InterruptedException ignored) {
+      ignored.printStackTrace();
     } catch (Exception e) {
+      e.printStackTrace();
       PublicTools.logToast("player", e.toString(), false);
     } finally {
       if (audioDecode != null) audioDecode.release();

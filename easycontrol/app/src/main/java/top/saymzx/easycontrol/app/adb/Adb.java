@@ -158,6 +158,7 @@ public class Adb {
         }
       }
     } catch (Exception ignored) {
+      ignored.printStackTrace();
       close();
     }
   }
@@ -168,6 +169,7 @@ public class Adb {
         channel.write(byteBuffer);
       }
     } catch (Exception ignored) {
+      ignored.printStackTrace();
       close();
     }
   }

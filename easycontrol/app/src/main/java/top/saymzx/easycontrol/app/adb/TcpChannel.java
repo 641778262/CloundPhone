@@ -46,6 +46,7 @@ public class TcpChannel implements AdbChannel {
       inputStream.close();
       socket.close();
     } catch (Exception ignored) {
+      ignored.printStackTrace();
     }
   }
 }

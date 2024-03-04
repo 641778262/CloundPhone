@@ -102,6 +102,7 @@ public class BufferStream {
     try {
       underlySocketFunction.close(this);
     } catch (Exception ignored) {
+      ignored.printStackTrace();
     }
   }
 
