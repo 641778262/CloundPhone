@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="20dp"
+    android:layout_marginRight="20dp"
+    android:alpha="0.8"
+    android:background="@drawable/popup_bg"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:text="@string/device_cloud_phone"
+        android:textColor="@color/white"
+        android:textSize="24sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:background="@drawable/popup_resolution_bg"
+        android:orientation="vertical"
+        android:paddingLeft="15dp"
+        android:paddingTop="15dp"
+        android:paddingRight="15dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/device_resolution"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="10dp"
+            android:background="@color/white" />
+
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rb_super"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:button="@null"
+                android:gravity="center"
+                android:paddingTop="20dp"
+                android:paddingBottom="20dp"
+                android:text="@string/device_resolution_super"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <RadioButton
+                android:id="@+id/rb_high"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:button="@null"
+                android:gravity="center"
+                android:paddingTop="20dp"
+                android:paddingBottom="20dp"
+                android:text="@string/device_resolution_high"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <RadioButton
+                android:id="@+id/rb_common"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:button="@null"
+                android:gravity="center"
+                android:paddingTop="20dp"
+                android:paddingBottom="20dp"
+                android:text="@string/device_resolution_common"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <RadioButton
+                android:id="@+id/rb_auto"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:button="@null"
+                android:gravity="center"
+                android:maxLines="2"
+                android:paddingTop="20dp"
+                android:paddingBottom="20dp"
+                android:text="@string/device_resolution_auto"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+        </RadioGroup>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_voice"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center|left"
+            android:paddingLeft="20dp"
+            android:paddingTop="20dp"
+            android:paddingBottom="10dp"
+            android:text="@string/device_voice_off"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/tv_key"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center|left"
+            android:paddingTop="20dp"
+            android:paddingBottom="10dp"
+            android:text="@string/device_hide_keys"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:id="@+id/iv_switch"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@drawable/popup_btn_bg"
+            android:padding="8dp"
+            android:src="@drawable/o" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:id="@+id/iv_home"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@drawable/popup_btn_bg"
+            android:padding="8dp"
+            android:src="@drawable/square" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:id="@+id/iv_back"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@drawable/popup_btn_bg"
+            android:padding="8dp"
+            android:src="@drawable/caret_left" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="12dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_reboot"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/popup_resolution_bg"
+            android:gravity="center"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:text="@string/device_reboot"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/tv_exit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/popup_resolution_bg"
+            android:gravity="center"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:text="@string/device_exit"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+    </LinearLayout>
+</LinearLayout>
