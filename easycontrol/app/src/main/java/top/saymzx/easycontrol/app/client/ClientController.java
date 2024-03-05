@@ -150,9 +150,9 @@ public class ClientController implements TextureView.SurfaceTextureListener {
 
   private synchronized void changeToFull() {
     hide();
-    Intent intent = new Intent(AppData.mainActivity, FullActivity.class);
+    Intent intent = new Intent(AppData.applicationContext, FullActivity.class);
     intent.putExtra("uuid", device.uuid);
-    AppData.mainActivity.startActivity(intent);
+    AppData.applicationContext.startActivity(intent);
   }
 
   private synchronized void changeToSmall() {

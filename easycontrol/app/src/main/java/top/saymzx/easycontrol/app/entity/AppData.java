@@ -18,7 +18,6 @@ import top.saymzx.easycontrol.app.helper.PublicTools;
 public class AppData {
   @SuppressLint("StaticFieldLeak")
   public static Context applicationContext;
-  public static MainActivity mainActivity;
   public static Handler uiHandler;
 
   // 数据库工具库
@@ -37,11 +36,10 @@ public class AppData {
   // 设置值
   public static Setting setting;
 
-  public static void init(MainActivity m) {
-    mainActivity = m;
-    applicationContext = m.getApplicationContext();
+  public static void init(Context context) {
+    applicationContext = context.getApplicationContext();
     AppSettings.initAppSettings();
-    uiHandler = new android.os.Handler(m.getMainLooper());
+    uiHandler = new android.os.Handler(context.getMainLooper());
     dbHelper = new DbHelper(applicationContext);
     clipBoard = (ClipboardManager) applicationContext.getSystemService(Context.CLIPBOARD_SERVICE);
     wifiManager = (WifiManager) applicationContext.getSystemService(Context.WIFI_SERVICE);
