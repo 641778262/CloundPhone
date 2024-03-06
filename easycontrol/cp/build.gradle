@@ -28,6 +28,15 @@ android {
     }
 }
 
+
 dependencies {
     implementation "androidx.annotation:annotation:1.7.1"
+    compileOnly 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
+    compileOnly 'androidx.core:core:1.1.0'
+    compileOnly 'androidx.fragment:fragment:1.1.0'
+    compileOnly 'androidx.appcompat:appcompat:1.1.0'
+    compileOnly 'androidx.recyclerview:recyclerview:1.1.0'
+    compileOnly 'com.alibaba:fastjson:1.2.83'
+
+    compileOnly fileTree(include: ['uniapp-v8-release.aar'], dir: '../app/libs')
 }

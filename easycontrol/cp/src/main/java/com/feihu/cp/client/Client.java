@@ -31,12 +31,12 @@ public class Client {
     if(existClientController != null && existClientController.fullView != null) {
       context = existClientController.fullView;
     }
-    Pair<View, WindowManager.LayoutParams> loading = null;
+//    Pair<View, WindowManager.LayoutParams> loading = null;
 //    if(existClientController == null || !existClientController.autoReConnect){//第一次连接或者非自动连接
-      loading = ViewTools.createConnectLoading(context,retry);
-      AppData.windowManager.addView(loading.first, loading.second);
+//      loading = ViewTools.createConnectLoading(context,retry);
+//      AppData.windowManager.addView(loading.first, loading.second);
 //    }
-    final Pair<View, WindowManager.LayoutParams> loadingPair = loading;
+//    final Pair<View, WindowManager.LayoutParams> loadingPair = loading;
 
     // 连接
     clientStream = new ClientStream(device, usbDevice, connected -> {
@@ -44,9 +44,9 @@ public class Client {
         existClientController.handleException = false;
       }
       try {
-        if(loadingPair != null) {
-          AppData.windowManager.removeView(loadingPair.first);
-        }
+//        if(loadingPair != null) {
+//          AppData.windowManager.removeView(loadingPair.first);
+//        }
       } catch (Exception ignored) {
         ignored.printStackTrace();
       }
