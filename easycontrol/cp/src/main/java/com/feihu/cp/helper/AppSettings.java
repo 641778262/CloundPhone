@@ -2,17 +2,26 @@ package com.feihu.cp.helper;
 
 import android.os.SystemClock;
 
+
 public class AppSettings {
     private static final String KEY_VOICE = "key_voice";
     private static final String KEY_VIRTUAL_KEYS = "key_virtual_keys";
     private static final String KEY_RESOLUTION = "key_resolution";
 
-    public static final long AUTO_DISCONNECT_TIME = 2 * 60 * 1000;//无操作自动断开时间
+    public static final long AUTO_DISCONNECT_TIME = 5 * 60 * 1000;//无操作自动断开时间
+    public static final long BACK_DISCONNECT_TIME = 2 * 15 * 1000;//退到后台自动断开时间
 
-    private static final int RESOLUTION_SUPER = 3;
-    private static final int RESOLUTION_HIGH = 2;
-    private static final int RESOLUTION_COMMON = 1;
+    public static final int RESOLUTION_SUPER = 3;
+    public static final int RESOLUTION_HIGH = 2;
+    public static final int RESOLUTION_COMMON = 1;
+    private static final int BIT_COMMON = 1;
+    private static final int BIT_HIGH = 2;
+    private static final int BIT_SUPER = 4;
+    private static final int FPS_COMMON = 90;
+    private static final int FPS_HIGH = 90;
+    private static final int FPS_SUPER = 90;
 
+    public static boolean sPaused;//退出到桌面
     public static boolean sConnected;//是否已经连接成功
     public static long sLastTouchTime;//上次操作云手机的时间
     private static boolean sShowVoice;
@@ -23,11 +32,11 @@ public class AppSettings {
     public static void initAppSettings() {
         sShowVoice = SharedPreferencesUtils.getBooleanParam(KEY_VOICE, true);
         sShowVirtualKeys = SharedPreferencesUtils.getBooleanParam(KEY_VIRTUAL_KEYS, true);
-        sResolutionType = SharedPreferencesUtils.getIntParam(KEY_RESOLUTION, 0);
+        sResolutionType = SharedPreferencesUtils.getIntParam(KEY_RESOLUTION, RESOLUTION_COMMON);
     }
 
     public static boolean showVoice() {
-        return sShowVoice;
+        return sShowVoice && !AppSettings.sPaused;
     }
 
     public static void setShowVoice(boolean showVoice) {
@@ -53,11 +62,32 @@ public class AppSettings {
         SharedPreferencesUtils.setParam(KEY_RESOLUTION, sResolutionType);
     }
 
+    public static int getVideoBits() {
+        switch (sResolutionType) {
+            case RESOLUTION_SUPER:
+                return BIT_SUPER;
+            case RESOLUTION_HIGH:
+                return BIT_HIGH;
+        }
+        return BIT_COMMON;
+    }
+
+    public static int getVideoFps() {
+        switch (sResolutionType) {
+            case RESOLUTION_SUPER:
+                return FPS_SUPER;
+            case RESOLUTION_HIGH:
+                return FPS_HIGH;
+        }
+        return FPS_COMMON;
+    }
+
     public static void resetLastTouchTime() {
         sLastTouchTime = SystemClock.elapsedRealtime();
     }
 
     public static boolean showTimeOutDialog() {
-        return sConnected && SystemClock.elapsedRealtime() - sLastTouchTime > AUTO_DISCONNECT_TIME;
+        long autoDisconnectTime = sPaused ? BACK_DISCONNECT_TIME : AUTO_DISCONNECT_TIME;
+        return sConnected && SystemClock.elapsedRealtime() - sLastTouchTime > autoDisconnectTime;
     }
 }

@@ -1,16 +1,15 @@
 package top.saymzx.easycontrol.app.client;
 
+import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.hardware.usb.UsbDevice;
-import android.util.Log;
-import android.util.Pair;
 import android.view.View;
-import android.view.WindowManager;
 
+import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
 import top.saymzx.easycontrol.app.helper.AppSettings;
-import top.saymzx.easycontrol.app.helper.ViewTools;
 
 public class Client {
   // 组件
@@ -19,34 +18,50 @@ public class Client {
   private ClientPlayer clientPlayer = null;
   private final Device device;
 
-  public Client(Device device,ClientController existClientController) {
-    this(device, null,existClientController);
+  public Client(Context context,Device device,ClientController existClientController) {
+    this(context,device, null,existClientController);
   }
 
-  public Client(Device device, UsbDevice usbDevice,ClientController existClientController) {
+  public Client(Context context,Device device, UsbDevice usbDevice,ClientController existClientController) {
     this.device = device;
     // 已经存在设备连接
     if (ClientController.getDevice(device.uuid) != null && existClientController == null) return;
     boolean retry = existClientController != null && !existClientController.autoReConnect;//主动点提示框重新连接
-    Context context = AppData.applicationContext;
+//    Context context = AppData.applicationContext;
     if(existClientController != null && existClientController.fullView != null) {
       context = existClientController.fullView;
     }
-    Pair<View, WindowManager.LayoutParams> loading = null;
-//    if(existClientController == null || !existClientController.autoReConnect){//第一次连接或者非自动连接
-      loading = ViewTools.createConnectLoading(context,retry);
-      AppData.windowManager.addView(loading.first, loading.second);
-//    }
-    final Pair<View, WindowManager.LayoutParams> loadingPair = loading;
 
+//    Pair<View, WindowManager.LayoutParams> loading = null;
+//    if(existClientController == null || !existClientController.autoReConnect){//第一次连接或者非自动连接
+//      loading = ViewTools.createConnectLoading(context,retry);
+//      AppData.windowManager.addView(loading.first, loading.second);
+//    }
+//    final Pair<View, WindowManager.LayoutParams> loadingPair = loading;
+
+    if(!(context instanceof Activity)) {
+      return;
+    }
+    Dialog dialog = null;
+    try {
+      dialog = new Dialog(context, R.style.CustomDialog);
+      dialog.setContentView(View.inflate(context,R.layout.item_loading,null));
+      dialog.setCancelable(false);
+      dialog.setCanceledOnTouchOutside(false);
+      dialog.show();
+    }catch (Exception e) {
+      e.printStackTrace();
+    }
+    final Dialog loadingDialog = dialog;
+    final Context copyContext = context;
     // 连接
     clientStream = new ClientStream(device, usbDevice, connected -> {
       if(existClientController != null) {
         existClientController.handleException = false;
       }
       try {
-        if(loadingPair != null) {
-          AppData.windowManager.removeView(loadingPair.first);
+        if(loadingDialog != null && loadingDialog.isShowing()) {
+          loadingDialog.dismiss();
         }
       } catch (Exception ignored) {
         ignored.printStackTrace();
@@ -56,9 +71,10 @@ public class Client {
 
       });
       if (connected) {//连接成功
+        AppSettings.resetLastTouchTime();
         // 控制器
         if(existClientController == null) {
-          clientController = new ClientController(device, clientStream, ready -> {
+          clientController = new ClientController(copyContext, device, clientStream, ready -> {
             if (ready) {//TextureView准备就绪可以播放
               // 播放器
               clientPlayer = new ClientPlayer(device, clientStream, clientController);
@@ -87,6 +103,7 @@ public class Client {
   }
 
   public void release() {
+    AppSettings.sConnected = false;
     AppData.dbHelper.update(device);
     if(clientPlayer != null) {
       clientPlayer.close();

@@ -16,7 +16,7 @@
     android:roundIcon="${app_icon_round}"
     android:supportsRtl="true"
     android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar"
-    android:usesCleartextTraffic="true">
+    >
     <activity
       android:name=".MainActivity"
       android:exported="true">

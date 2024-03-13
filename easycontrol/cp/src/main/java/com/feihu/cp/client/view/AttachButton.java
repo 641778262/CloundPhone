@@ -3,11 +3,14 @@ package com.feihu.cp.client.view;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.BounceInterpolator;
+import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
+
+import com.feihu.cp.helper.AppSettings;
+
 
 /**
  * 自定义View实现拖动并自动吸边效果
@@ -19,7 +22,7 @@ import androidx.annotation.Nullable;
  * @attr customIsAttach  //是否需要自动吸边
  * @attr customIsDrag    //是否可拖曳
  */
-public class AttachButton extends View {
+public class AttachButton extends LinearLayout {
     private float mLastRawX;
     private float mLastRawY;
     private final String TAG = "AttachButton";
@@ -62,6 +65,7 @@ public class AttachButton extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        AppSettings.resetLastTouchTime();
         //判断是否需要滑动
         if (customIsDrag) {
             //当前手指的坐标

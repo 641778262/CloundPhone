@@ -131,7 +131,7 @@ public class ClientModule extends UniModule {
                     } else {
                         Device device = new Device(UUID.randomUUID().toString(), Device.TYPE_NETWORK);
                         device.address = address;
-                        new Client(device, null);
+                        new Client(mUniSDKInstance.getContext(),device, null);
                         data.put(CODE, CODE_SUCCESS);
                         data.put(MSG, "connecting phone");
                     }

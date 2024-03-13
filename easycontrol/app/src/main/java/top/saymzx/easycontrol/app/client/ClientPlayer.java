@@ -10,7 +10,6 @@ import top.saymzx.easycontrol.app.client.decode.AudioDecode;
 import top.saymzx.easycontrol.app.client.decode.VideoDecode;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
-import top.saymzx.easycontrol.app.helper.AppSettings;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class ClientPlayer {
@@ -49,10 +48,8 @@ public class ClientPlayer {
         switch (clientStream.readByteFromMain()) {
           case AUDIO_EVENT:
             ByteBuffer audioFrame = clientStream.readFrameFromMain();
-            if(AppSettings.showVoice()) {
-              if (audioDecode != null) audioDecode.decodeIn(audioFrame);
-              else audioDecode = new AudioDecode(useOpus, audioFrame, playHandler);
-            }
+            if (audioDecode != null) audioDecode.decodeIn(audioFrame);
+            else audioDecode = new AudioDecode(useOpus, audioFrame, playHandler);
             break;
           case CLIPBOARD_EVENT:
             ClientController.handleControll(device.uuid, "setClipBoard", clientStream.readByteArrayFromMain(clientStream.readIntFromMain()));

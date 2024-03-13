@@ -2,20 +2,27 @@
 <resources>
   <string name="device_cloud_phone">云手机</string>
   <string name="device_resolution">清晰度</string>
-  <string name="device_resolution_super">超清\n720p</string>
-  <string name="device_resolution_high">高清\n540p</string>
-  <string name="device_resolution_common">普清\n360p</string>
+  <string name="device_resolution_super">超清(慢)\n720p</string>
+  <string name="device_resolution_high">高清(中)\n540p</string>
+  <string name="device_resolution_common">普清(快)\n360p</string>
   <string name="device_resolution_auto">智能\n自动选择</string>
   <string name="device_voice_on">开启声音</string>
   <string name="device_voice_off">关闭声音</string>
-  <string name="device_show_keys">显示虚拟按键</string>
-  <string name="device_hide_keys">隐藏虚拟按键</string>
+  <string name="device_show_keys">显示虚拟键</string>
+  <string name="device_hide_keys">隐藏虚拟键</string>
+  <string name="device_exit_tips">再按一次退出连接</string>
   <string name="device_reboot">重启设备</string>
   <string name="device_exit">退出设备</string>
+  <string name="cancel">取消</string>
+  <string name="confirm">确定</string>
+  <string name="title_tips">温馨提示</string>
+  <string name="disconnect_tips">因您长时间未操作，已为您自动断开连接</string>
+  <string name="reconnect_device">重新连接</string>
+  <string name="exit_device">退出设备</string>
 
   <string name="connect_progressing">加速连接云手机...</string>
   <string name="connect_retry">正在重新连接...</string>
-  <string name="connect_net_tips">连接断开，请检查网络后重新连接</string>
+  <string name="connect_net_tips">连接断开，请重新连接</string>
   <string name="connect_net_error">当前网络异常，请检查网络后重新连接</string>
 
 

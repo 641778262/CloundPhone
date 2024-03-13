@@ -21,11 +21,27 @@
             android:orientation="horizontal" />
 
         <com.feihu.cp.client.view.AttachButton
-            android:id="@+id/button_setting"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center_vertical"
-            android:background="@drawable/phone" />
+            android:id="@+id/ll_setting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="120dp"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/iv_net"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                tools:src="@drawable/setting_wifi_blue" />
+
+            <TextView
+                android:id="@+id/tv_ms"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/blue"
+                android:textSize="16sp"
+                tools:text="20ms" />
+        </com.feihu.cp.client.view.AttachButton>
     </FrameLayout>
 
 
@@ -33,10 +49,7 @@
         android:id="@+id/nav_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:paddingBottom="10dp">
+        android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/button_rotate"
@@ -51,32 +64,37 @@
 
         <ImageView
             android:id="@+id/button_switch"
-            android:layout_width="0dp"
-            android:layout_height="30dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="30dp"
             android:layout_weight="1"
-            android:focusable="false"
-            android:src="@drawable/square"
-            android:tint="#DEDEDE" />
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:src="@drawable/setting_switch" />
 
         <ImageView
             android:id="@+id/button_home"
-            android:layout_width="0dp"
-            android:layout_height="30dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
             android:layout_weight="1"
             android:focusable="false"
-            android:padding="4dp"
-            android:src="@drawable/o"
-            android:tint="#DEDEDE" />
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:src="@drawable/setting_home" />
 
         <ImageView
             android:id="@+id/button_back"
-            android:layout_width="0dp"
-            android:layout_height="30dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
             android:layout_weight="1"
-            android:focusable="false"
-            android:padding="4dp"
-            android:src="@drawable/caret_left"
-            android:tint="#DEDEDE" />
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:src="@drawable/setting_back" />
 
     </LinearLayout>
 

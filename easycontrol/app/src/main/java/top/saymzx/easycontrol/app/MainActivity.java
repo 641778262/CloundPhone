@@ -80,12 +80,13 @@ public class MainActivity extends Activity {
 
   // 检查权限
   private boolean checkPermission() {
-    // 检查悬浮窗权限，防止某些设备如鸿蒙不兼容
-    try {
-      return Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(this);
-    } catch (Exception ignored) {
-      return true;
-    }
+//     检查悬浮窗权限，防止某些设备如鸿蒙不兼容
+//    try {
+//      return Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(this);
+//    } catch (Exception ignored) {
+//      return true;
+//    }
+    return true;
   }
 
   // 创建Client加载框

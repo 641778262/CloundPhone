@@ -12,9 +12,12 @@ import android.os.Handler;
 
 import androidx.annotation.NonNull;
 
+import com.feihu.cp.helper.AppSettings;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.LinkedBlockingQueue;
+
 
 public class AudioDecode {
   private MediaCodec decodec;
@@ -75,6 +78,9 @@ public class AudioDecode {
   private final LinkedBlockingQueue<Integer> intputBufferQueue = new LinkedBlockingQueue<>();
 
   public void decodeIn(ByteBuffer data) throws InterruptedException {
+    if(!AppSettings.showVoice()) {
+      return;
+    }
     try {
       int inIndex = intputBufferQueue.take();
       decodec.getInputBuffer(inIndex).put(data);
@@ -127,9 +133,9 @@ public class AudioDecode {
       audioFormat.setChannelMask(AudioFormat.CHANNEL_OUT_STEREO);
       // 3
       audioTrackBuild.setAudioAttributes(audioAttributesBulider.build())
-        .setAudioFormat(audioFormat.build())
-        .setTransferMode(AudioTrack.MODE_STREAM)
-        .setBufferSizeInBytes(bufferSize);
+              .setAudioFormat(audioFormat.build())
+              .setTransferMode(AudioTrack.MODE_STREAM)
+              .setBufferSizeInBytes(bufferSize);
       // 4
       audioTrack = audioTrackBuild.build();
     } else audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, SAMPLE_RATE, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT, bufferSize, AudioTrack.MODE_STREAM);

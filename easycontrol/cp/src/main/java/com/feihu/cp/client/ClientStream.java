@@ -3,14 +3,6 @@ package com.feihu.cp.client;
 import android.hardware.usb.UsbDevice;
 import android.util.Pair;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.nio.ByteBuffer;
-
-import com.feihu.cp.BuildConfig;
 import com.feihu.cp.R;
 import com.feihu.cp.adb.Adb;
 import com.feihu.cp.buffer.BufferStream;
@@ -18,8 +10,18 @@ import com.feihu.cp.client.decode.DecodecTools;
 import com.feihu.cp.entity.AppData;
 import com.feihu.cp.entity.Device;
 import com.feihu.cp.entity.MyInterface;
+import com.feihu.cp.helper.AppSettings;
 import com.feihu.cp.helper.DeviceTools;
 import com.feihu.cp.helper.PublicTools;
+
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.nio.ByteBuffer;
+
+
 
 public class ClientStream {
   private boolean isClose = false;
@@ -86,54 +88,54 @@ public class ClientStream {
 
   // 启动Server
   private void startServer(Device device) throws Exception {
-    if (/*BuildConfig.ENABLE_DEBUG_FEATURE ||*/ !adb.runAdbCmd("ls /data/local/tmp/easycontrol_*").contains(serverName)) {
+    if (/*BuildConfig.ENABLE_DEBUG_FEATURE || */!adb.runAdbCmd("ls /data/local/tmp/easycontrol_*").contains(serverName)) {
       adb.runAdbCmd("rm /data/local/tmp/easycontrol_* ");
       adb.pushFile(AppData.applicationContext.getResources().openRawResource(R.raw.easycontrol_server), serverName);
     }
     shell = adb.getShell();
     shell.write(ByteBuffer.wrap(("app_process -Djava.class.path=" + serverName + " / top.saymzx.easycontrol.server.Server"
-      + " isAudio=1" + " maxSize=" + device.maxSize
-      + " maxFps=" + device.maxFps
-      + " maxVideoBit=" + device.maxVideoBit
-      + " keepAwake=" + (device.keepWakeOnRunning ? 1 : 0)
-      + " supportH265=" + ((device.useH265 && supportH265) ? 1 : 0)
-      + " supportOpus=" + (supportOpus ? 1 : 0) + " \n").getBytes()));
+            + " isAudio=1" + " maxSize=" + device.maxSize
+            + " maxFps=" + AppSettings.getVideoFps()
+            + " maxVideoBit=" + AppSettings.getVideoBits()
+            + " keepAwake=" + (device.keepWakeOnRunning ? 1 : 0)
+            + " supportH265=" + ((device.useH265 && supportH265) ? 1 : 0)
+            + " supportOpus=" + (supportOpus ? 1 : 0) + " \n").getBytes()));
   }
 
   // 连接Server
   private void connectServer(Pair<String, Integer> address) throws Exception {
-    Thread.sleep(50);
+//    Thread.sleep(50);
     int reTry = 60;
-    long startTime = System.currentTimeMillis();
-    if (address != null) {
-      reTry /= 2;
-      for (int i = 0; i < reTry; i++) {
-        try {
-          if (mainSocket == null) {
-            mainSocket = new Socket();
-            mainSocket.connect(new InetSocketAddress(address.first, 25166), 1000);
-          }
-          if (videoSocket == null) {
-            videoSocket = new Socket();
-            videoSocket.connect(new InetSocketAddress(address.first, 25166), 1000);
-          }
-          mainOutputStream = mainSocket.getOutputStream();
-          mainDataInputStream = new DataInputStream(mainSocket.getInputStream());
-          videoDataInputStream = new DataInputStream(videoSocket.getInputStream());
-          connectDirect = true;
-          return;
-        } catch (Exception ignored) {
-          ignored.printStackTrace();
-          // 此处检查是因为代码是靠连接错误约束时间的，但有些设备为了安全，在端口没有开启的情况下不会回复reset错误，而是不回复，导致无法检测错误，无法约束时间
-          // 如果超时，直接跳出循环
-          if (System.currentTimeMillis() - startTime >= 5000) {
-            reTry = 60;
-            break;
-          }
-          Thread.sleep(50);
-        }
-      }
-    }
+//    long startTime = System.currentTimeMillis();
+//    if (address != null) {
+//      reTry /= 2;
+//      for (int i = 0; i < reTry; i++) {
+//        try {
+//          if (mainSocket == null) {
+//            mainSocket = new Socket();
+//            mainSocket.connect(new InetSocketAddress(address.first, 25166), 1000);
+//          }
+//          if (videoSocket == null) {
+//            videoSocket = new Socket();
+//            videoSocket.connect(new InetSocketAddress(address.first, 25166), 1000);
+//          }
+//          mainOutputStream = mainSocket.getOutputStream();
+//          mainDataInputStream = new DataInputStream(mainSocket.getInputStream());
+//          videoDataInputStream = new DataInputStream(videoSocket.getInputStream());
+//          connectDirect = true;
+//          return;
+//        } catch (Exception ignored) {
+//          ignored.printStackTrace();
+//          // 此处检查是因为代码是靠连接错误约束时间的，但有些设备为了安全，在端口没有开启的情况下不会回复reset错误，而是不回复，导致无法检测错误，无法约束时间
+//          // 如果超时，直接跳出循环
+//          if (System.currentTimeMillis() - startTime >= 5000) {
+//            reTry = 60;
+//            break;
+//          }
+//          Thread.sleep(50);
+//        }
+//      }
+//    }
     // 直连失败尝试ADB中转
     for (int i = 0; i < reTry; i++) {
       try {

@@ -61,7 +61,7 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
   }
 
   private void handleScreenOff() {
-    for (Device device : deviceListAdapter.devicesList) ClientController.handleControll(device.uuid, "close", null);
+//    for (Device device : deviceListAdapter.devicesList) ClientController.handleControll(device.uuid, "close", null);
   }
 
   private void handleControl(Context context, Intent intent) {

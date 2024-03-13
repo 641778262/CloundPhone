@@ -16,83 +16,105 @@ import android.os.Message;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.PopupWindow;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+
+
 
 import java.nio.ByteBuffer;
 
 import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.client.ClientController;
 import top.saymzx.easycontrol.app.client.ControlPacket;
-import top.saymzx.easycontrol.app.databinding.ActivityFullBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
 import top.saymzx.easycontrol.app.helper.AppSettings;
 import top.saymzx.easycontrol.app.helper.CustomOnClickListener;
 import top.saymzx.easycontrol.app.helper.DeviceTools;
+import top.saymzx.easycontrol.app.helper.PingUtils;
 import top.saymzx.easycontrol.app.helper.PublicTools;
+import top.saymzx.easycontrol.app.helper.ToastUtils;
 import top.saymzx.easycontrol.app.helper.ViewTools;
 
 public class FullActivity extends Activity implements SensorEventListener {
   private boolean isClose = false;
   private Device device;
-  private ActivityFullBinding activityFullBinding;
   private boolean autoRotate;
   private boolean light = true;
   private long lastBackPressTime;
 
+  private ViewGroup textureViewLayout;
+  private View barView;
+
+  private final PingUtils mPingUtils = new PingUtils();
+
   private static final int MSG_CHECK_TOUCH_TIME = 1001;
   private static final long CHECK_TOUCH_TIME_INTERVAL = 5*1000;
   private final Handler mHandler = new Handler(Looper.getMainLooper()){
-      @Override
-      public void handleMessage(@NonNull Message msg) {
-          if(AppSettings.showTimeOutDialog()) {
-
-          } else {
-              sendEmptyMessageDelayed(MSG_CHECK_TOUCH_TIME,CHECK_TOUCH_TIME_INTERVAL);
-          }
+    @Override
+    public void handleMessage(@NonNull Message msg) {
+      if(msg.what == MSG_CHECK_TOUCH_TIME) {
+        if(showNoHandleTimeOut()) {
+          removeCallbacksAndMessages(MSG_CHECK_TOUCH_TIME);
+        } else {
+          sendEmptyMessageDelayed(MSG_CHECK_TOUCH_TIME,CHECK_TOUCH_TIME_INTERVAL);
+        }
       }
+    }
   };
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     ViewTools.setFullScreen(this);
-    activityFullBinding = ActivityFullBinding.inflate(this.getLayoutInflater());
-    setContentView(activityFullBinding.getRoot());
+    setContentView(R.layout.activity_full);
+    textureViewLayout = findViewById(R.id.texture_view_layout);
+    barView = findViewById(R.id.bar_view);
     device = ClientController.getDevice(getIntent().getStringExtra("uuid"));
     if (device == null) return;
     ClientController.setFullView(device.uuid, this);
     // 初始化
-    activityFullBinding.barView.setVisibility(View.GONE);
+    barView.setVisibility(View.GONE);
     setNavBarHide(AppSettings.showVirtualKeys());
     autoRotate = AppData.setting.getAutoRotate();
-    activityFullBinding.buttonAutoRotate.setImageResource(autoRotate ? R.drawable.un_rotate : R.drawable.rotate);
+    ((ImageView)findViewById(R.id.button_auto_rotate)).setImageResource(autoRotate ? R.drawable.un_rotate : R.drawable.rotate);
     // 按键监听
     setButtonListener();
     setKeyEvent();
     // 更新textureView
-    activityFullBinding.textureViewLayout.addView(ClientController.getTextureView(device.uuid), 0);
-    activityFullBinding.textureViewLayout.post(this::updateMaxSize);
+    textureViewLayout.addView(ClientController.getTextureView(device.uuid), 0);
+    textureViewLayout.post(this::updateMaxSize);
     // 页面自动旋转
     AppData.sensorManager.registerListener(this, AppData.sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
     mHandler.sendEmptyMessageDelayed(MSG_CHECK_TOUCH_TIME,CHECK_TOUCH_TIME_INTERVAL);
   }
 
   @Override
+  protected void onResume() {
+    super.onResume();
+    AppSettings.sPaused = false;
+    AppSettings.resetLastTouchTime();
+  }
+
+  @Override
   protected void onPause() {
     AppData.sensorManager.unregisterListener(this);
-    if (isChangingConfigurations()) activityFullBinding.textureViewLayout.removeView(ClientController.getTextureView(device.uuid));
+    AppSettings.sPaused = true;
+    if (isChangingConfigurations()) textureViewLayout.removeView(ClientController.getTextureView(device.uuid));
 //    else if (!isClose) ClientController.handleControll(device.uuid, device.fullToMiniOnRunning ? "changeToMini" : "changeToSmall", ByteBuffer.wrap("changeToFull".getBytes()));
     super.onPause();
   }
 
   @Override
   public void onMultiWindowModeChanged(boolean isInMultiWindowMode, Configuration newConfig) {
-    activityFullBinding.textureViewLayout.post(this::updateMaxSize);
+    textureViewLayout.post(this::updateMaxSize);
     super.onMultiWindowModeChanged(isInMultiWindowMode, newConfig);
   }
 
@@ -101,8 +123,8 @@ public class FullActivity extends Activity implements SensorEventListener {
   }
 
   private void updateMaxSize() {
-    int width = activityFullBinding.textureViewLayout.getMeasuredWidth();
-    int height = activityFullBinding.textureViewLayout.getMeasuredHeight();
+    int width = textureViewLayout.getMeasuredWidth();
+    int height = textureViewLayout.getMeasuredHeight();
     ByteBuffer byteBuffer = ByteBuffer.allocate(8);
     byteBuffer.putInt(width);
     byteBuffer.putInt(height);
@@ -114,68 +136,98 @@ public class FullActivity extends Activity implements SensorEventListener {
   public void hide() {
     try {
       isClose = true;
-      activityFullBinding.textureViewLayout.removeView(ClientController.getTextureView(device.uuid));
+      textureViewLayout.removeView(ClientController.getTextureView(device.uuid));
       finish();
     } catch (Exception ignored) {
-        ignored.printStackTrace();
+      ignored.printStackTrace();
     }
   }
 
   // 设置按钮监听
   private void setButtonListener() {
-    activityFullBinding.buttonRotate.setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonRotate", null));
-    activityFullBinding.buttonBack.setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonBack", null));
-    activityFullBinding.buttonHome.setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonHome", null));
-    activityFullBinding.buttonSwitch.setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonSwitch", null));
-    activityFullBinding.buttonNavBar.setOnClickListener(v -> {
-      setNavBarHide(activityFullBinding.navBar.getVisibility() == View.GONE);
+    findViewById(R.id.button_rotate).setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonRotate", null));
+    findViewById(R.id.button_back).setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonBack", null));
+    findViewById(R.id.button_home).setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonHome", null));
+    findViewById(R.id.button_switch).setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonSwitch", null));
+    findViewById(R.id.button_nav_bar).setOnClickListener(v -> {
+      setNavBarHide(findViewById(R.id.nav_bar).getVisibility() == View.GONE);
       changeBarView();
     });
-    activityFullBinding.buttonMini.setOnClickListener(v -> ClientController.handleControll(device.uuid, "changeToMini", null));
-    activityFullBinding.buttonSmall.setOnClickListener(v -> ClientController.handleControll(device.uuid, "changeToSmall", null));
-    activityFullBinding.buttonClose.setOnClickListener(v -> ClientController.handleControll(device.uuid, "close", null));
-    activityFullBinding.buttonLight.setOnClickListener(v -> {
+    findViewById(R.id.button_mini).setOnClickListener(v -> ClientController.handleControll(device.uuid, "changeToMini", null));
+    findViewById(R.id.button_small).setOnClickListener(v -> ClientController.handleControll(device.uuid, "changeToSmall", null));
+    findViewById(R.id.button_close).setOnClickListener(v -> ClientController.handleControll(device.uuid, "close", null));
+    findViewById(R.id.button_light).setOnClickListener(v -> {
       light = !light;
-      activityFullBinding.buttonLight.setImageResource(light ? R.drawable.lightbulb_off : R.drawable.lightbulb);
+      ((ImageView)findViewById(R.id.button_light)).setImageResource(light ? R.drawable.lightbulb_off : R.drawable.lightbulb);
       ClientController.handleControll(device.uuid, light ? "buttonLight" : "buttonLightOff", null);
       changeBarView();
     });
-    activityFullBinding.buttonPower.setOnClickListener(v -> {
+    findViewById(R.id.button_power).setOnClickListener(v -> {
       ClientController.handleControll(device.uuid, "buttonPower", null);
       changeBarView();
     });
-    activityFullBinding.buttonMore.setOnClickListener(v -> changeBarView());
-    activityFullBinding.buttonAutoRotate.setOnClickListener(v -> {
+    findViewById(R.id.button_more).setOnClickListener(v -> changeBarView());
+    findViewById(R.id.button_auto_rotate).setOnClickListener(v -> {
       autoRotate = !autoRotate;
       AppData.setting.setAutoRotate(autoRotate);
-      activityFullBinding.buttonAutoRotate.setImageResource(autoRotate ? R.drawable.un_rotate : R.drawable.rotate);
+      ((ImageView)findViewById(R.id.button_auto_rotate)).setImageResource(autoRotate ? R.drawable.un_rotate : R.drawable.rotate);
       changeBarView();
     });
-      activityFullBinding.buttonSetting.setOnClickListener(v -> {
-          showPopupWindow();
+    findViewById(R.id.ll_setting).setOnClickListener(v -> {
+      showPopupWindow();
+    });
+    ImageView netIv = findViewById(R.id.iv_net);
+    netIv.setImageResource(DeviceTools.isWiFiNet()?R.drawable.setting_wifi_blue:R.drawable.setting_net_blue);
+    TextView msTv = findViewById(R.id.tv_ms);
+    mPingUtils.checkPings(device.address, time -> {
+      if(AppSettings.sPaused) {
+        return;
+      }
+      mHandler.post(() -> {
+        if(!DeviceTools.isConnected()) {
+          return;
+        }
+        if(time > 0) {
+          boolean wifi = DeviceTools.isWiFiNet();
+          msTv.setVisibility(View.VISIBLE);
+          if(time < 50) {
+            netIv.setImageResource(wifi?R.drawable.setting_wifi_blue:R.drawable.setting_net_blue);
+            msTv.setTextColor(getResources().getColor(R.color.blue));
+          } else if (time < 100) {
+            msTv.setTextColor(getResources().getColor(R.color.orange));
+            netIv.setImageResource(wifi?R.drawable.setting_wifi_orange:R.drawable.setting_net_orange);
+          } else {
+            msTv.setTextColor(getResources().getColor(R.color.red));
+            netIv.setImageResource(wifi?R.drawable.setting_wifi_red:R.drawable.setting_net_red);
+          }
+          msTv.setText(String.valueOf(time+"ms"));
+        } else {
+          msTv.setVisibility(View.INVISIBLE);
+        }
       });
+    });
   }
 
   // 导航栏隐藏
   private void setNavBarHide(boolean isShow) {
-    activityFullBinding.navBar.setVisibility(isShow ? View.VISIBLE : View.GONE);
-    activityFullBinding.buttonNavBar.setImageResource(isShow ? R.drawable.not_equal : R.drawable.equals);
-    activityFullBinding.textureViewLayout.post(this::updateMaxSize);
+    findViewById(R.id.nav_bar).setVisibility(isShow ? View.VISIBLE : View.GONE);
+    ((ImageView)findViewById(R.id.button_nav_bar)).setImageResource(isShow ? R.drawable.not_equal : R.drawable.equals);
+    textureViewLayout.post(this::updateMaxSize);
   }
 
   private void changeBarView() {
-    boolean toShowView = activityFullBinding.barView.getVisibility() == View.GONE;
+    boolean toShowView = barView.getVisibility() == View.GONE;
     boolean isLandscape = getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE || getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-    ViewTools.viewAnim(activityFullBinding.barView, toShowView, 0, PublicTools.dp2px(40f) * (isLandscape ? -1 : 1), (isStart -> {
-      if (isStart && toShowView) activityFullBinding.barView.setVisibility(View.VISIBLE);
-      else if (!isStart && !toShowView) activityFullBinding.barView.setVisibility(View.GONE);
+    ViewTools.viewAnim(barView, toShowView, 0, PublicTools.dp2px(40f) * (isLandscape ? -1 : 1), (isStart -> {
+      if (isStart && toShowView) barView.setVisibility(View.VISIBLE);
+      else if (!isStart && !toShowView) barView.setVisibility(View.GONE);
     }));
   }
 
   @Override
   public void onSensorChanged(SensorEvent sensorEvent) {
     if (!autoRotate || Sensor.TYPE_ACCELEROMETER != sensorEvent.sensor.getType()
-            || activityFullBinding.textureViewLayout.getMeasuredWidth() < activityFullBinding.textureViewLayout.getMeasuredHeight()) return;
+            || textureViewLayout.getMeasuredWidth() < textureViewLayout.getMeasuredHeight()) return;
     float[] values = sensorEvent.values;
     float x = values[0];
     float y = values[1];
@@ -216,7 +268,7 @@ public class FullActivity extends Activity implements SensorEventListener {
         ClientController.handleControll(device.uuid, "close", null);
       } else {
         lastBackPressTime = System.currentTimeMillis();
-        Toast.makeText(getApplicationContext(),"再按一次退出云手机", Toast.LENGTH_SHORT).show();
+        ToastUtils.showToastNoRepeat(R.string.device_exit_tips);
       }
       return true;
     }
@@ -227,86 +279,168 @@ public class FullActivity extends Activity implements SensorEventListener {
     return super.onKeyDown(keyCode, event);
   }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mHandler.removeCallbacksAndMessages(null);
-    }
-
-    private PopupWindow showPopupWindow() {
-        View view = View.inflate(this, R.layout.popup_setting, null);
-        view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-        boolean isLandscape = getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                || getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-        int width = isLandscape ? DeviceTools.getScreenWidth() * 3 / 5 : DeviceTools.getScreenWidth() * 5 / 6;
-        final PopupWindow popupWindow = new PopupWindow(view, width, view
-                .getMeasuredHeight(), true);
-        popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        popupWindow.setOutsideTouchable(true);
-        popupWindow.setTouchable(true);
-        TextView voiceTv = view.findViewById(R.id.tv_voice);
-        voiceTv.setText(AppSettings.showVoice() ? R.string.device_voice_off : R.string.device_voice_on);
-        TextView keyTv = view.findViewById(R.id.tv_key);
-        keyTv.setText(AppSettings.showVirtualKeys() ? R.string.device_hide_keys : R.string.device_show_keys);
-        CustomOnClickListener listener = new CustomOnClickListener() {
-            @Override
-            public void onClickView(View view) {
-                switch (view.getId()) {
-                    case R.id.tv_voice:
-                        if(AppSettings.showVoice()) {
-                            AppSettings.setShowVoice(false);
-                            voiceTv.setText(R.string.device_voice_on);
-                        } else {
-                            AppSettings.setShowVoice(true);
-                            voiceTv.setText(R.string.device_voice_off);
-                        }
-                        break;
-                    case R.id.tv_key:
-                        if(AppSettings.showVirtualKeys()) {
-                            AppSettings.setShowVirtualKeys(false);
-                            keyTv.setText(R.string.device_show_keys);
-                            setNavBarHide(false);
-                        } else {
-                            AppSettings.setShowVirtualKeys(true);
-                            keyTv.setText(R.string.device_hide_keys);
-                            setNavBarHide(true);
-
-                        }
-                        break;
-                    case R.id.tv_reboot:
-                        break;
-                    case R.id.tv_exit:
-                        popupWindow.dismiss();
-                        ClientController.handleControll(device.uuid, "close", null);
-                        break;
-                    case R.id.iv_home:
-                        ClientController.handleControll(device.uuid, "buttonHome", null);
-                        break;
-                    case R.id.iv_switch:
-                        ClientController.handleControll(device.uuid, "buttonSwitch", null);
-                        break;
-                    case R.id.iv_back:
-                        ClientController.handleControll(device.uuid, "buttonBack", null);
-                        break;
-                }
-            }
-        };
-
-        voiceTv.setOnClickListener(listener);
-        keyTv.setOnClickListener(listener);
-        view.findViewById(R.id.tv_reboot).setOnClickListener(listener);
-        view.findViewById(R.id.tv_exit).setOnClickListener(listener);
-        view.findViewById(R.id.iv_home).setOnClickListener(listener);
-        view.findViewById(R.id.iv_switch).setOnClickListener(listener);
-        view.findViewById(R.id.iv_back).setOnClickListener(listener);
-
-        popupWindow.showAtLocation(getWindow().getDecorView(), Gravity.CENTER, 0, 0);
-        return popupWindow;
-    }
-
-    public void showNoHandleTimeOut() {
-      if(AppSettings.showTimeOutDialog()) {
-
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    try {
+      mHandler.removeCallbacksAndMessages(null);
+      if(mTimeOutDialog != null && mTimeOutDialog.isShowing()) {
+        mTimeOutDialog.dismiss();
       }
+      mPingUtils.destroy();
+    }catch (Exception e){
+      e.printStackTrace();
     }
+
+  }
+
+  private void showPopupWindow() {
+    try {
+      View view = View.inflate(this, R.layout.popup_setting, null);
+      view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+      boolean isLandscape = getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+              || getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+      int width = isLandscape ? DeviceTools.getScreenWidth() * 4/ 5 : DeviceTools.getScreenWidth() * 5 / 6;
+      final PopupWindow popupWindow = new PopupWindow(view, width, view
+              .getMeasuredHeight(), true);
+      popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+      popupWindow.setOutsideTouchable(true);
+      popupWindow.setTouchable(true);
+
+
+      RadioGroup radioGroup = view.findViewById(R.id.rg_resolution);
+      RadioButton radioButton = null;
+      switch (AppSettings.getResolutionType()) {
+        case AppSettings.RESOLUTION_HIGH:
+          radioButton = view.findViewById(R.id.rb_high);
+          break;
+        case AppSettings.RESOLUTION_SUPER:
+          radioButton = view.findViewById(R.id.rb_super);
+          break;
+        default:
+          radioButton = view.findViewById(R.id.rb_common);
+          break;
+      }
+      radioButton.setChecked(true);
+      radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(RadioGroup group, int checkedId) {
+          if(checkedId == R.id.rb_high) {
+            AppSettings.setResolutionType(AppSettings.RESOLUTION_HIGH);
+          } else if(checkedId == R.id.rb_super) {
+            AppSettings.setResolutionType(AppSettings.RESOLUTION_SUPER);
+          } else {
+            AppSettings.setResolutionType(AppSettings.RESOLUTION_COMMON);
+          }
+          if(AppSettings.sConnected) {
+            ClientController.handleControll(device.uuid, "disConnect", null);
+          }
+          ClientController.handleControll(device.uuid, "reConnect", null);
+        }
+      });
+      TextView voiceTv = view.findViewById(R.id.tv_voice);
+      ImageView voiceIv = view.findViewById(R.id.iv_voice);
+      voiceTv.setText(AppSettings.showVoice() ? R.string.device_voice_off : R.string.device_voice_on);
+      voiceIv.setImageResource(AppSettings.showVoice() ?R.drawable.setting_voice_off:R.drawable.setting_voice_on);
+      TextView keyTv = view.findViewById(R.id.tv_key);
+      ImageView keyIv = view.findViewById(R.id.iv_key);
+      keyTv.setText(AppSettings.showVirtualKeys() ? R.string.device_hide_keys : R.string.device_show_keys);
+      keyIv.setImageResource(AppSettings.showVirtualKeys() ? R.drawable.setting_vk_off : R.drawable.setting_vk_on);
+      CustomOnClickListener listener = new CustomOnClickListener() {
+        @Override
+        public void onClickView(View view) {
+          int viewId = view.getId();
+          if(viewId == R.id.ll_voice) {
+            if(AppSettings.showVoice()) {
+              AppSettings.setShowVoice(false);
+              voiceTv.setText(R.string.device_voice_on);
+              voiceIv.setImageResource(R.drawable.setting_voice_on);
+            } else {
+              AppSettings.setShowVoice(true);
+              voiceTv.setText(R.string.device_voice_off);
+              voiceIv.setImageResource(R.drawable.setting_voice_off);
+            }
+          } else if(viewId == R.id.ll_key) {
+            if(AppSettings.showVirtualKeys()) {
+              AppSettings.setShowVirtualKeys(false);
+              keyTv.setText(R.string.device_show_keys);
+              keyIv.setImageResource(R.drawable.setting_vk_on);
+              setNavBarHide(false);
+            } else {
+              AppSettings.setShowVirtualKeys(true);
+              keyTv.setText(R.string.device_hide_keys);
+              keyIv.setImageResource(R.drawable.setting_vk_off);
+              setNavBarHide(true);
+
+            }
+          } else if(viewId == R.id.ll_reboot) {
+
+          } else if(viewId == R.id.ll_exit) {
+            popupWindow.dismiss();
+            ClientController.handleControll(device.uuid, "close", null);
+          } else if(viewId == R.id.iv_home) {
+            ClientController.handleControll(device.uuid, "buttonHome", null);
+          } else if(viewId == R.id.iv_switch) {
+            ClientController.handleControll(device.uuid, "buttonSwitch", null);
+          } else if(viewId == R.id.iv_back) {
+            ClientController.handleControll(device.uuid, "buttonBack", null);
+          }
+        }
+      };
+
+      view.findViewById(R.id.ll_voice).setOnClickListener(listener);
+      view.findViewById(R.id.ll_key).setOnClickListener(listener);
+      view.findViewById(R.id.ll_reboot).setOnClickListener(listener);
+      view.findViewById(R.id.ll_exit).setOnClickListener(listener);
+      view.findViewById(R.id.iv_home).setOnClickListener(listener);
+      view.findViewById(R.id.iv_switch).setOnClickListener(listener);
+      view.findViewById(R.id.iv_back).setOnClickListener(listener);
+
+      popupWindow.showAtLocation(getWindow().getDecorView(), Gravity.CENTER, 0, 0);
+    }catch (Exception e) {
+      e.printStackTrace();
+    }
+
+  }
+
+  private CustomDialog mTimeOutDialog;
+  public boolean showNoHandleTimeOut() {
+    if(mTimeOutDialog != null && mTimeOutDialog.isShowing()) {
+      return false;
+    }
+    if(!AppSettings.showTimeOutDialog()) {
+      return false;
+    }
+    try {
+      if(mTimeOutDialog == null) {
+        mTimeOutDialog = new CustomDialog(this).setMessageText(R.string.disconnect_tips)
+                .setTitleText(R.string.title_tips).setCancelText(R.string.exit_device)
+                .setConfirmText(R.string.reconnect_device).setOnClickListener(new CustomDialog.OnClickListener() {
+                  @Override
+                  public void onCancelClick() {
+                    ClientController.handleControll(device.uuid, "close", null);
+                  }
+
+                  @Override
+                  public void onConfirmClick() {
+                    if(!DeviceTools.isConnected()) {
+                      Toast.makeText(getApplicationContext(),R.string.connect_net_error,Toast.LENGTH_LONG).show();
+                      return;
+                    }
+                    mTimeOutDialog.dismiss();
+                    mHandler.sendEmptyMessageDelayed(MSG_CHECK_TOUCH_TIME,CHECK_TOUCH_TIME_INTERVAL);
+                    ClientController.handleControll(device.uuid, "reConnect", null);
+                  }
+                });
+      }
+      if(AppSettings.sConnected) {
+        ClientController.handleControll(device.uuid, "disConnect", null);
+      }
+      mTimeOutDialog.show();
+    }catch (Exception e) {
+      e.printStackTrace();
+      return false;
+    }
+    return true;
+  }
 }

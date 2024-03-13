@@ -3,29 +3,29 @@ package com.feihu.cp.client;
 import static android.content.ClipDescription.MIMETYPE_TEXT_PLAIN;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.ClipData;
-import android.content.DialogInterface;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.SurfaceTexture;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Objects;
-
 import com.feihu.cp.R;
+import com.feihu.cp.client.Client;
+import com.feihu.cp.client.ClientStream;
+import com.feihu.cp.client.ControlPacket;
+import com.feihu.cp.client.view.CustomDialog;
 import com.feihu.cp.client.view.FullActivity;
 import com.feihu.cp.entity.AppData;
 import com.feihu.cp.entity.Device;
@@ -33,6 +33,12 @@ import com.feihu.cp.entity.MyInterface;
 import com.feihu.cp.helper.AppSettings;
 import com.feihu.cp.helper.DeviceTools;
 import com.feihu.cp.helper.PublicTools;
+
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Objects;
+
+
 
 public class ClientController implements TextureView.SurfaceTextureListener {
   private static final HashMap<String, ClientController> allController = new HashMap<>();
@@ -47,7 +53,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
   public boolean handleException;
   public boolean autoReConnect;//断开连接后有网的情况下自动连接
 
-//  private final SmallView smallView;
+  //  private final SmallView smallView;
 //  private final MiniView miniView;
   public FullActivity fullView;
 
@@ -57,9 +63,11 @@ public class ClientController implements TextureView.SurfaceTextureListener {
 
   private final HandlerThread handlerThread = new HandlerThread("easycontrol_controler");
   private final Handler handler;
+  private Context context;
 
-  public ClientController(Device device, ClientStream clientStream, MyInterface.MyFunctionBoolean handle) {
+  public ClientController(Context context,Device device, ClientStream clientStream, MyInterface.MyFunctionBoolean handle) {
     allController.put(device.uuid, this);
+    this.context = context;
     this.device = device;
     this.clientStream = clientStream;
     this.handle = handle;
@@ -81,7 +89,6 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     this.clientStream = clientStream;
     this.handle = handle;
     handle.run(true);
-    AppSettings.resetLastTouchTime();
   }
 
   public static void handleControll(String uuid, String action, ByteBuffer byteBuffer) {
@@ -96,6 +103,8 @@ public class ClientController implements TextureView.SurfaceTextureListener {
       else if (action.equals("changeToFull")) clientController.changeToFull();
       else if (action.equals("changeToMini")) clientController.changeToMini(byteBuffer);
       else if (action.equals("close")) clientController.close(null);
+      else if (action.equals("disConnect"))clientController.disconnect();
+      else if (action.equals("reConnect")){ clientController.autoReConnect = false;tryReConnect(clientController);}
       else if (action.equals("buttonPower")) clientController.clientStream.writeToMain(ControlPacket.createPowerEvent(-1));
       else if (action.equals("buttonWake")) clientController.clientStream.writeToMain(ControlPacket.createPowerEvent(1));
       else if (action.equals("buttonLock")) clientController.clientStream.writeToMain(ControlPacket.createPowerEvent(0));
@@ -108,6 +117,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
       else if (action.equals("keepAlive")) clientController.clientStream.writeToMain(ControlPacket.createKeepAlive());
       else if (action.equals("checkSizeAndSite")) clientController.checkSizeAndSite();
       else if (action.equals("checkClipBoard")) clientController.checkClipBoard();
+
       else if (byteBuffer == null) return;
       else if (action.equals("writeByteBuffer")) clientController.clientStream.writeToMain(byteBuffer);
       else if (action.equals("updateMaxSize")) clientController.updateMaxSize(byteBuffer);
@@ -116,7 +126,10 @@ public class ClientController implements TextureView.SurfaceTextureListener {
       else if (action.equals("setClipBoard")) clientController.setClipBoard(byteBuffer);
     } catch (Exception ignored) {
       ignored.printStackTrace();
-      tryReConnect(clientController);
+      Log.d("fff","action==="+action);
+      if(!AppSettings.sPaused) {
+        tryReConnect(clientController);
+      }
 //      clientController.close(AppData.applicationContext.getString(R.string.toast_stream_closed));
     }
   }
@@ -148,10 +161,15 @@ public class ClientController implements TextureView.SurfaceTextureListener {
   }
 
   private synchronized void changeToFull() {
-    hide();
-    Intent intent = new Intent(AppData.applicationContext, FullActivity.class);
-    intent.putExtra("uuid", device.uuid);
-    AppData.applicationContext.startActivity(intent);
+    try {
+      hide();
+      Intent intent = new Intent(context, FullActivity.class);
+      intent.putExtra("uuid", device.uuid);
+      context.startActivity(intent);
+    }catch (Exception e) {
+      e.printStackTrace();
+    }
+
   }
 
   private synchronized void changeToSmall() {
@@ -173,7 +191,6 @@ public class ClientController implements TextureView.SurfaceTextureListener {
 
   //连接断开重连
   private static void tryReConnect(ClientController clientController) {
-    clientController.handle.run(false);//主动断开连接
     if(clientController.isClose) {
       return;
     }
@@ -181,9 +198,10 @@ public class ClientController implements TextureView.SurfaceTextureListener {
       return;
     }
     clientController.handleException = true;
+    clientController.handle.run(false);//主动断开连接
     if(DeviceTools.isConnected() && !clientController.autoReConnect) {//自动重连
       clientController.autoReConnect = true;
-      new Client(clientController.device,null,clientController);
+      new Client(clientController.context,clientController.device,null,clientController);
     } else {
       showConnectDialog(clientController);
     }
@@ -192,28 +210,37 @@ public class ClientController implements TextureView.SurfaceTextureListener {
   public static void showConnectDialog(ClientController clientController) {
     try {
       clientController.autoReConnect = false;
-      AlertDialog.Builder builder = new AlertDialog.Builder(clientController.fullView)
-              .setMessage(DeviceTools.isConnected()?R.string.connect_net_tips:R.string.connect_net_error)
-              .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+
+      CustomDialog customDialog = new CustomDialog(clientController.fullView);
+      customDialog.setMessageText(DeviceTools.isConnected()?
+                      R.string.connect_net_tips: R.string.connect_net_error).setTitleText(R.string.title_tips).
+              setCancelText(R.string.exit_device).setConfirmText(R.string.reconnect_device).
+              setOnClickListener(new CustomDialog.OnClickListener() {
                 @Override
-                public void onClick(DialogInterface dialog, int which) {
-                  dialog.dismiss();
+                public void onCancelClick() {
+                  ClientController.handleControll(clientController.device.uuid, "close", null);
                 }
-              }).setPositiveButton("确定", new DialogInterface.OnClickListener() {
                 @Override
-                public void onClick(DialogInterface dialog, int which) {
-                  dialog.dismiss();
-                  new Client(clientController.device,null,clientController);
+                public void onConfirmClick() {
+                  if(!DeviceTools.isConnected()) {
+                    Toast.makeText(AppData.applicationContext,R.string.connect_net_error,Toast.LENGTH_LONG).show();
+                    return;
+                  }
+                  customDialog.dismiss();
+                  new Client(clientController.context,clientController.device,null,clientController);
                 }
               });
-      builder.setCancelable(true);
-
-      Dialog dialog = builder.create();
-      dialog.setCanceledOnTouchOutside(false);
-      dialog.show();
+      customDialog.show();
     }catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  /**
+   * 主动断开连接，长时间没有操作或者切出去
+   */
+  private void disconnect() {
+    handle.run(false);
   }
 
   private void close(String error) {
@@ -267,11 +294,11 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     if (fullView != null) {
       if (layoutParams.width >= layoutParams.height) {
         if (fullView.getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-            fullView.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+          fullView.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
       } else {
         if (fullView.getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-            fullView.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+          fullView.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
       }
     }

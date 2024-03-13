@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import top.saymzx.easycontrol.app.helper.AppSettings;
+
 public class AudioDecode {
   private MediaCodec decodec;
   private AudioTrack audioTrack;
@@ -75,6 +77,9 @@ public class AudioDecode {
   private final LinkedBlockingQueue<Integer> intputBufferQueue = new LinkedBlockingQueue<>();
 
   public void decodeIn(ByteBuffer data) throws InterruptedException {
+    if(!AppSettings.showVoice()) {
+      return;
+    }
     try {
       int inIndex = intputBufferQueue.take();
       decodec.getInputBuffer(inIndex).put(data);

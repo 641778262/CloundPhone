@@ -4,14 +4,15 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 
-import java.nio.ByteBuffer;
-
 import com.feihu.cp.client.decode.AudioDecode;
 import com.feihu.cp.client.decode.VideoDecode;
 import com.feihu.cp.entity.AppData;
 import com.feihu.cp.entity.Device;
-import com.feihu.cp.helper.AppSettings;
 import com.feihu.cp.helper.PublicTools;
+
+import java.nio.ByteBuffer;
+
+
 
 public class ClientPlayer {
   private boolean isClose = false;
@@ -49,10 +50,8 @@ public class ClientPlayer {
         switch (clientStream.readByteFromMain()) {
           case AUDIO_EVENT:
             ByteBuffer audioFrame = clientStream.readFrameFromMain();
-            if(AppSettings.showVoice()) {
-              if (audioDecode != null) audioDecode.decodeIn(audioFrame);
-              else audioDecode = new AudioDecode(useOpus, audioFrame, playHandler);
-            }
+            if (audioDecode != null) audioDecode.decodeIn(audioFrame);
+            else audioDecode = new AudioDecode(useOpus, audioFrame, playHandler);
             break;
           case CLIPBOARD_EVENT:
             ClientController.handleControll(device.uuid, "setClipBoard", clientStream.readByteArrayFromMain(clientStream.readIntFromMain()));
