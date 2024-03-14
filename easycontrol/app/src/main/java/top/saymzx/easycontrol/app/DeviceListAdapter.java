@@ -15,6 +15,7 @@ import com.feihu.cp.client.Client;
 import com.feihu.cp.client.ClientStream;
 import com.feihu.cp.entity.AppData;
 import com.feihu.cp.entity.Device;
+import com.feihu.cp.helper.DeviceTools;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -138,7 +139,7 @@ public class DeviceListAdapter extends BaseAdapter {
       UsbDevice usbDevice = linkDevices.get(device.uuid);
       if (usbDevice == null) return;
       new Client(context,device, usbDevice,null);
-    } else new Client(context,device,null);
+    } else DeviceTools.connectCloudPhone(context,device);
   }
 
   public void startDefaultDevice() {

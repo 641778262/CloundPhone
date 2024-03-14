@@ -14,10 +14,49 @@ import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 
+import com.feihu.cp.R;
+import com.feihu.cp.client.Client;
+import com.feihu.cp.client.view.CustomDialog;
 import com.feihu.cp.entity.AppData;
+import com.feihu.cp.entity.Device;
 import com.feihu.cp.entity.MyInterface;
 
 public class DeviceTools {
+    public static void connectCloudPhone(Context context, Device device) {
+        try {
+            if (!isConnected()) {
+                ToastUtils.showToastNoRepeat(R.string.connect_net_error);
+                return;
+            }
+            if (isMobileNet() && AppSettings.showMobileNetTips()) {
+                CustomDialog customDialog = new CustomDialog(context);
+                customDialog.setMessageText(R.string.connect_mobile_net).setCheckBoxVisible().setOnClickListener(new CustomDialog.OnClickListener() {
+                    @Override
+                    public void onCancelClick() {
+
+                    }
+
+                    @Override
+                    public void onConfirmClick() {
+                        customDialog.dismiss();
+                        new Client(context, device, null);
+                        if (customDialog.isChecked()) {
+                            AppSettings.setShowMobileNetTips(false);
+                        }
+                    }
+                });
+                customDialog.show();
+            } else {
+                new Client(context, device, null);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+
     // 设置全面屏
     public static void setFullScreen(Activity context) {
         // 全屏显示
@@ -110,6 +149,7 @@ public class DeviceTools {
     public static boolean isMobileNet() {
         return ConnectivityManager.TYPE_MOBILE == getNetworkType();
     }
+
     public static String getVersionName() {
         PackageManager pm = AppData.applicationContext.getPackageManager();
         String pkgName = AppData.applicationContext.getPackageName();

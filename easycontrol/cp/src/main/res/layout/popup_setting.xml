@@ -4,11 +4,12 @@
     android:layout_height="wrap_content"
     android:layout_marginLeft="20dp"
     android:layout_marginRight="20dp"
-    android:alpha="0.8"
+    android:alpha="0.9"
     android:background="@drawable/popup_bg"
     android:orientation="vertical">
 
     <TextView
+        android:id="@+id/tv_phone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
@@ -261,7 +262,7 @@
         android:layout_marginLeft="15dp"
         android:layout_marginTop="16dp"
         android:layout_marginRight="15dp"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="5dp"
         android:orientation="horizontal">
 
         <com.feihu.cp.client.view.PressLinearLayout
@@ -297,13 +298,12 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
             android:layout_weight="1"
             android:background="@drawable/popup_resolution_bg"
             android:gravity="center"
             android:orientation="vertical"
-           >
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp">
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -322,14 +322,12 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:textSize="10sp"
-                android:textColor="@color/blue"
                 android:alpha="0.8"
-                android:text="@string/device_exit_msg" />
-
+                android:gravity="center"
+                android:text="@string/device_exit_msg"
+                android:textColor="@color/blue"
+                android:textSize="10sp" />
         </com.feihu.cp.client.view.PressLinearLayout>
-
 
     </LinearLayout>
 </LinearLayout>

@@ -10,6 +10,7 @@ import com.feihu.cp.entity.AppData;
 
 public class ToastUtils {
     private static Toast mToast;
+
     public static void showToastNoRepeat(String text) {
         try {
             if (mToast == null) {

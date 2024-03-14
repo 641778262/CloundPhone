@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:layout_marginLeft="20dp"
     android:layout_marginRight="20dp"
-    android:alpha="0.8"
+    android:alpha="0.9"
     android:background="@drawable/popup_bg"
     android:orientation="vertical">
 
@@ -14,6 +14,7 @@
         android:orientation="horizontal">
 
         <TextView
+            android:id="@+id/tv_phone"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -260,7 +261,7 @@
         android:layout_marginLeft="20dp"
         android:layout_marginTop="10dp"
         android:layout_marginRight="20dp"
-        android:layout_marginBottom="18dp"
+        android:layout_marginBottom="5dp"
         android:orientation="horizontal">
 
         <com.feihu.cp.client.view.PressLinearLayout

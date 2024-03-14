@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -252,8 +253,10 @@ public class FullActivity extends Activity implements SensorEventListener {
             popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             popupWindow.setOutsideTouchable(true);
             popupWindow.setTouchable(true);
-
-
+            TextView phoneTv = view.findViewById(R.id.tv_phone);
+            if(!TextUtils.isEmpty(device.name)) {
+                phoneTv.setText(device.name);
+            }
             RadioGroup radioGroup = view.findViewById(R.id.rg_resolution);
             RadioButton radioButton = null;
             switch (AppSettings.getResolutionType()) {

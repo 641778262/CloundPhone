@@ -154,7 +154,7 @@ public class PublicTools {
   // 日志
   public static void logToast(String type, String msg, boolean showToast) {
     Log.e("Easycontrol_" + type, msg);
-    if (showToast) AppData.uiHandler.post(() -> Toast.makeText(AppData.applicationContext, type + ":" + msg, Toast.LENGTH_SHORT).show());
+    if (showToast) AppData.uiHandler.post(() -> ToastUtils.showToastNoRepeat(msg));
   }
 
   // 获取密钥文件

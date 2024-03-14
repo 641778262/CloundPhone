@@ -8,6 +8,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.feihu.cp.R;
@@ -22,12 +23,14 @@ public class CustomDialog extends AlertDialog {
 
     private TextView tvTitle;
     private TextView tvContent;
+    private CheckBox cb;
 
     private String title;
     private String message;
 
     private String cancelText;
     private String confirmText;
+    private boolean cbVisible;
 
     public CustomDialog(Context context) {
         super(context, R.style.CustomDialog);
@@ -99,6 +102,9 @@ public class CustomDialog extends AlertDialog {
         if (!TextUtils.isEmpty(confirmText)) {
             tvConfirm.setText(confirmText);
         }
+        if(cbVisible) {
+            cb.setVisibility(View.VISIBLE);
+        }
     }
 
     public CustomDialog setTitleText(String title) {
@@ -151,7 +157,7 @@ public class CustomDialog extends AlertDialog {
 
     public CustomDialog setConfirmText(String confirmText) {
         this.confirmText = confirmText;
-        if(tvConfirm != null) {
+        if (tvConfirm != null) {
             tvConfirm.setText(confirmText);
         }
         return this;
@@ -159,14 +165,23 @@ public class CustomDialog extends AlertDialog {
 
     public CustomDialog setConfirmText(int textId) {
         this.confirmText = getContext().getString(textId);
-        if(tvConfirm != null) {
+        if (tvConfirm != null) {
             tvConfirm.setText(confirmText);
         }
         return this;
     }
 
-    private void initView() {
+    public CustomDialog setCheckBoxVisible() {
+        this.cbVisible = true;
+        return this;
+    }
 
+    public boolean isChecked(){
+        return cb!= null && cb.isChecked();
+    }
+
+    private void initView() {
+        cb = findViewById(R.id.cb_tips);
         tvCancel = findViewById(R.id.tv_cancel);
         tvConfirm = findViewById(R.id.tv_confirm);
         tvTitle = findViewById(R.id.tv_title);
