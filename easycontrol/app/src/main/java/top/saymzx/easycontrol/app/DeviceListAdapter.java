@@ -15,7 +15,6 @@ import com.feihu.cp.client.Client;
 import com.feihu.cp.client.ClientStream;
 import com.feihu.cp.entity.AppData;
 import com.feihu.cp.entity.Device;
-import com.feihu.cp.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;

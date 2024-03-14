@@ -7,7 +7,6 @@ import android.widget.Toast;
 
 import com.feihu.cp.entity.AppData;
 import com.feihu.cp.helper.PublicTools;
-import com.feihu.cp.R;
 
 import top.saymzx.easycontrol.app.databinding.ActivitySetBinding;
 

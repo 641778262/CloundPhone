@@ -11,7 +11,6 @@ import android.widget.Toast;
 
 import com.feihu.cp.entity.AppData;
 import com.feihu.cp.entity.Device;
-import com.feihu.cp.R;
 
 import java.util.UUID;
 

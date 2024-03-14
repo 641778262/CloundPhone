@@ -11,10 +11,14 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="10dp"
+        android:maxLines="1"
         android:text="@string/device_cloud_phone"
         android:textColor="@color/white"
-        android:textSize="20sp" />
+        android:textSize="18sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -56,6 +60,7 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
             <RadioGroup
                 android:id="@+id/rg_resolution"
                 android:layout_width="match_parent"
@@ -118,20 +123,18 @@
                     android:textSize="16sp"
                     android:visibility="gone" />
             </RadioGroup>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="3dp"
                 android:layout_gravity="right"
-                android:textColor="@color/white"
                 android:layout_marginTop="10dp"
-                android:textSize="10sp"
-                android:text="推荐"
                 android:background="@color/red"
-                />
+                android:padding="3dp"
+                android:text="推荐"
+                android:textColor="@color/white"
+                android:textSize="10sp" />
         </FrameLayout>
-
-
 
 
     </LinearLayout>
@@ -154,12 +157,12 @@
                 android:id="@+id/tv_voice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="16dp"
+                android:layout_marginRight="12dp"
                 android:paddingTop="10dp"
                 android:paddingBottom="10dp"
                 android:text="@string/device_voice_off"
                 android:textColor="@color/white"
-                android:textSize="18sp" />
+                android:textSize="16sp" />
 
             <ImageView
                 android:id="@+id/iv_voice"
@@ -182,12 +185,12 @@
                 android:id="@+id/tv_key"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="16dp"
+                android:layout_marginRight="12dp"
                 android:paddingTop="10dp"
                 android:paddingBottom="10dp"
                 android:text="@string/device_hide_keys"
                 android:textColor="@color/white"
-                android:textSize="18sp" />
+                android:textSize="16sp" />
 
             <ImageView
                 android:id="@+id/iv_key"
@@ -212,7 +215,7 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <ImageView
+        <com.feihu.cp.client.view.PressImageView
             android:id="@+id/iv_switch"
             android:layout_width="50dp"
             android:layout_height="50dp"
@@ -225,7 +228,7 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <ImageView
+        <com.feihu.cp.client.view.PressImageView
             android:id="@+id/iv_home"
             android:layout_width="50dp"
             android:layout_height="50dp"
@@ -238,7 +241,7 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <ImageView
+        <com.feihu.cp.client.view.PressImageView
             android:id="@+id/iv_back"
             android:layout_width="50dp"
             android:layout_height="50dp"
@@ -261,7 +264,7 @@
         android:layout_marginBottom="12dp"
         android:orientation="horizontal">
 
-        <LinearLayout
+        <com.feihu.cp.client.view.PressLinearLayout
             android:id="@+id/ll_reboot"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -270,7 +273,8 @@
             android:gravity="center"
             android:orientation="horizontal"
             android:paddingTop="10dp"
-            android:paddingBottom="10dp">
+            android:paddingBottom="10dp"
+            android:visibility="gone">
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -285,34 +289,46 @@
                 android:text="@string/device_reboot"
                 android:textColor="@color/white"
                 android:textSize="18sp" />
-        </LinearLayout>
+        </com.feihu.cp.client.view.PressLinearLayout>
 
-        <LinearLayout
+        <com.feihu.cp.client.view.PressLinearLayout
             android:id="@+id/ll_exit"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
             android:layout_weight="1"
             android:background="@drawable/popup_resolution_bg"
             android:gravity="center"
-            android:orientation="horizontal"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp">
+            android:orientation="vertical"
+           >
 
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/setting_exit" />
+                android:src="@drawable/setting_exit"
+                android:visibility="gone" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
                 android:gravity="center"
                 android:text="@string/device_exit"
                 android:textColor="@color/white"
-                android:textSize="18sp" />
-        </LinearLayout>
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textSize="10sp"
+                android:textColor="@color/blue"
+                android:alpha="0.8"
+                android:text="@string/device_exit_msg" />
+
+        </com.feihu.cp.client.view.PressLinearLayout>
 
 
     </LinearLayout>

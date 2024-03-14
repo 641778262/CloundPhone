@@ -3,11 +3,7 @@
 
   <uses-permission android:name="android.permission.INTERNET" /> <!-- 网络 -->
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" /> <!-- 悬浮窗 -->
-  <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
   <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-  <uses-permission android:name="android.permission.USB_PERMISSION" /> <!-- USB -->
-  <uses-feature android:name="android.hardware.usb.host" />
 
   <application
     android:icon="${app_icon}"
@@ -35,10 +31,6 @@
     <activity
       android:name=".IpActivity"
       android:exported="false" />
-    <activity
-      android:name=".client.view.FullActivity"
-      android:exported="false"
-      android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar.Fullscreen" />
     <activity
       android:name=".AdbKeyActivity"
       android:exported="false" />

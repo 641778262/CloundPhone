@@ -8,7 +8,6 @@ import android.widget.Toast;
 import com.feihu.cp.adb.AdbKeyPair;
 import com.feihu.cp.entity.AppData;
 import com.feihu.cp.helper.PublicTools;
-import com.feihu.cp.R;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;

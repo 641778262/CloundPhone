@@ -14,8 +14,8 @@
         android:supportsRtl="true">
         <activity
             android:name="com.feihu.cp.client.view.FullActivity"
-            android:exported="false"
-            android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar.Fullscreen" />
+            android:exported="false"/>
+            <!--android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar.Fullscreen"--> />
 
     </application>
 

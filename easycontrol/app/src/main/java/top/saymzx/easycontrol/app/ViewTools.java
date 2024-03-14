@@ -18,9 +18,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.feihu.cp.R;
 import com.feihu.cp.entity.AppData;
 import com.feihu.cp.entity.MyInterface;
+
 
 import java.util.Locale;
 
@@ -69,8 +69,8 @@ public class ViewTools {
 
   // 创建Client加载框
   public static Pair<View, WindowManager.LayoutParams> createConnectLoading(Context context,boolean reConnect) {
-    View loadingView = View.inflate(context,R.layout.item_loading,null);
-    TextView tvMessage = loadingView.findViewById(R.id.tv_message);
+    View loadingView = View.inflate(context,com.feihu.cp.R.layout.item_loading,null);
+    TextView tvMessage = loadingView.findViewById(com.feihu.cp.R.id.tv_message);
     tvMessage.setText(reConnect?R.string.connect_retry:R.string.connect_progressing);
     WindowManager.LayoutParams loadingViewParams = new WindowManager.LayoutParams(
       WindowManager.LayoutParams.WRAP_CONTENT,
