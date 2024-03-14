@@ -5,16 +5,17 @@ import android.os.Bundle;
 import android.util.Pair;
 import android.widget.Toast;
 
+import com.feihu.cp.adb.AdbKeyPair;
+import com.feihu.cp.entity.AppData;
+import com.feihu.cp.helper.PublicTools;
+import com.feihu.cp.R;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import top.saymzx.easycontrol.app.adb.AdbKeyPair;
 import top.saymzx.easycontrol.app.databinding.ActivityAdbKeyBinding;
-import top.saymzx.easycontrol.app.entity.AppData;
-import top.saymzx.easycontrol.app.helper.PublicTools;
-import top.saymzx.easycontrol.app.helper.ViewTools;
+
 
 public class AdbKeyActivity extends Activity {
   private ActivityAdbKeyBinding activityAdbKeyBinding;

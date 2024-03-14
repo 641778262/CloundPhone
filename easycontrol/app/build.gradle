@@ -53,6 +53,7 @@ android {
 }
 
 dependencies {
+  api(project(":cp"))
   debugImplementation 'com.squareup.leakcanary:leakcanary-android:3.0-alpha-1'
   compileOnly fileTree(include: ['uniapp-v8-release.aar'], dir: '../app/libs')
 }

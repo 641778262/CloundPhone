@@ -16,17 +16,18 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.feihu.cp.entity.AppData;
+import com.feihu.cp.helper.PublicTools;
+import com.feihu.cp.R;
+
 import java.util.ArrayList;
 
 import top.saymzx.easycontrol.app.databinding.ActivityMainBinding;
 import top.saymzx.easycontrol.app.databinding.ItemRequestPermissionBinding;
 import top.saymzx.easycontrol.app.databinding.ItemScanAddressListBinding;
 import top.saymzx.easycontrol.app.databinding.ItemTextBinding;
-import top.saymzx.easycontrol.app.entity.AppData;
-import top.saymzx.easycontrol.app.helper.DeviceListAdapter;
 import top.saymzx.easycontrol.app.helper.MyBroadcastReceiver;
-import top.saymzx.easycontrol.app.helper.PublicTools;
-import top.saymzx.easycontrol.app.helper.ViewTools;
+
 
 public class MainActivity extends Activity {
 

@@ -39,7 +39,6 @@ import com.feihu.cp.helper.DeviceTools;
 import com.feihu.cp.helper.PingUtils;
 import com.feihu.cp.helper.PublicTools;
 import com.feihu.cp.helper.ToastUtils;
-import com.feihu.cp.helper.ViewTools;
 
 import java.nio.ByteBuffer;
 
@@ -75,7 +74,7 @@ public class FullActivity extends Activity implements SensorEventListener {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    ViewTools.setFullScreen(this);
+    DeviceTools.setFullScreen(this);
     setContentView(R.layout.activity_full);
     textureViewLayout = findViewById(R.id.texture_view_layout);
     barView = findViewById(R.id.bar_view);
@@ -220,7 +219,7 @@ public class FullActivity extends Activity implements SensorEventListener {
   private void changeBarView() {
     boolean toShowView = barView.getVisibility() == View.GONE;
     boolean isLandscape = getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE || getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-    ViewTools.viewAnim(barView, toShowView, 0, PublicTools.dp2px(40f) * (isLandscape ? -1 : 1), (isStart -> {
+    DeviceTools.viewAnim(barView, toShowView, 0, PublicTools.dp2px(40f) * (isLandscape ? -1 : 1), (isStart -> {
       if (isStart && toShowView) barView.setVisibility(View.VISIBLE);
       else if (!isStart && !toShowView) barView.setVisibility(View.GONE);
     }));

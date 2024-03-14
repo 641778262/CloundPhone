@@ -2,14 +2,12 @@ package top.saymzx.easycontrol.app;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Pair;
-import android.view.View;
-import android.view.WindowManager;
+
+
+import com.feihu.cp.entity.AppData;
 
 import top.saymzx.easycontrol.app.databinding.ActivityActiveBinding;
-import top.saymzx.easycontrol.app.entity.AppData;
-import top.saymzx.easycontrol.app.helper.PublicTools;
-import top.saymzx.easycontrol.app.helper.ViewTools;
+;
 
 public class ActiveActivity extends Activity {
 

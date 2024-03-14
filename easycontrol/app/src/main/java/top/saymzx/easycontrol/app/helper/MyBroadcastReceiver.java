@@ -12,13 +12,16 @@ import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.os.Build;
 
+import com.feihu.cp.client.ClientController;
+import com.feihu.cp.entity.AppData;
+import com.feihu.cp.entity.Device;
+
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Objects;
 
-import top.saymzx.easycontrol.app.client.ClientController;
-import top.saymzx.easycontrol.app.entity.AppData;
-import top.saymzx.easycontrol.app.entity.Device;
+import top.saymzx.easycontrol.app.DeviceListAdapter;
+
 
 public class MyBroadcastReceiver extends BroadcastReceiver {
 

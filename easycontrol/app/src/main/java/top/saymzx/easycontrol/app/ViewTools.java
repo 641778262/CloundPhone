@@ -1,4 +1,4 @@
-package top.saymzx.easycontrol.app.helper;
+package top.saymzx.easycontrol.app;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -12,44 +12,24 @@ import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewPropertyAnimator;
 import android.view.WindowManager;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.OvershootInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ScrollView;
+import android.widget.TextView;
+
+import com.feihu.cp.R;
+import com.feihu.cp.entity.AppData;
+import com.feihu.cp.entity.MyInterface;
 
 import java.util.Locale;
 
-import top.saymzx.easycontrol.app.R;
-import top.saymzx.easycontrol.app.databinding.ItemLoadingBinding;
 import top.saymzx.easycontrol.app.databinding.ItemSpinnerBinding;
 import top.saymzx.easycontrol.app.databinding.ItemSwitchBinding;
 import top.saymzx.easycontrol.app.databinding.ItemTextBinding;
 import top.saymzx.easycontrol.app.databinding.ModuleDialogBinding;
-import top.saymzx.easycontrol.app.entity.AppData;
-import top.saymzx.easycontrol.app.entity.MyInterface;
 
 public class ViewTools {
-  // 设置全面屏
-  public static void setFullScreen(Activity context) {
-    // 全屏显示
-    context.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-    context.getWindow().getDecorView().setSystemUiVisibility(
-      View.SYSTEM_UI_FLAG_FULLSCREEN |
-        View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
-        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
-        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-    // 设置异形屏
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-      WindowManager.LayoutParams lp = context.getWindow().getAttributes();
-      lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-      context.getWindow().setAttributes(lp);
-    }
-  }
 
   // 设置语言
   public static void setLocale(Activity context) {
@@ -89,8 +69,9 @@ public class ViewTools {
 
   // 创建Client加载框
   public static Pair<View, WindowManager.LayoutParams> createConnectLoading(Context context,boolean reConnect) {
-    ItemLoadingBinding loadingView = ItemLoadingBinding.inflate(LayoutInflater.from(context));
-    loadingView.tvMessage.setText(reConnect?R.string.connect_retry:R.string.connect_progressing);
+    View loadingView = View.inflate(context,R.layout.item_loading,null);
+    TextView tvMessage = loadingView.findViewById(R.id.tv_message);
+    tvMessage.setText(reConnect?R.string.connect_retry:R.string.connect_progressing);
     WindowManager.LayoutParams loadingViewParams = new WindowManager.LayoutParams(
       WindowManager.LayoutParams.WRAP_CONTENT,
       WindowManager.LayoutParams.WRAP_CONTENT,
@@ -99,7 +80,7 @@ public class ViewTools {
       PixelFormat.TRANSLUCENT
     );
     loadingViewParams.gravity = Gravity.CENTER;
-    return new Pair<>(loadingView.getRoot(), loadingViewParams);
+    return new Pair<>(loadingView, loadingViewParams);
   }
 
   // 创建纯文本卡片
@@ -156,34 +137,5 @@ public class ViewTools {
       }
     });
     return spinnerView;
-  }
-
-  // 更改View的形态
-  public static void viewAnim(View view, boolean toShowView, int translationX, int translationY, MyInterface.MyFunctionBoolean action) {
-    // 创建平移动画
-    view.setTranslationX(toShowView ? translationX : 0);
-    float endX = toShowView ? 0 : translationX;
-    view.setTranslationY(toShowView ? translationY : 0);
-    float endY = toShowView ? 0 : translationY;
-    // 创建透明度动画
-    view.setAlpha(toShowView ? 0f : 1f);
-    float endAlpha = toShowView ? 1f : 0f;
-
-    // 设置动画时长和插值器
-    ViewPropertyAnimator animator = view.animate()
-      .translationX(endX)
-      .translationY(endY)
-      .alpha(endAlpha)
-      .setDuration(toShowView ? 300 : 200)
-      .setInterpolator(toShowView ? new OvershootInterpolator() : new DecelerateInterpolator());
-    animator.withStartAction(() -> {
-      if (action != null) action.run(true);
-    });
-    animator.withEndAction(() -> {
-      if (action != null) action.run(false);
-    });
-
-    // 启动动画
-    animator.start();
   }
 }

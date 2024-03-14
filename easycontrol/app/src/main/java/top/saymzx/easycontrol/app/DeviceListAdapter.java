@@ -1,4 +1,4 @@
-package top.saymzx.easycontrol.app.helper;
+package top.saymzx.easycontrol.app;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -11,19 +11,20 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Toast;
 
+import com.feihu.cp.client.Client;
+import com.feihu.cp.client.ClientStream;
+import com.feihu.cp.entity.AppData;
+import com.feihu.cp.entity.Device;
+import com.feihu.cp.R;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Random;
 
-import top.saymzx.easycontrol.app.DeviceDetailActivity;
-import top.saymzx.easycontrol.app.R;
-import top.saymzx.easycontrol.app.client.Client;
-import top.saymzx.easycontrol.app.client.ClientStream;
+
 import top.saymzx.easycontrol.app.databinding.ItemDevicesItemBinding;
 import top.saymzx.easycontrol.app.databinding.ItemSetDeviceBinding;
-import top.saymzx.easycontrol.app.entity.AppData;
-import top.saymzx.easycontrol.app.entity.Device;
 
 public class DeviceListAdapter extends BaseAdapter {
 

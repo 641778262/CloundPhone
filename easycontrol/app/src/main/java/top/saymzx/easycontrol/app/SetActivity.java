@@ -5,10 +5,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.feihu.cp.entity.AppData;
+import com.feihu.cp.helper.PublicTools;
+import com.feihu.cp.R;
+
 import top.saymzx.easycontrol.app.databinding.ActivitySetBinding;
-import top.saymzx.easycontrol.app.entity.AppData;
-import top.saymzx.easycontrol.app.helper.PublicTools;
-import top.saymzx.easycontrol.app.helper.ViewTools;
+
 
 public class SetActivity extends Activity {
   private ActivitySetBinding activitySetBinding;

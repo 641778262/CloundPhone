@@ -9,13 +9,14 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import com.feihu.cp.entity.AppData;
+import com.feihu.cp.entity.Device;
+import com.feihu.cp.R;
+
 import java.util.UUID;
 
 import top.saymzx.easycontrol.app.databinding.ActivityDeviceDetailBinding;
-import top.saymzx.easycontrol.app.entity.AppData;
-import top.saymzx.easycontrol.app.entity.Device;
 import top.saymzx.easycontrol.app.helper.MyBroadcastReceiver;
-import top.saymzx.easycontrol.app.helper.ViewTools;
 
 public class DeviceDetailActivity extends Activity {
   private ActivityDeviceDetailBinding activityDeviceDetailBinding;
@@ -79,9 +80,9 @@ public class DeviceDetailActivity extends Activity {
     activityDeviceDetailBinding.layoutOnCloseSub.addView(ViewTools.createSwitchCard(this, getString(R.string.device_reconnect_on_close), getString(R.string.device_reconnect_on_close_detail), device.reconnectOnClose, isChecked -> device.reconnectOnClose = isChecked).getRoot());
     // 参数
     activityDeviceDetailBinding.layoutOption.setOnClickListener(v -> activityDeviceDetailBinding.layoutOptionSub.setVisibility(activityDeviceDetailBinding.layoutOptionSub.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE));
-    ArrayAdapter<String> maxSizeAdapter = new ArrayAdapter<>(AppData.applicationContext, R.layout.item_spinner_item, maxSizeList);
-    ArrayAdapter<String> maxFpsAdapter = new ArrayAdapter<>(AppData.applicationContext, R.layout.item_spinner_item, maxFpsList);
-    ArrayAdapter<String> maxVideoBitAdapter = new ArrayAdapter<>(AppData.applicationContext, R.layout.item_spinner_item, maxVideoBitList);
+    ArrayAdapter<String> maxSizeAdapter = new ArrayAdapter<>(AppData.applicationContext, top.saymzx.easycontrol.app.R.layout.item_spinner_item, maxSizeList);
+    ArrayAdapter<String> maxFpsAdapter = new ArrayAdapter<>(AppData.applicationContext, top.saymzx.easycontrol.app.R.layout.item_spinner_item, maxFpsList);
+    ArrayAdapter<String> maxVideoBitAdapter = new ArrayAdapter<>(AppData.applicationContext, top.saymzx.easycontrol.app.R.layout.item_spinner_item, maxVideoBitList);
     activityDeviceDetailBinding.layoutOptionSub.addView(ViewTools.createSwitchCard(this, getString(R.string.device_is_audio), getString(R.string.device_is_audio_detail), device.isAudio, isChecked -> device.isAudio = isChecked).getRoot());
     activityDeviceDetailBinding.layoutOptionSub.addView(ViewTools.createSpinnerCard(this, getString(R.string.device_max_size), getString(R.string.device_max_size_detail), String.valueOf(device.maxSize), maxSizeAdapter, str -> device.maxSize = Integer.parseInt(str)).getRoot());
     activityDeviceDetailBinding.layoutOptionSub.addView(ViewTools.createSpinnerCard(this, getString(R.string.device_max_fps), getString(R.string.device_max_fps_detail), String.valueOf(device.maxFps), maxFpsAdapter, str -> device.maxFps = Integer.parseInt(str)).getRoot());
