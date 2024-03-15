@@ -102,7 +102,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
       if (action.equals("changeToSmall")) clientController.changeToSmall();
       else if (action.equals("changeToFull")) clientController.changeToFull();
       else if (action.equals("changeToMini")) clientController.changeToMini(byteBuffer);
-      else if (action.equals("close")) clientController.close(null);
+      else if (action.equals("close")) clientController.close();
       else if (action.equals("disConnect"))clientController.disconnect();
       else if (action.equals("reConnect")){ clientController.autoReConnect = false;tryReConnect(clientController);}
       else if (action.equals("buttonPower")) clientController.clientStream.writeToMain(ControlPacket.createPowerEvent(-1));
@@ -242,7 +242,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     handle.run(false);
   }
 
-  private void close(String error) {
+  private void close() {
     if (isClose) return;
     isClose = true;
     hide();
@@ -252,7 +252,6 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     else if (device.lightOnClose) handleControll(device.uuid, "buttonLight", null);
 //    if (error != null && device.isNetworkDevice() && device.reconnectOnClose) new Client(device,null);
     // 打印日志
-    if (error != null) PublicTools.logToast("controller", error, true);
     handlerThread.interrupt();
     allController.remove(device.uuid);
     if (surfaceTexture != null) surfaceTexture.release();

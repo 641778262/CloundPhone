@@ -9,7 +9,7 @@ public class AppSettings {
     private static final String KEY_RESOLUTION = "key_resolution";
     private static final String KEY_MOBILE_NET_TIPS = "key_mobile_net_tips";
 
-    public static final long AUTO_DISCONNECT_TIME = 5 * 60 * 1000;//无操作自动断开时间
+    public static final long AUTO_DISCONNECT_TIME = 10 * 60 * 1000;//无操作自动断开时间
     public static final long BACK_DISCONNECT_TIME = 2 * 15 * 1000;//退到后台自动断开时间
 
     public static final int RESOLUTION_SUPER = 3;
