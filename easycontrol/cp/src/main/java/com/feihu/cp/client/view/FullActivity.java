@@ -290,11 +290,11 @@ public class FullActivity extends Activity implements SensorEventListener {
             TextView voiceTv = view.findViewById(R.id.tv_voice);
             ImageView voiceIv = view.findViewById(R.id.iv_voice);
             voiceTv.setText(AppSettings.showVoice() ? R.string.device_voice_off : R.string.device_voice_on);
-            voiceIv.setImageResource(AppSettings.showVoice() ? R.drawable.setting_voice_off : R.drawable.setting_voice_on);
+            voiceIv.setImageResource(AppSettings.showVoice() ? R.drawable.setting_voice_on : R.drawable.setting_voice_off);
             TextView keyTv = view.findViewById(R.id.tv_key);
             ImageView keyIv = view.findViewById(R.id.iv_key);
             keyTv.setText(AppSettings.showVirtualKeys() ? R.string.device_hide_keys : R.string.device_show_keys);
-            keyIv.setImageResource(AppSettings.showVirtualKeys() ? R.drawable.setting_vk_off : R.drawable.setting_vk_on);
+            keyIv.setImageResource(AppSettings.showVirtualKeys() ? R.drawable.setting_vk_on : R.drawable.setting_vk_off);
             CustomOnClickListener listener = new CustomOnClickListener() {
                 @Override
                 public void onClickView(View view) {
@@ -303,22 +303,22 @@ public class FullActivity extends Activity implements SensorEventListener {
                         if (AppSettings.showVoice()) {
                             AppSettings.setShowVoice(false);
                             voiceTv.setText(R.string.device_voice_on);
-                            voiceIv.setImageResource(R.drawable.setting_voice_on);
+                            voiceIv.setImageResource(R.drawable.setting_voice_off);
                         } else {
                             AppSettings.setShowVoice(true);
                             voiceTv.setText(R.string.device_voice_off);
-                            voiceIv.setImageResource(R.drawable.setting_voice_off);
+                            voiceIv.setImageResource(R.drawable.setting_voice_on);
                         }
                     } else if (viewId == R.id.ll_key) {
                         if (AppSettings.showVirtualKeys()) {
                             AppSettings.setShowVirtualKeys(false);
                             keyTv.setText(R.string.device_show_keys);
-                            keyIv.setImageResource(R.drawable.setting_vk_on);
+                            keyIv.setImageResource(R.drawable.setting_vk_off);
                             setNavBarHide(false);
                         } else {
                             AppSettings.setShowVirtualKeys(true);
                             keyTv.setText(R.string.device_hide_keys);
-                            keyIv.setImageResource(R.drawable.setting_vk_off);
+                            keyIv.setImageResource(R.drawable.setting_vk_on);
                             setNavBarHide(true);
 
                         }

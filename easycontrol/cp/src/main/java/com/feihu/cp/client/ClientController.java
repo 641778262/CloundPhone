@@ -10,7 +10,6 @@ import android.content.pm.ActivityInfo;
 import android.graphics.SurfaceTexture;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -22,9 +21,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 import com.feihu.cp.R;
-import com.feihu.cp.client.Client;
-import com.feihu.cp.client.ClientStream;
-import com.feihu.cp.client.ControlPacket;
 import com.feihu.cp.client.view.CustomDialog;
 import com.feihu.cp.client.view.FullActivity;
 import com.feihu.cp.entity.AppData;
@@ -89,6 +85,10 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     this.clientStream = clientStream;
     this.handle = handle;
     handle.run(true);
+  }
+
+  public static ClientController getExistClientController(String uuid) {
+    return allController.get(uuid);
   }
 
   public static void handleControll(String uuid, String action, ByteBuffer byteBuffer) {
@@ -200,7 +200,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     clientController.handle.run(false);//主动断开连接
     if(DeviceTools.isConnected() && !clientController.autoReConnect) {//自动重连
       clientController.autoReConnect = true;
-      new Client(clientController.context,clientController.device,null,clientController);
+      Client.showDialog(clientController.context, clientController.device,clientController);
     } else {
       showConnectDialog(clientController);
     }
@@ -226,7 +226,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
                     return;
                   }
                   customDialog.dismiss();
-                  new Client(clientController.context,clientController.device,null,clientController);
+                  Client.showDialog(clientController.context,clientController.device,clientController);
                 }
               });
       customDialog.show();

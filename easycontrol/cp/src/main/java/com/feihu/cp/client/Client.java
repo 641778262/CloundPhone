@@ -4,12 +4,20 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.hardware.usb.UsbDevice;
+import android.text.TextUtils;
 import android.view.View;
 
 import com.feihu.cp.R;
 import com.feihu.cp.entity.AppData;
 import com.feihu.cp.entity.Device;
 import com.feihu.cp.helper.AppSettings;
+import com.taobao.weex.WXSDKInstance;
+import com.taobao.weex.WXSDKManager;
+
+import java.lang.ref.SoftReference;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 public class Client {
@@ -19,6 +27,50 @@ public class Client {
     private ClientPlayer clientPlayer = null;
     private final Device device;
 
+    private static SoftReference<Dialog> dialogReference;
+
+    public static void showDialog(Context context, Device device,ClientController existClientController) {
+        if (!(context instanceof Activity) || device == null || TextUtils.isEmpty(device.address)) {
+            return;
+        }
+        try {
+            Dialog dialog = new Dialog(context, R.style.CustomDialog);
+            dialogReference = new SoftReference<>(dialog);
+            dialog.setContentView(View.inflate(context, R.layout.item_loading, null));
+            dialog.setCancelable(false);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if(AppSettings.sUniApp) {
+            List<WXSDKInstance> instances = WXSDKManager.getInstance().getWXRenderManager().getAllInstances();
+            for (WXSDKInstance instance : instances) {
+                Map<String, Object> params = new HashMap<>();
+                params.put("uuid", device.uuid);
+                params.put("address", device.address);
+                params.put("name", device.name);
+                instance.fireGlobalEventCallback("openPort", params);
+            }
+        } else {
+            new Client(context,device,existClientController);
+        }
+
+    }
+
+    public static void dismissDialog() {
+        try{
+            if (dialogReference != null) {
+                Dialog dialog = dialogReference.get();
+                if (dialog != null && dialog.isShowing()) {
+                    dialog.dismiss();
+                    dialogReference.clear();
+                }
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     public Client(Context context, Device device, ClientController existClientController) {
         this(context, device, null, existClientController);
     }
@@ -26,8 +78,10 @@ public class Client {
     public Client(Context context, Device device, UsbDevice usbDevice, ClientController existClientController) {
         this.device = device;
         // 已经存在设备连接
-        if (ClientController.getDevice(device.uuid) != null && existClientController == null)
+        if (ClientController.getDevice(device.uuid) != null && existClientController == null) {
+            dismissDialog();
             return;
+        }
         boolean retry = existClientController != null && !existClientController.autoReConnect;//主动点提示框重新连接
 //    Context context = AppData.applicationContext;
         if (existClientController != null && existClientController.fullView != null) {
@@ -41,33 +95,13 @@ public class Client {
 //    }
 //    final Pair<View, WindowManager.LayoutParams> loadingPair = loading;
 
-        if (!(context instanceof Activity)) {
-            return;
-        }
-        Dialog dialog = null;
-        try {
-            dialog = new Dialog(context, R.style.CustomDialog);
-            dialog.setContentView(View.inflate(context, R.layout.item_loading, null));
-            dialog.setCancelable(false);
-            dialog.setCanceledOnTouchOutside(false);
-            dialog.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        final Dialog loadingDialog = dialog;
         final Context copyContext = context;
         // 连接
         clientStream = new ClientStream(device, usbDevice, connected -> {
             if (existClientController != null) {
                 existClientController.handleException = false;
             }
-            try {
-                if (loadingDialog != null && loadingDialog.isShowing()) {
-                    loadingDialog.dismiss();
-                }
-            } catch (Exception ignored) {
-                ignored.printStackTrace();
-            }
+            dismissDialog();
             AppSettings.sConnected = connected;
             AppData.uiHandler.post(() -> {
 

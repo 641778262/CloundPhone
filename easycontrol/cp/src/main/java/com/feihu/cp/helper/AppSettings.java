@@ -8,6 +8,8 @@ public class AppSettings {
     private static final String KEY_VIRTUAL_KEYS = "key_virtual_keys";
     private static final String KEY_RESOLUTION = "key_resolution";
     private static final String KEY_MOBILE_NET_TIPS = "key_mobile_net_tips";
+    private static final String KEY_FULL_SCREEN = "key_full_screen";
+    private static final String KEY_BACK_CONFIRM = "key_back_confirm";
 
     public static final long AUTO_DISCONNECT_TIME = 10 * 60 * 1000;//无操作自动断开时间
     public static final long BACK_DISCONNECT_TIME = 2 * 15 * 1000;//退到后台自动断开时间
@@ -30,12 +32,36 @@ public class AppSettings {
     private static int sResolutionType;
     private static boolean sShowMobileNetTips;
 
+    private static boolean sFullScreen;
+    private static boolean sBackConfirm;
+    public static boolean sUniApp;//是否通过uniApp访问
+
 
     public static void initAppSettings() {
         sShowVoice = SharedPreferencesUtils.getBooleanParam(KEY_VOICE, true);
         sShowVirtualKeys = SharedPreferencesUtils.getBooleanParam(KEY_VIRTUAL_KEYS, true);
         sResolutionType = SharedPreferencesUtils.getIntParam(KEY_RESOLUTION, RESOLUTION_COMMON);
         sShowMobileNetTips = SharedPreferencesUtils.getBooleanParam(KEY_MOBILE_NET_TIPS, true);
+        sFullScreen = SharedPreferencesUtils.getBooleanParam(KEY_FULL_SCREEN,true);
+        sBackConfirm = SharedPreferencesUtils.getBooleanParam(KEY_BACK_CONFIRM,true);
+    }
+
+    public static boolean isFullScreen() {
+        return sFullScreen;
+    }
+
+    public static void setFullScreen(boolean fullScreen) {
+        sFullScreen = fullScreen;
+        SharedPreferencesUtils.setParam(KEY_FULL_SCREEN,fullScreen);
+    }
+
+    public static boolean isBackConfirm() {
+        return sBackConfirm;
+    }
+
+    public static void setBackConfirm(boolean backConfirm) {
+       sBackConfirm = backConfirm;
+       SharedPreferencesUtils.setParam(KEY_BACK_CONFIRM,backConfirm);
     }
 
     public static boolean showMobileNetTips() {

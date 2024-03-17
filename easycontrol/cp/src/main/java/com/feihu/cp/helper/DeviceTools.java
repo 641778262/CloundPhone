@@ -39,7 +39,7 @@ public class DeviceTools {
                     @Override
                     public void onConfirmClick() {
                         customDialog.dismiss();
-                        new Client(context, device, null);
+                        Client.showDialog(context, device,null);
                         if (customDialog.isChecked()) {
                             AppSettings.setShowMobileNetTips(false);
                         }
@@ -47,13 +47,11 @@ public class DeviceTools {
                 });
                 customDialog.show();
             } else {
-                new Client(context, device, null);
+                Client.showDialog(context, device,null);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
 
 

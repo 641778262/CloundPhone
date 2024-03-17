@@ -138,7 +138,7 @@ public class DeviceListAdapter extends BaseAdapter {
     if (device.isLinkDevice()) {
       UsbDevice usbDevice = linkDevices.get(device.uuid);
       if (usbDevice == null) return;
-      new Client(context,device, usbDevice,null);
+      Client.showDialog(context,device,null);
     } else DeviceTools.connectCloudPhone(context,device);
   }
 

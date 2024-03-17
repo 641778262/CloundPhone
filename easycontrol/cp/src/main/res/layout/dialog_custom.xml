@@ -24,6 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
+        android:layout_marginBottom="10dp"
         android:layout_marginRight="20dp"
         android:gravity="center"
         android:lineSpacingExtra="6dp"
@@ -38,6 +39,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:gravity="center_vertical"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:button="@drawable/dialog_check_box"
+        android:paddingStart="8dp"
         android:text="@string/connect_no_tips"
         android:textColor="@color/blue"
         android:textSize="13sp"
@@ -47,7 +53,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         android:layout_marginBottom="20dp"
         android:gravity="center"
         android:orientation="horizontal">
