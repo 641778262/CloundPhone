@@ -147,7 +147,7 @@ public class PublicTools {
       intent.setData(Uri.parse(url));
       context.startActivity(intent);
     } catch (Exception ignored) {
-      Toast.makeText(context, context.getString(R.string.toast_no_browser), Toast.LENGTH_SHORT).show();
+      ToastUtils.showToastNoRepeat(R.string.toast_no_browser);
     }
   }
 

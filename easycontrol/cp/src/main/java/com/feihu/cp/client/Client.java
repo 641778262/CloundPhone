@@ -11,12 +11,10 @@ import com.feihu.cp.R;
 import com.feihu.cp.entity.AppData;
 import com.feihu.cp.entity.Device;
 import com.feihu.cp.helper.AppSettings;
-import com.taobao.weex.WXSDKInstance;
-import com.taobao.weex.WXSDKManager;
+import com.feihu.cp.helper.DeviceTools;
 
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
@@ -29,7 +27,7 @@ public class Client {
 
     private static SoftReference<Dialog> dialogReference;
 
-    public static void showDialog(Context context, Device device,ClientController existClientController) {
+    public static void showDialog(Context context, Device device, ClientController existClientController) {
         if (!(context instanceof Activity) || device == null || TextUtils.isEmpty(device.address)) {
             return;
         }
@@ -43,23 +41,20 @@ public class Client {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if(AppSettings.sUniApp) {
-            List<WXSDKInstance> instances = WXSDKManager.getInstance().getWXRenderManager().getAllInstances();
-            for (WXSDKInstance instance : instances) {
-                Map<String, Object> params = new HashMap<>();
-                params.put("uuid", device.uuid);
-                params.put("address", device.address);
-                params.put("name", device.name);
-                instance.fireGlobalEventCallback("openPort", params);
-            }
+        if (AppSettings.sUniApp) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("uuid", device.uuid);
+            params.put("address", device.address);
+            params.put("name", device.name);
+            DeviceTools.fireGlobalEvent("openPort", params);
         } else {
-            new Client(context,device,existClientController);
+            new Client(context, device, existClientController);
         }
 
     }
 
     public static void dismissDialog() {
-        try{
+        try {
             if (dialogReference != null) {
                 Dialog dialog = dialogReference.get();
                 if (dialog != null && dialog.isShowing()) {
@@ -67,10 +62,11 @@ public class Client {
                     dialogReference.clear();
                 }
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
     public Client(Context context, Device device, ClientController existClientController) {
         this(context, device, null, existClientController);
     }

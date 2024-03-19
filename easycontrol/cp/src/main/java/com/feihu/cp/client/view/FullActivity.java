@@ -23,7 +23,6 @@ import android.widget.PopupWindow;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -40,6 +39,8 @@ import com.feihu.cp.helper.PingUtils;
 import com.feihu.cp.helper.ToastUtils;
 
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class FullActivity extends Activity implements SensorEventListener {
@@ -68,7 +69,16 @@ public class FullActivity extends Activity implements SensorEventListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        DeviceTools.setFullScreen(this);
+        try {
+            if (AppSettings.isFullScreen()) {
+                DeviceTools.setFullScreen(this);
+            } else {
+                DeviceTools.setStatusAndNavBar(this);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         setContentView(R.layout.activity_full);
         textureViewLayout = findViewById(R.id.texture_view_layout);
         device = ClientController.getDevice(getIntent().getStringExtra("uuid"));
@@ -107,10 +117,6 @@ public class FullActivity extends Activity implements SensorEventListener {
     public void onMultiWindowModeChanged(boolean isInMultiWindowMode, Configuration newConfig) {
         textureViewLayout.post(this::updateMaxSize);
         super.onMultiWindowModeChanged(isInMultiWindowMode, newConfig);
-    }
-
-    @Override
-    public void onBackPressed() {
     }
 
     private void updateMaxSize() {
@@ -211,7 +217,7 @@ public class FullActivity extends Activity implements SensorEventListener {
         int action = event.getAction();
 
         if (action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_BACK) {
-            if (System.currentTimeMillis() - lastBackPressTime < 2000) {
+            if (!AppSettings.isBackConfirm() || System.currentTimeMillis() - lastBackPressTime < 2000) {
                 ClientController.handleControll(device.uuid, "close", null);
             } else {
                 lastBackPressTime = System.currentTimeMillis();
@@ -254,7 +260,7 @@ public class FullActivity extends Activity implements SensorEventListener {
             popupWindow.setOutsideTouchable(true);
             popupWindow.setTouchable(true);
             TextView phoneTv = view.findViewById(R.id.tv_phone);
-            if(!TextUtils.isEmpty(device.name)) {
+            if (!TextUtils.isEmpty(device.name)) {
                 phoneTv.setText(device.name);
             }
             RadioGroup radioGroup = view.findViewById(R.id.rg_resolution);
@@ -304,10 +310,16 @@ public class FullActivity extends Activity implements SensorEventListener {
                             AppSettings.setShowVoice(false);
                             voiceTv.setText(R.string.device_voice_on);
                             voiceIv.setImageResource(R.drawable.setting_voice_off);
+                            Map<String, Object> params = new HashMap<>();
+                            params.put("voice", false);
+                            DeviceTools.fireGlobalEvent("refreshSettings", params);
                         } else {
                             AppSettings.setShowVoice(true);
                             voiceTv.setText(R.string.device_voice_off);
                             voiceIv.setImageResource(R.drawable.setting_voice_on);
+                            Map<String, Object> params = new HashMap<>();
+                            params.put("voice", true);
+                            DeviceTools.fireGlobalEvent("refreshSettings", params);
                         }
                     } else if (viewId == R.id.ll_key) {
                         if (AppSettings.showVirtualKeys()) {
@@ -374,7 +386,7 @@ public class FullActivity extends Activity implements SensorEventListener {
                             @Override
                             public void onConfirmClick() {
                                 if (!DeviceTools.isConnected()) {
-                                    Toast.makeText(getApplicationContext(), R.string.connect_net_error, Toast.LENGTH_LONG).show();
+                                    ToastUtils.showToastNoRepeat(R.string.connect_net_error);
                                     return;
                                 }
                                 mTimeOutDialog.dismiss();

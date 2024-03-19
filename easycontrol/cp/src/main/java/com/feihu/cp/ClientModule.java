@@ -14,9 +14,6 @@ import com.feihu.cp.helper.DeviceTools;
 import com.feihu.cp.helper.PublicTools;
 import com.feihu.cp.helper.ToastUtils;
 
-
-import java.util.UUID;
-
 import io.dcloud.feature.uniapp.annotation.UniJSMethod;
 import io.dcloud.feature.uniapp.bridge.UniJSCallback;
 import io.dcloud.feature.uniapp.common.UniModule;
@@ -24,9 +21,9 @@ import io.dcloud.feature.uniapp.common.UniModule;
 public class ClientModule extends UniModule {
     private static final String MSG = "msg";
     private static final String CODE = "code";
-    private static final String TEXT = "text";
     private static final String CODE_SUCCESS = "success";
     private static final String CODE_FAIL = "fail";
+
 
     @UniJSMethod(uiThread = true)
     public void testContext(UniJSCallback callback) {
@@ -136,11 +133,12 @@ public class ClientModule extends UniModule {
                 data.put(CODE, CODE_FAIL);
                 data.put(MSG, "openCloudPhonePort params null");
             } else {
+                String uuid = params.getString("uuid");
                 String address = params.getString("address");
                 String name = params.getString("name");
-                if (TextUtils.isEmpty(address)) {
+                if (TextUtils.isEmpty(address) || TextUtils.isEmpty(uuid)) {
                     data.put(CODE, CODE_FAIL);
-                    data.put(MSG, "openCloudPhonePort address param empty");
+                    data.put(MSG, "openCloudPhonePort address or uuid param empty");
                 } else {
                     Pair<String, Integer> pair = null;
                     try {
@@ -152,7 +150,7 @@ public class ClientModule extends UniModule {
                         data.put(CODE, CODE_FAIL);
                         data.put(MSG, "openCloudPhonePort address param error");
                     } else {
-                        Device device = new Device(UUID.randomUUID().toString(), Device.TYPE_NETWORK);
+                        Device device = new Device(uuid, Device.TYPE_NETWORK);
                         device.address = address;
                         device.name = name;
                         DeviceTools.connectCloudPhone(mUniSDKInstance.getContext(), device);
@@ -243,7 +241,7 @@ public class ClientModule extends UniModule {
                 data.put(CODE, CODE_FAIL);
                 data.put(MSG, "showToast params null");
             } else {
-                String text = params.getString(TEXT);
+                String text = params.getString("text");
                 if (TextUtils.isEmpty(text)) {
                     data.put(CODE, CODE_FAIL);
                     data.put(MSG, "showToast text param empty");

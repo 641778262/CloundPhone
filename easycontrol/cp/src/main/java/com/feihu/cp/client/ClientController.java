@@ -29,6 +29,7 @@ import com.feihu.cp.entity.MyInterface;
 import com.feihu.cp.helper.AppSettings;
 import com.feihu.cp.helper.DeviceTools;
 import com.feihu.cp.helper.PublicTools;
+import com.feihu.cp.helper.ToastUtils;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -200,7 +201,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     clientController.handle.run(false);//主动断开连接
     if(DeviceTools.isConnected() && !clientController.autoReConnect) {//自动重连
       clientController.autoReConnect = true;
-      Client.showDialog(clientController.context, clientController.device,clientController);
+      Client.showDialog(clientController.fullView, clientController.device,clientController);
     } else {
       showConnectDialog(clientController);
     }
@@ -222,11 +223,11 @@ public class ClientController implements TextureView.SurfaceTextureListener {
                 @Override
                 public void onConfirmClick() {
                   if(!DeviceTools.isConnected()) {
-                    Toast.makeText(AppData.applicationContext,R.string.connect_net_error,Toast.LENGTH_LONG).show();
+                    ToastUtils.showToastNoRepeat(R.string.connect_net_error);
                     return;
                   }
                   customDialog.dismiss();
-                  Client.showDialog(clientController.context,clientController.device,clientController);
+                  Client.showDialog(clientController.fullView,clientController.device,clientController);
                 }
               });
       customDialog.show();

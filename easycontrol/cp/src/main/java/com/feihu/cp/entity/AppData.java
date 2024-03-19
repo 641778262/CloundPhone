@@ -36,6 +36,9 @@ public class AppData {
     public static Setting setting;
 
     public static void init(Context context) {
+        if (applicationContext != null) {
+            return;
+        }
         applicationContext = context.getApplicationContext();
         AppSettings.initAppSettings();
         uiHandler = new Handler(context.getMainLooper());

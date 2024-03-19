@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
@@ -20,8 +21,26 @@ import com.feihu.cp.client.view.CustomDialog;
 import com.feihu.cp.entity.AppData;
 import com.feihu.cp.entity.Device;
 import com.feihu.cp.entity.MyInterface;
+import com.taobao.weex.WXSDKInstance;
+import com.taobao.weex.WXSDKManager;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DeviceTools {
+
+    public static void fireGlobalEvent(String eventName, Map<String, Object> params) {
+        if(AppSettings.sUniApp) {
+            List<WXSDKInstance> instances = WXSDKManager.getInstance().getWXRenderManager().getAllInstances();
+            for (WXSDKInstance instance : instances) {
+                if(!TextUtils.isEmpty(eventName)) {
+                    instance.fireGlobalEventCallback(eventName, params);
+                }
+            }
+        }
+    }
+
     public static void connectCloudPhone(Context context, Device device) {
         try {
             if (!isConnected()) {
@@ -39,39 +58,53 @@ public class DeviceTools {
                     @Override
                     public void onConfirmClick() {
                         customDialog.dismiss();
-                        Client.showDialog(context, device,null);
+                        Client.showDialog(context, device, null);
                         if (customDialog.isChecked()) {
                             AppSettings.setShowMobileNetTips(false);
+                            Map<String, Object> params = new HashMap<>();
+                            params.put("mobileNetTips", false);
+                            DeviceTools.fireGlobalEvent("refreshSettings", params);
                         }
                     }
                 });
                 customDialog.show();
             } else {
-                Client.showDialog(context, device,null);
+                Client.showDialog(context, device, null);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    // 设置状态栏导航栏颜色
+    public static void setStatusAndNavBar(Activity context) {
+       if(StatusBarUtil.transparencyBar(context)) {
+           StatusBarUtil.statusBarFontMode(context,false);
+       }
+    }
 
     // 设置全面屏
     public static void setFullScreen(Activity context) {
-        // 全屏显示
-        context.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        context.getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_FULLSCREEN |
-                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
-                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
-                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-        // 设置异形屏
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            WindowManager.LayoutParams lp = context.getWindow().getAttributes();
-            lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-            context.getWindow().setAttributes(lp);
+        try {
+            // 全屏显示
+            context.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            context.getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_FULLSCREEN |
+                            View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+            // 设置异形屏
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                WindowManager.LayoutParams lp = context.getWindow().getAttributes();
+                lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+                context.getWindow().setAttributes(lp);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
     }
 
     public static void viewAnim(View view, boolean toShowView, int translationX, int translationY, MyInterface.MyFunctionBoolean action) {
