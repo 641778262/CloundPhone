@@ -16,7 +16,6 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -259,7 +258,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     handle.run(false);
   }
 
-  private static final int minLength = PublicTools.dp2px(200f);
+  private static final int minLength = DeviceTools.dp2px(200f);
 
   private void updateMaxSize(ByteBuffer byteBuffer) {
     int width = Math.max(byteBuffer.getInt(), minLength);
@@ -351,7 +350,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
   private String nowClipboardText = "";
 
   private void checkClipBoard() {
-    ClipData clipBoard = AppData.clipBoard.getPrimaryClip();
+    ClipData clipBoard = PublicTools.getClipboardManager().getPrimaryClip();
     if (clipBoard != null && clipBoard.getItemCount() > 0) {
       String newClipBoardText = String.valueOf(clipBoard.getItemAt(0).getText());
       if (!Objects.equals(nowClipboardText, newClipBoardText)) {
@@ -363,7 +362,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
 
   private void setClipBoard(ByteBuffer byteBuffer) {
     nowClipboardText = new String(byteBuffer.array());
-    AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(MIMETYPE_TEXT_PLAIN, nowClipboardText));
+    PublicTools.getClipboardManager().setPrimaryClip(ClipData.newPlainText(MIMETYPE_TEXT_PLAIN, nowClipboardText));
   }
 
   private void runShell(ByteBuffer byteBuffer) throws Exception {

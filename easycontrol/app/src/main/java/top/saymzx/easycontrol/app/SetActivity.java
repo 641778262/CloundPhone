@@ -36,7 +36,7 @@ public class SetActivity extends Activity {
       Toast.makeText(this, getString(R.string.toast_success), Toast.LENGTH_SHORT).show();
     }).getRoot());
     activitySetBinding.setOther.addView(ViewTools.createTextCard(this, getString(R.string.set_other_locale), () -> {
-      AppData.setting.setLocale(AppData.setting.getLocale().equals("en") ? "zh" : "en");
+//      AppData.setting.setLocale(AppData.setting.getLocale().equals("en") ? "zh" : "en");
       Toast.makeText(this, getString(R.string.toast_change_locale), Toast.LENGTH_SHORT).show();
     }).getRoot());
     // 关于

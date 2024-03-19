@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.feihu.cp.entity.AppData;
 import com.feihu.cp.entity.Device;
+import com.feihu.cp.helper.PublicTools;
 
 import java.util.UUID;
 
@@ -48,7 +49,7 @@ public class DeviceDetailActivity extends Activity {
   private void drawUI() {
     // UUID
     activityDeviceDetailBinding.uuid.setOnClickListener(v -> {
-      AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(ClipDescription.MIMETYPE_TEXT_PLAIN, device.uuid));
+      PublicTools.getClipboardManager().setPrimaryClip(ClipData.newPlainText(ClipDescription.MIMETYPE_TEXT_PLAIN, device.uuid));
       Toast.makeText(this, getString(R.string.toast_copy), Toast.LENGTH_SHORT).show();
     });
     // 预填写参数

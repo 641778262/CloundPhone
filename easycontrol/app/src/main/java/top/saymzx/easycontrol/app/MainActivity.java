@@ -74,9 +74,9 @@ public class MainActivity extends Activity {
   }
 
   // 检测激活
-  private void checkActive() {
-    if (!AppData.setting.getIsActive()) startActivity(new Intent(this, ActiveActivity.class));
-  }
+//  private void checkActive() {
+//    if (!AppData.setting.getIsActive()) startActivity(new Intent(this, ActiveActivity.class));
+//  }
 
   // 检查权限
   private boolean checkPermission() {
@@ -124,24 +124,24 @@ public class MainActivity extends Activity {
 
   // 扫描局域网地址
   private void scanAddress() {
-    Pair<View, WindowManager.LayoutParams> loading = ViewTools.createConnectLoading(this,false);
-    AppData.windowManager.addView(loading.first, loading.second);
-    new Thread(() -> {
-      ArrayList<String> scannedAddresses = PublicTools.scanAddress();
-      AppData.windowManager.removeView(loading.first);
-      AppData.uiHandler.post(() -> {
-        ItemScanAddressListBinding scanAddressListView = ItemScanAddressListBinding.inflate(LayoutInflater.from(this));
-        Dialog dialog = ViewTools.createDialog(this, true, scanAddressListView.getRoot());
-        for (String i : scannedAddresses) {
-          ItemTextBinding text = ViewTools.createTextCard(this, i, () -> {
-            AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(ClipDescription.MIMETYPE_TEXT_PLAIN, i));
-            Toast.makeText(this, getString(R.string.toast_copy), Toast.LENGTH_SHORT).show();
-          });
-          scanAddressListView.list.addView(text.getRoot());
-        }
-        dialog.show();
-      });
-    }).start();
+//    Pair<View, WindowManager.LayoutParams> loading = ViewTools.createConnectLoading(this,false);
+//    AppData.windowManager.addView(loading.first, loading.second);
+//    new Thread(() -> {
+//      ArrayList<String> scannedAddresses = PublicTools.scanAddress();
+//      AppData.windowManager.removeView(loading.first);
+//      AppData.uiHandler.post(() -> {
+//        ItemScanAddressListBinding scanAddressListView = ItemScanAddressListBinding.inflate(LayoutInflater.from(this));
+//        Dialog dialog = ViewTools.createDialog(this, true, scanAddressListView.getRoot());
+//        for (String i : scannedAddresses) {
+//          ItemTextBinding text = ViewTools.createTextCard(this, i, () -> {
+//            AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(ClipDescription.MIMETYPE_TEXT_PLAIN, i));
+//            Toast.makeText(this, getString(R.string.toast_copy), Toast.LENGTH_SHORT).show();
+//          });
+//          scanAddressListView.list.addView(text.getRoot());
+//        }
+//        dialog.show();
+//      });
+//    }).start();
   }
 
 }

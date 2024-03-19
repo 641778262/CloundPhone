@@ -36,14 +36,14 @@ public class IpActivity extends Activity {
     Pair<ArrayList<String>, ArrayList<String>> listPair = PublicTools.getIp();
     for (String i : listPair.first) {
       ItemTextBinding text = ViewTools.createTextCard(this, i, () -> {
-        AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(ClipDescription.MIMETYPE_TEXT_PLAIN, i));
+        PublicTools.getClipboardManager().setPrimaryClip(ClipData.newPlainText(ClipDescription.MIMETYPE_TEXT_PLAIN, i));
         Toast.makeText(this, getString(R.string.toast_copy), Toast.LENGTH_SHORT).show();
       });
       activityIpBinding.ipv4.addView(text.getRoot());
     }
     for (String i : listPair.second) {
       ItemTextBinding text = ViewTools.createTextCard(this, i, () -> {
-        AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(ClipDescription.MIMETYPE_TEXT_PLAIN, i));
+        PublicTools.getClipboardManager().setPrimaryClip(ClipData.newPlainText(ClipDescription.MIMETYPE_TEXT_PLAIN, i));
         Toast.makeText(this, getString(R.string.toast_copy), Toast.LENGTH_SHORT).show();
       });
       activityIpBinding.ipv6.addView(text.getRoot());

@@ -8,6 +8,7 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
+import android.hardware.usb.UsbManager;
 import android.hardware.usb.UsbRequest;
 
 import java.io.IOException;
@@ -16,7 +17,7 @@ import java.nio.ByteOrder;
 import java.util.LinkedList;
 
 import com.feihu.cp.buffer.BufferNew;
-import com.feihu.cp.entity.AppData;
+import com.feihu.cp.helper.PublicTools;
 
 public class UsbChannel implements AdbChannel {
 
@@ -30,8 +31,9 @@ public class UsbChannel implements AdbChannel {
 
     public UsbChannel(UsbDevice usbDevice) throws IOException {
         // 连接USB设备
-        if (AppData.usbManager == null) throw new IOException("not have usbManager");
-        usbConnection = AppData.usbManager.openDevice(usbDevice);
+        UsbManager usbManager = PublicTools.getUsbManager();
+        if (usbManager == null) throw new IOException("not have usbManager");
+        usbConnection = usbManager.openDevice(usbDevice);
         if (usbConnection == null) return;
         // 查找ADB的接口
         for (int i = 0; i < usbDevice.getInterfaceCount(); i++) {

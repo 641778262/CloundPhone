@@ -15,6 +15,7 @@ import android.os.Build;
 import com.feihu.cp.client.ClientController;
 import com.feihu.cp.entity.AppData;
 import com.feihu.cp.entity.Device;
+import com.feihu.cp.helper.PublicTools;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -90,17 +91,19 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
 
   // 检查已连接设备
   public void checkConnectedUsb(Context context) {
-    if (AppData.usbManager == null) return;
-    for (Map.Entry<String, UsbDevice> entry : AppData.usbManager.getDeviceList().entrySet()) onConnectUsb(context, entry.getValue());
+    UsbManager usbManager = PublicTools.getUsbManager();
+    if (usbManager == null) return;
+    for (Map.Entry<String, UsbDevice> entry : usbManager.getDeviceList().entrySet()) onConnectUsb(context, entry.getValue());
   }
 
   // 请求USB设备权限
   private void onConnectUsb(Context context, UsbDevice usbDevice) {
-    if (AppData.usbManager == null) return;
+    UsbManager usbManager = PublicTools.getUsbManager();
+    if (usbManager == null) return;
     Intent intent = new Intent(ACTION_USB_PERMISSION);
     intent.setPackage(AppData.applicationContext.getPackageName());
     PendingIntent permissionIntent = PendingIntent.getBroadcast(context, 0, intent, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_MUTABLE : 0);
-    AppData.usbManager.requestPermission(usbDevice, permissionIntent);
+    usbManager.requestPermission(usbDevice, permissionIntent);
   }
 
   // 当断开设备

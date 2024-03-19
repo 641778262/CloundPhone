@@ -1,6 +1,7 @@
 package com.feihu.cp.client.view;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -50,6 +51,7 @@ public class FullActivity extends Activity implements SensorEventListener {
 
     private ViewGroup textureViewLayout;
     private final PingUtils mPingUtils = new PingUtils();
+    private static SensorManager sensorManager;
 
     private static final int MSG_CHECK_TOUCH_TIME = 1001;
     private static final long CHECK_TOUCH_TIME_INTERVAL = 5 * 1000;
@@ -91,8 +93,9 @@ public class FullActivity extends Activity implements SensorEventListener {
         // 更新textureView
         textureViewLayout.addView(ClientController.getTextureView(device.uuid), 0);
         textureViewLayout.post(this::updateMaxSize);
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         // 页面自动旋转
-        AppData.sensorManager.registerListener(this, AppData.sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
         mHandler.sendEmptyMessageDelayed(MSG_CHECK_TOUCH_TIME, CHECK_TOUCH_TIME_INTERVAL);
     }
 
@@ -105,7 +108,7 @@ public class FullActivity extends Activity implements SensorEventListener {
 
     @Override
     protected void onPause() {
-        AppData.sensorManager.unregisterListener(this);
+        sensorManager.unregisterListener(this);
         AppSettings.sPaused = true;
         if (isChangingConfigurations())
             textureViewLayout.removeView(ClientController.getTextureView(device.uuid));

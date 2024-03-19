@@ -33,13 +33,13 @@ public class ViewTools {
 
   // 设置语言
   public static void setLocale(Activity context) {
-    Resources resources = context.getResources();
-    Configuration config = resources.getConfiguration();
-    String locale = AppData.setting.getLocale();
-    if (locale.equals("")) config.locale = Locale.getDefault();
-    else if (locale.equals("en")) config.locale = Locale.ENGLISH;
-    else if (locale.equals("zh")) config.locale = Locale.CHINESE;
-    resources.updateConfiguration(config, resources.getDisplayMetrics());
+//    Resources resources = context.getResources();
+//    Configuration config = resources.getConfiguration();
+//    String locale = AppData.setting.getLocale();
+//    if (locale.equals("")) config.locale = Locale.getDefault();
+//    else if (locale.equals("en")) config.locale = Locale.ENGLISH;
+//    else if (locale.equals("zh")) config.locale = Locale.CHINESE;
+//    resources.updateConfiguration(config, resources.getDisplayMetrics());
   }
 
   // 设置状态栏导航栏颜色

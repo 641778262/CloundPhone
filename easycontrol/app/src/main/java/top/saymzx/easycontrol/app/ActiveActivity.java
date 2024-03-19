@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.os.Bundle;
 
 
-import com.feihu.cp.entity.AppData;
 
 import top.saymzx.easycontrol.app.databinding.ActivityActiveBinding;
 ;
@@ -28,7 +27,7 @@ public class ActiveActivity extends Activity {
   }
 
   private void drawUi() {
-    activityActiveBinding.key.setText(AppData.setting.getActiveKey());
+//    activityActiveBinding.key.setText(AppData.setting.getActiveKey());
 //    activityActiveBinding.url.setOnClickListener(v -> PublicTools.startUrl(this, "https://gitee.com/mingzhixianweb/easycontrol/blob/master/DONATE.md"));
   }
 
