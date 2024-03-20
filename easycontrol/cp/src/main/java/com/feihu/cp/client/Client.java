@@ -6,12 +6,14 @@ import android.content.Context;
 import android.hardware.usb.UsbDevice;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.TextView;
 
 import com.feihu.cp.R;
 import com.feihu.cp.entity.AppData;
 import com.feihu.cp.entity.Device;
 import com.feihu.cp.helper.AppSettings;
 import com.feihu.cp.helper.DeviceTools;
+import com.feihu.cp.helper.ToastUtils;
 
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
@@ -34,7 +36,18 @@ public class Client {
         try {
             Dialog dialog = new Dialog(context, R.style.CustomDialog);
             dialogReference = new SoftReference<>(dialog);
-            dialog.setContentView(View.inflate(context, R.layout.item_loading, null));
+            View contentView = View.inflate(context, R.layout.item_loading, null);
+            TextView messageTv = contentView.findViewById(R.id.tv_message);
+
+            switch (device.connectType) {
+                case Device.CONNECT_TYPE_RECONNECT:
+                    messageTv.setText(R.string.connect_retry);
+                    break;
+                case Device.CONNECT_TYPE_CHANGE_RESOLUTION:
+                    messageTv.setText(R.string.connect_resolution);
+                    break;
+            }
+            dialog.setContentView(contentView);
             dialog.setCancelable(false);
             dialog.setCanceledOnTouchOutside(false);
             dialog.show();
@@ -99,10 +112,21 @@ public class Client {
             }
             dismissDialog();
             AppSettings.sConnected = connected;
-            AppData.uiHandler.post(() -> {
-
-            });
             if (connected) {//连接成功
+                if(device.connectType == Device.CONNECT_TYPE_CHANGE_RESOLUTION) {
+                    switch (AppSettings.getResolutionType()) {
+                        case AppSettings.RESOLUTION_SUPER:
+                            ToastUtils.showToastNoRepeat(R.string.change_resolution_super);
+                            break;
+                        case AppSettings.RESOLUTION_HIGH:
+                            ToastUtils.showToastNoRepeat(R.string.change_resolution_high);
+                            break;
+                        default:
+                            ToastUtils.showToastNoRepeat(R.string.change_resolution_common);
+                            break;
+                    }
+
+                }
                 AppSettings.resetLastTouchTime();
                 // 控制器
                 if (existClientController == null) {

@@ -23,12 +23,17 @@
 
   <string name="connect_progressing">加速连接云手机...</string>
   <string name="connect_retry">正在重新连接...</string>
+  <string name="connect_resolution">正在切换清晰度...</string>
   <string name="connect_net_tips">连接断开，请重新连接</string>
   <string name="connect_net_error">当前网络异常，请检查网络后重新连接</string>
   <string name="connect_mobile_net">采用视频流方式控制云手机将消耗您的手机流量，是否继续？</string>
   <string name="connect_no_tips">不再提示</string>
   <string name="connect_time_out">连接超时，请重新连接</string>
   <string name="connect_error">连接失败，请重新连接</string>
+
+  <string name="change_resolution_common">清晰度已切换为普清</string>
+  <string name="change_resolution_high">清晰度已切换为高清</string>
+  <string name="change_resolution_super">清晰度已切换为超清</string>
 
 
   <string name="main_scan_device_local">本机</string>

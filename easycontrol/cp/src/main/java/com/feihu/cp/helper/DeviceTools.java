@@ -69,6 +69,7 @@ public class DeviceTools {
                 });
                 customDialog.show();
             } else {
+                device.connectType = Device.CONNECT_TYPE_NORMAL;
                 Client.showDialog(context, device, null);
             }
         } catch (Exception e) {

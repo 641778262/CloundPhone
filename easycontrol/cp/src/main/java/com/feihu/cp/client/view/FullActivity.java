@@ -31,7 +31,6 @@ import androidx.annotation.NonNull;
 import com.feihu.cp.R;
 import com.feihu.cp.client.ClientController;
 import com.feihu.cp.client.ControlPacket;
-import com.feihu.cp.entity.AppData;
 import com.feihu.cp.entity.Device;
 import com.feihu.cp.helper.AppSettings;
 import com.feihu.cp.helper.CustomOnClickListener;
@@ -51,7 +50,7 @@ public class FullActivity extends Activity implements SensorEventListener {
 
     private ViewGroup textureViewLayout;
     private final PingUtils mPingUtils = new PingUtils();
-    private static SensorManager sensorManager;
+    private SensorManager sensorManager;
 
     private static final int MSG_CHECK_TOUCH_TIME = 1001;
     private static final long CHECK_TOUCH_TIME_INTERVAL = 5 * 1000;
@@ -92,8 +91,8 @@ public class FullActivity extends Activity implements SensorEventListener {
         setButtonListener();
         // 更新textureView
         textureViewLayout.addView(ClientController.getTextureView(device.uuid), 0);
-        textureViewLayout.post(this::updateMaxSize);
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mHandler.post(this::updateMaxSize);
+        sensorManager = (SensorManager) getApplication().getSystemService(Context.SENSOR_SERVICE);
         // 页面自动旋转
         sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
         mHandler.sendEmptyMessageDelayed(MSG_CHECK_TOUCH_TIME, CHECK_TOUCH_TIME_INTERVAL);
@@ -118,7 +117,7 @@ public class FullActivity extends Activity implements SensorEventListener {
 
     @Override
     public void onMultiWindowModeChanged(boolean isInMultiWindowMode, Configuration newConfig) {
-        textureViewLayout.post(this::updateMaxSize);
+        mHandler.post(this::updateMaxSize);
         super.onMultiWindowModeChanged(isInMultiWindowMode, newConfig);
     }
 
@@ -293,7 +292,13 @@ public class FullActivity extends Activity implements SensorEventListener {
                     if (AppSettings.sConnected) {
                         ClientController.handleControll(device.uuid, "disConnect", null);
                     }
+                    device.connectType = Device.CONNECT_TYPE_CHANGE_RESOLUTION;
                     ClientController.handleControll(device.uuid, "reConnect", null);
+                    try {
+                        popupWindow.dismiss();
+                    }catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             });
             TextView voiceTv = view.findViewById(R.id.tv_voice);
@@ -394,6 +399,7 @@ public class FullActivity extends Activity implements SensorEventListener {
                                 }
                                 mTimeOutDialog.dismiss();
                                 mHandler.sendEmptyMessageDelayed(MSG_CHECK_TOUCH_TIME, CHECK_TOUCH_TIME_INTERVAL);
+                                device.connectType = Device.CONNECT_TYPE_RECONNECT;
                                 ClientController.handleControll(device.uuid, "reConnect", null);
                             }
                         });

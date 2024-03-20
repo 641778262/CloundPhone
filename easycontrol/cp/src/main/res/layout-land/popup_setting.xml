@@ -11,6 +11,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
@@ -19,8 +20,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="20dp"
-            android:maxLines="1"
             android:layout_weight="1"
+            android:maxLines="1"
             android:text="@string/device_cloud_phone"
             android:textColor="@color/white"
             android:textSize="18sp" />
@@ -49,7 +50,7 @@
                 android:id="@+id/iv_voice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
+                android:layout_marginTop="1dp"
                 android:src="@drawable/setting_voice_off" />
         </LinearLayout>
 
@@ -57,7 +58,7 @@
             android:id="@+id/ll_key"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
+            android:gravity="center"
             android:orientation="horizontal"
             android:paddingLeft="10dp"
             android:paddingTop="15dp"

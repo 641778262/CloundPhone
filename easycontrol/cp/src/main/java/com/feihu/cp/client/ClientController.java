@@ -127,6 +127,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     } catch (Exception ignored) {
       ignored.printStackTrace();
       if(!AppSettings.sPaused) {
+        clientController.device.connectType = Device.CONNECT_TYPE_RECONNECT;
         tryReConnect(clientController);
       }
 //      clientController.close(AppData.applicationContext.getString(R.string.toast_stream_closed));
@@ -226,6 +227,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
                     return;
                   }
                   customDialog.dismiss();
+                  clientController.device.connectType = Device.CONNECT_TYPE_RECONNECT;
                   Client.showDialog(clientController.fullView,clientController.device,clientController);
                 }
               });
