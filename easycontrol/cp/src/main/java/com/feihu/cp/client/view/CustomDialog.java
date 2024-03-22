@@ -12,6 +12,7 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.feihu.cp.R;
+import com.feihu.cp.helper.DeviceTools;
 
 
 public class CustomDialog extends AlertDialog {
@@ -58,7 +59,11 @@ public class CustomDialog extends AlertDialog {
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
         Window window = getWindow();
         lp.copyFrom(window.getAttributes());
-        lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
+        if (DeviceTools.isLandscape()) {
+            lp.width = DeviceTools.getScreenWidth() * 3 / 5;
+        } else {
+            lp.width = DeviceTools.getScreenWidth() * 5 / 6;
+        }
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
         //设置起始位置
 //        lp.x  = 100;
@@ -102,7 +107,7 @@ public class CustomDialog extends AlertDialog {
         if (!TextUtils.isEmpty(confirmText)) {
             tvConfirm.setText(confirmText);
         }
-        if(cbVisible) {
+        if (cbVisible) {
             cb.setVisibility(View.VISIBLE);
         }
     }
@@ -176,8 +181,8 @@ public class CustomDialog extends AlertDialog {
         return this;
     }
 
-    public boolean isChecked(){
-        return cb!= null && cb.isChecked();
+    public boolean isChecked() {
+        return cb != null && cb.isChecked();
     }
 
     private void initView() {

@@ -20,6 +20,7 @@
   <string name="disconnect_tips">因您长时间未操作，已为您自动断开连接</string>
   <string name="reconnect_device">重新连接</string>
   <string name="exit_device">退出设备</string>
+  <string name="exit_device_tips">是否退出连接？\n退出后云手机APP将继续正常运行</string>
 
   <string name="connect_progressing">加速连接云手机...</string>
   <string name="connect_retry">正在重新连接...</string>

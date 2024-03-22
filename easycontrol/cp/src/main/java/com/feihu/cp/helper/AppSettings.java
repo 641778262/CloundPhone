@@ -12,7 +12,7 @@ public class AppSettings {
     private static final String KEY_BACK_CONFIRM = "key_back_confirm";
 
     public static final long AUTO_DISCONNECT_TIME = 10 * 60 * 1000;//无操作自动断开时间
-    public static final long BACK_DISCONNECT_TIME = 2 * 15 * 1000;//退到后台自动断开时间
+    public static final long BACK_DISCONNECT_TIME = 5 * 1000;//退到后台自动断开时间
 
     public static final int RESOLUTION_SUPER = 3;
     public static final int RESOLUTION_HIGH = 2;
@@ -42,8 +42,8 @@ public class AppSettings {
         sShowVirtualKeys = SharedPreferencesUtils.getBooleanParam(KEY_VIRTUAL_KEYS, true);
         sResolutionType = SharedPreferencesUtils.getIntParam(KEY_RESOLUTION, RESOLUTION_COMMON);
         sShowMobileNetTips = SharedPreferencesUtils.getBooleanParam(KEY_MOBILE_NET_TIPS, true);
-        sFullScreen = SharedPreferencesUtils.getBooleanParam(KEY_FULL_SCREEN,true);
-        sBackConfirm = SharedPreferencesUtils.getBooleanParam(KEY_BACK_CONFIRM,true);
+        sFullScreen = SharedPreferencesUtils.getBooleanParam(KEY_FULL_SCREEN, true);
+        sBackConfirm = SharedPreferencesUtils.getBooleanParam(KEY_BACK_CONFIRM, true);
     }
 
     public static boolean isFullScreen() {
@@ -52,7 +52,7 @@ public class AppSettings {
 
     public static void setFullScreen(boolean fullScreen) {
         sFullScreen = fullScreen;
-        SharedPreferencesUtils.setParam(KEY_FULL_SCREEN,fullScreen);
+        SharedPreferencesUtils.setParam(KEY_FULL_SCREEN, fullScreen);
     }
 
     public static boolean isBackConfirm() {
@@ -60,8 +60,8 @@ public class AppSettings {
     }
 
     public static void setBackConfirm(boolean backConfirm) {
-       sBackConfirm = backConfirm;
-       SharedPreferencesUtils.setParam(KEY_BACK_CONFIRM,backConfirm);
+        sBackConfirm = backConfirm;
+        SharedPreferencesUtils.setParam(KEY_BACK_CONFIRM, backConfirm);
     }
 
     public static boolean showMobileNetTips() {

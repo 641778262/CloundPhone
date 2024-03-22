@@ -101,8 +101,12 @@ public class FullActivity extends Activity implements SensorEventListener {
     @Override
     protected void onResume() {
         super.onResume();
-        AppSettings.sPaused = false;
+        if (AppSettings.sPaused && !AppSettings.sConnected) {
+            device.connectType = Device.CONNECT_TYPE_AUTO_CONNECT;
+            ClientController.handleControll(device.uuid, "reConnect", null);
+        }
         AppSettings.resetLastTouchTime();
+        AppSettings.sPaused = false;
     }
 
     @Override
@@ -159,7 +163,7 @@ public class FullActivity extends Activity implements SensorEventListener {
                 return;
             }
             mHandler.post(() -> {
-                if (!DeviceTools.isConnected()) {
+                if (!DeviceTools.isNetConnected()) {
                     return;
                 }
                 if (time > 0) {
@@ -219,13 +223,26 @@ public class FullActivity extends Activity implements SensorEventListener {
         int action = event.getAction();
 
         if (action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_BACK) {
-            if (!AppSettings.isBackConfirm() || System.currentTimeMillis() - lastBackPressTime < 2000) {
-                ClientController.handleControll(device.uuid, "close", null);
+            if (AppSettings.isBackConfirm()) {
+                showBackConfirmDialog();
             } else {
-                lastBackPressTime = System.currentTimeMillis();
-                ToastUtils.showToastNoRepeat(R.string.device_exit_tips);
+                if (System.currentTimeMillis() - lastBackPressTime < 2000) {
+                    ClientController.handleControll(device.uuid, "close", null);
+                } else {
+                    lastBackPressTime = System.currentTimeMillis();
+                    ToastUtils.showToastNoRepeat(R.string.device_exit_tips);
+                }
             }
+
             return true;
+        }
+        if (action == KeyEvent.ACTION_DOWN && (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)) {
+            if (!AppSettings.showVoice()) {
+                AppSettings.setShowVoice(true);
+                Map<String, Object> params = new HashMap<>();
+                params.put("voice", true);
+                DeviceTools.fireGlobalEvent("refreshSettings", params);
+            }
         }
         if (action == KeyEvent.ACTION_DOWN && keyCode != KeyEvent.KEYCODE_VOLUME_UP && keyCode != KeyEvent.KEYCODE_VOLUME_DOWN) {
             ClientController.handleControll(device.uuid, "writeByteBuffer", ControlPacket.createKeyEvent(event.getKeyCode(), event.getMetaState()));
@@ -296,7 +313,7 @@ public class FullActivity extends Activity implements SensorEventListener {
                     ClientController.handleControll(device.uuid, "reConnect", null);
                     try {
                         popupWindow.dismiss();
-                    }catch (Exception e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -372,6 +389,33 @@ public class FullActivity extends Activity implements SensorEventListener {
 
     }
 
+    private void showBackConfirmDialog() {
+        try {
+            CustomDialog customDialog = new CustomDialog(this);
+            customDialog.setMessageText(R.string.exit_device_tips).setCheckBoxVisible().setOnClickListener(new CustomDialog.OnClickListener() {
+                @Override
+                public void onCancelClick() {
+
+                }
+
+                @Override
+                public void onConfirmClick() {
+                    customDialog.dismiss();
+                    if (customDialog.isChecked()) {
+                        AppSettings.setBackConfirm(false);
+                        Map<String, Object> params = new HashMap<>();
+                        params.put("backConfirm", false);
+                        DeviceTools.fireGlobalEvent("refreshSettings", params);
+                    }
+                    ClientController.handleControll(device.uuid, "close", null);
+                }
+            });
+            customDialog.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private CustomDialog mTimeOutDialog;
 
     public boolean showNoHandleTimeOut() {
@@ -382,36 +426,40 @@ public class FullActivity extends Activity implements SensorEventListener {
             return false;
         }
         try {
-            if (mTimeOutDialog == null) {
-                mTimeOutDialog = new CustomDialog(this).setMessageText(R.string.disconnect_tips)
-                        .setTitleText(R.string.title_tips).setCancelText(R.string.exit_device)
-                        .setConfirmText(R.string.reconnect_device).setOnClickListener(new CustomDialog.OnClickListener() {
-                            @Override
-                            public void onCancelClick() {
-                                ClientController.handleControll(device.uuid, "close", null);
-                            }
-
-                            @Override
-                            public void onConfirmClick() {
-                                if (!DeviceTools.isConnected()) {
-                                    ToastUtils.showToastNoRepeat(R.string.connect_net_error);
-                                    return;
-                                }
-                                mTimeOutDialog.dismiss();
-                                mHandler.sendEmptyMessageDelayed(MSG_CHECK_TOUCH_TIME, CHECK_TOUCH_TIME_INTERVAL);
-                                device.connectType = Device.CONNECT_TYPE_RECONNECT;
-                                ClientController.handleControll(device.uuid, "reConnect", null);
-                            }
-                        });
-            }
             if (AppSettings.sConnected) {
                 ClientController.handleControll(device.uuid, "disConnect", null);
             }
-            mTimeOutDialog.show();
+            if (!AppSettings.sPaused) {
+                if (mTimeOutDialog == null) {
+                    mTimeOutDialog = new CustomDialog(this).setMessageText(R.string.disconnect_tips)
+                            .setTitleText(R.string.title_tips).setCancelText(R.string.exit_device)
+                            .setConfirmText(R.string.reconnect_device).setOnClickListener(new CustomDialog.OnClickListener() {
+                                @Override
+                                public void onCancelClick() {
+                                    ClientController.handleControll(device.uuid, "close", null);
+                                }
+
+                                @Override
+                                public void onConfirmClick() {
+                                    if (!DeviceTools.isNetConnected()) {
+                                        ToastUtils.showToastNoRepeat(R.string.connect_net_error);
+                                        return;
+                                    }
+                                    mTimeOutDialog.dismiss();
+                                    mHandler.sendEmptyMessageDelayed(MSG_CHECK_TOUCH_TIME, CHECK_TOUCH_TIME_INTERVAL);
+                                    device.connectType = Device.CONNECT_TYPE_RECONNECT;
+                                    ClientController.handleControll(device.uuid, "reConnect", null);
+                                }
+                            });
+                }
+                mTimeOutDialog.show();
+                return true;
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
-        return true;
+        return false;
     }
 }

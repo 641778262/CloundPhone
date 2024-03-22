@@ -269,8 +269,13 @@ public class ClientStream {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
+        try {
+            if(connectThread != null) {
+                connectThread.interrupt();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public static void runOnceCmd(Device device, UsbDevice usbDevice, String cmd, MyInterface.MyFunctionBoolean handle) {

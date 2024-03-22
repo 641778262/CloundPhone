@@ -39,6 +39,7 @@ public class Device {
     public static final int CONNECT_TYPE_NORMAL = 0;
     public static final int CONNECT_TYPE_CHANGE_RESOLUTION = 1;
     public static final int CONNECT_TYPE_RECONNECT = 2;
+    public static final int CONNECT_TYPE_AUTO_CONNECT = 3;
 
     public Device(String uuid, int type) {
         this.uuid = uuid;

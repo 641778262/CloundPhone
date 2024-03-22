@@ -45,9 +45,9 @@
         android:button="@drawable/dialog_check_box"
         android:paddingStart="8dp"
         android:text="@string/connect_no_tips"
+        android:visibility="gone"
         android:textColor="@color/blue"
         android:textSize="13sp"
-        android:visibility="gone"
         tools:visibility="visible" />
 
     <LinearLayout
@@ -58,7 +58,7 @@
         android:gravity="center"
         android:orientation="horizontal">
 
-        <TextView
+        <com.feihu.cp.client.view.PressTextView
             android:id="@+id/tv_cancel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -72,16 +72,16 @@
             android:textColor="#333333"
             android:textSize="16sp">
 
-        </TextView>
+        </com.feihu.cp.client.view.PressTextView>
 
-        <TextView
+        <com.feihu.cp.client.view.PressTextView
             android:id="@+id/tv_confirm"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="30dp"
             android:layout_marginRight="30dp"
             android:layout_weight="1"
-            android:background="@color/blue"
+            android:background="@drawable/dialog_confirm_btn_bg"
             android:gravity="center"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
@@ -89,7 +89,7 @@
             android:textColor="@color/white"
             android:textSize="16sp">
 
-        </TextView>
+        </com.feihu.cp.client.view.PressTextView>
     </LinearLayout>
 
 

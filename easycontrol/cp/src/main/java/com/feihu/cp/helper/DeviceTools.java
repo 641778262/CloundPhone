@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
@@ -31,10 +32,10 @@ import java.util.Map;
 public class DeviceTools {
 
     public static void fireGlobalEvent(String eventName, Map<String, Object> params) {
-        if(AppSettings.sUniApp) {
+        if (AppSettings.sUniApp) {
             List<WXSDKInstance> instances = WXSDKManager.getInstance().getWXRenderManager().getAllInstances();
             for (WXSDKInstance instance : instances) {
-                if(!TextUtils.isEmpty(eventName)) {
+                if (!TextUtils.isEmpty(eventName)) {
                     instance.fireGlobalEventCallback(eventName, params);
                 }
             }
@@ -43,7 +44,7 @@ public class DeviceTools {
 
     public static void connectCloudPhone(Context context, Device device) {
         try {
-            if (!isConnected()) {
+            if (!isNetConnected()) {
                 ToastUtils.showToastNoRepeat(R.string.connect_net_error);
                 return;
             }
@@ -79,9 +80,9 @@ public class DeviceTools {
 
     // 设置状态栏导航栏颜色
     public static void setStatusAndNavBar(Activity context) {
-       if(StatusBarUtil.transparencyBar(context)) {
-           StatusBarUtil.statusBarFontMode(context,false);
-       }
+        if (StatusBarUtil.transparencyBar(context)) {
+            StatusBarUtil.statusBarFontMode(context, false);
+        }
     }
 
     // 设置全面屏
@@ -146,6 +147,15 @@ public class DeviceTools {
         return dm.density;
     }
 
+    public static boolean isLandscape() {
+        try {
+            Configuration configuration = AppData.applicationContext.getResources().getConfiguration();
+            return configuration.orientation == Configuration.ORIENTATION_LANDSCAPE;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
     public static int getScreenHeight() {
         DisplayMetrics dm = AppData.applicationContext.getResources().getDisplayMetrics();
@@ -157,7 +167,7 @@ public class DeviceTools {
         return dm.widthPixels;
     }
 
-    public static boolean isConnected() {
+    public static boolean isNetConnected() {
         ConnectivityManager cm = (ConnectivityManager) AppData.applicationContext
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = cm.getActiveNetworkInfo();

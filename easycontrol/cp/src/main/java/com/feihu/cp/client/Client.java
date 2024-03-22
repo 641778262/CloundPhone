@@ -33,27 +33,30 @@ public class Client {
         if (!(context instanceof Activity) || device == null || TextUtils.isEmpty(device.address)) {
             return;
         }
-        try {
-            Dialog dialog = new Dialog(context, R.style.CustomDialog);
-            dialogReference = new SoftReference<>(dialog);
-            View contentView = View.inflate(context, R.layout.item_loading, null);
-            TextView messageTv = contentView.findViewById(R.id.tv_message);
+        if(device.connectType != Device.CONNECT_TYPE_AUTO_CONNECT) {
+            try {
+                Dialog dialog = new Dialog(context, R.style.CustomDialog);
+                dialogReference = new SoftReference<>(dialog);
+                View contentView = View.inflate(context, R.layout.item_loading, null);
+                TextView messageTv = contentView.findViewById(R.id.tv_message);
 
-            switch (device.connectType) {
-                case Device.CONNECT_TYPE_RECONNECT:
-                    messageTv.setText(R.string.connect_retry);
-                    break;
-                case Device.CONNECT_TYPE_CHANGE_RESOLUTION:
-                    messageTv.setText(R.string.connect_resolution);
-                    break;
+                switch (device.connectType) {
+                    case Device.CONNECT_TYPE_RECONNECT:
+                        messageTv.setText(R.string.connect_retry);
+                        break;
+                    case Device.CONNECT_TYPE_CHANGE_RESOLUTION:
+                        messageTv.setText(R.string.connect_resolution);
+                        break;
+                }
+                dialog.setContentView(contentView);
+                dialog.setCancelable(false);
+                dialog.setCanceledOnTouchOutside(false);
+                dialog.show();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            dialog.setContentView(contentView);
-            dialog.setCancelable(false);
-            dialog.setCanceledOnTouchOutside(false);
-            dialog.show();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+
         if (AppSettings.sUniApp) {
             Map<String, Object> params = new HashMap<>();
             params.put("uuid", device.uuid);
@@ -91,7 +94,7 @@ public class Client {
             dismissDialog();
             return;
         }
-        boolean retry = existClientController != null && !existClientController.autoReConnect;//主动点提示框重新连接
+//        boolean retry = existClientController != null && !existClientController.autoReConnect;//主动点提示框重新连接
 //    Context context = AppData.applicationContext;
         if (existClientController != null && existClientController.fullView != null) {
             context = existClientController.fullView;
