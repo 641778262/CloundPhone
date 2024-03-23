@@ -52,12 +52,7 @@ public class DeviceTools {
                 CustomDialog customDialog = new CustomDialog(context);
                 customDialog.setMessageText(R.string.connect_mobile_net).setCheckBoxVisible().setOnClickListener(new CustomDialog.OnClickListener() {
                     @Override
-                    public void onCancelClick() {
-
-                    }
-
-                    @Override
-                    public void onConfirmClick() {
+                    public void onConfirmClicked() {
                         customDialog.dismiss();
                         Client.showDialog(context, device, null);
                         if (customDialog.isChecked()) {

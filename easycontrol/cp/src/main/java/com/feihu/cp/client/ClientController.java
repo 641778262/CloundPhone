@@ -233,12 +233,12 @@ public class ClientController implements TextureView.SurfaceTextureListener {
                     setCancelText(R.string.device_exit).setConfirmText(R.string.reconnect_device).
                     setOnClickListener(new CustomDialog.OnClickListener() {
                         @Override
-                        public void onCancelClick() {
+                        public void onCancelClicked() {
                             ClientController.handleControll(clientController.device.uuid, "close", null);
                         }
 
                         @Override
-                        public void onConfirmClick() {
+                        public void onConfirmClicked() {
                             if (!DeviceTools.isNetConnected()) {
                                 ToastUtils.showToastNoRepeat(R.string.connect_net_error);
                                 return;

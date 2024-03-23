@@ -32,6 +32,7 @@ public class CustomDialog extends AlertDialog {
     private String cancelText;
     private String confirmText;
     private boolean cbVisible;
+    private int cancelVisibility;
 
     public CustomDialog(Context context) {
         super(context, R.style.CustomDialog);
@@ -79,7 +80,7 @@ public class CustomDialog extends AlertDialog {
             public void onClick(View v) {
                 dismiss();
                 if (listener != null) {
-                    listener.onCancelClick();
+                    listener.onCancelClicked();
                 }
             }
         });
@@ -88,7 +89,7 @@ public class CustomDialog extends AlertDialog {
             @Override
             public void onClick(View v) {
                 if (listener != null) {
-                    listener.onConfirmClick();
+                    listener.onConfirmClicked();
                 }
             }
         });
@@ -110,6 +111,8 @@ public class CustomDialog extends AlertDialog {
         if (cbVisible) {
             cb.setVisibility(View.VISIBLE);
         }
+        tvCancel.setVisibility(cancelVisibility);
+
     }
 
     public CustomDialog setTitleText(String title) {
@@ -176,6 +179,15 @@ public class CustomDialog extends AlertDialog {
         return this;
     }
 
+    public CustomDialog setCancelVisibility(int visibility) {
+        this.cancelVisibility = visibility;
+        if(tvCancel != null) {
+            tvCancel.setVisibility(visibility);
+        }
+        return this;
+    }
+
+
     public CustomDialog setCheckBoxVisible() {
         this.cbVisible = true;
         return this;
@@ -200,10 +212,12 @@ public class CustomDialog extends AlertDialog {
         return this;
     }
 
-    public interface OnClickListener {
-        void onCancelClick();
+    public static abstract class OnClickListener {
+        public void onCancelClicked() {
 
-        void onConfirmClick();
+        }
+
+        public abstract void onConfirmClicked();
     }
 }
 

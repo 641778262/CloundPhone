@@ -14,6 +14,8 @@ import com.feihu.cp.helper.DeviceTools;
 import com.feihu.cp.helper.PublicTools;
 import com.feihu.cp.helper.ToastUtils;
 
+import java.util.concurrent.TimeUnit;
+
 import io.dcloud.feature.uniapp.annotation.UniJSMethod;
 import io.dcloud.feature.uniapp.bridge.UniJSCallback;
 import io.dcloud.feature.uniapp.common.UniModule;
@@ -211,10 +213,10 @@ public class ClientModule extends UniModule {
                             Device device = new Device(uuid, Device.TYPE_NETWORK);
                             device.address = address;
                             device.name = name;
-                            device.leftTime = leftTime;
+                            device.leftTime = TimeUnit.MINUTES.toMillis(leftTime);
                             new Client(mUniSDKInstance.getContext(), device, ClientController.getExistClientController(uuid));
                             data.put(CODE, CODE_SUCCESS);
-                            data.put(MSG, "connectCloudPhone success");
+                            data.put(MSG, "connectCloudPhone success leftTime="+leftTime+" minutes");
                         }
                     }
 

@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -41,6 +42,7 @@ import com.feihu.cp.helper.ToastUtils;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 
 public class FullActivity extends Activity implements SensorEventListener {
@@ -52,8 +54,12 @@ public class FullActivity extends Activity implements SensorEventListener {
     private final PingUtils mPingUtils = new PingUtils();
     private SensorManager sensorManager;
 
+    private long mInitTime;
+
     private static final int MSG_CHECK_TOUCH_TIME = 1001;
+    private static final int MSG_CHECK_LEFT_TIME = 1002;
     private static final long CHECK_TOUCH_TIME_INTERVAL = 5 * 1000;
+    private static final long CHECK_LEFT_TIME_INTERVAL = 10 * 1000;
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {
@@ -62,6 +68,12 @@ public class FullActivity extends Activity implements SensorEventListener {
                     removeCallbacksAndMessages(MSG_CHECK_TOUCH_TIME);
                 } else {
                     sendEmptyMessageDelayed(MSG_CHECK_TOUCH_TIME, CHECK_TOUCH_TIME_INTERVAL);
+                }
+            } else if (msg.what == MSG_CHECK_LEFT_TIME) {
+                if (showLeftTimeDialog()) {
+                    removeCallbacksAndMessages(MSG_CHECK_LEFT_TIME);
+                } else {
+                    sendEmptyMessageDelayed(MSG_CHECK_LEFT_TIME, CHECK_LEFT_TIME_INTERVAL);
                 }
             }
         }
@@ -95,7 +107,10 @@ public class FullActivity extends Activity implements SensorEventListener {
         sensorManager = (SensorManager) getApplication().getSystemService(Context.SENSOR_SERVICE);
         // 页面自动旋转
         sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+        mInitTime = SystemClock.elapsedRealtime();
         mHandler.sendEmptyMessageDelayed(MSG_CHECK_TOUCH_TIME, CHECK_TOUCH_TIME_INTERVAL);
+        mHandler.sendEmptyMessageDelayed(MSG_CHECK_LEFT_TIME, CHECK_LEFT_TIME_INTERVAL);
+
     }
 
     @Override
@@ -113,8 +128,9 @@ public class FullActivity extends Activity implements SensorEventListener {
     protected void onPause() {
         sensorManager.unregisterListener(this);
         AppSettings.sPaused = true;
-        if (isChangingConfigurations())
+        if (isChangingConfigurations()) {
             textureViewLayout.removeView(ClientController.getTextureView(device.uuid));
+        }
 //    else if (!isClose) ClientController.handleControll(device.uuid, device.fullToMiniOnRunning ? "changeToMini" : "changeToSmall", ByteBuffer.wrap("changeToFull".getBytes()));
         super.onPause();
     }
@@ -394,12 +410,7 @@ public class FullActivity extends Activity implements SensorEventListener {
             CustomDialog customDialog = new CustomDialog(this);
             customDialog.setMessageText(R.string.device_exit_dialog_tips).setCheckBoxVisible().setOnClickListener(new CustomDialog.OnClickListener() {
                 @Override
-                public void onCancelClick() {
-
-                }
-
-                @Override
-                public void onConfirmClick() {
+                public void onConfirmClicked() {
                     customDialog.dismiss();
                     if (customDialog.isChecked()) {
                         AppSettings.setBackConfirm(false);
@@ -416,9 +427,71 @@ public class FullActivity extends Activity implements SensorEventListener {
         }
     }
 
+    private CustomDialog mLeftTimeDialog;
+    private boolean mHasShowLeftTime = false;
+
+    private boolean showLeftTimeDialog() {
+        try {
+            if (!AppSettings.sConnected || !DeviceTools.isNetConnected()) {
+                return false;
+            }
+            if (device.leftTime <= 0 || mLeftTimeDialog != null && mLeftTimeDialog.isShowing()) {
+                return false;
+            }
+            long leftTime = device.leftTime - (SystemClock.elapsedRealtime() - mInitTime);
+            if (leftTime <= 0) {
+                if (mLeftTimeDialog == null) {
+                    mLeftTimeDialog = new CustomDialog(this);
+                }
+                mLeftTimeDialog.setMessageText(R.string.device_expire_tips).setConfirmText(R.string.device_exit)
+                        .setCancelVisibility(View.GONE).setOnClickListener(new CustomDialog.OnClickListener() {
+                            @Override
+                            public void onConfirmClicked() {
+                                ClientController.handleControll(device.uuid, "close", null);
+                            }
+                        });
+                mLeftTimeDialog.show();
+                return true;
+            } else if (!mHasShowLeftTime && leftTime <= TimeUnit.MINUTES.toMillis(30) && leftTime >= TimeUnit.MINUTES.
+                    toMillis(10)) {//10-30分钟之间提示用户去续费
+                if (mLeftTimeDialog == null) {
+                    mLeftTimeDialog = new CustomDialog(this);
+                }
+                String tips = String.format(getString(R.string.device_left_time_tips), TimeUnit.MINUTES.
+                        convert(leftTime, TimeUnit.MILLISECONDS));
+                mLeftTimeDialog.setMessageText(tips).setCancelVisibility(View.VISIBLE).setConfirmText(R.string.device_recharge)
+                        .setOnClickListener(new CustomDialog.OnClickListener() {
+                            @Override
+                            public void onCancelClicked() {
+                                mHandler.sendEmptyMessageDelayed(MSG_CHECK_LEFT_TIME, CHECK_LEFT_TIME_INTERVAL);
+                            }
+
+                            @Override
+                            public void onConfirmClicked() {
+                                mLeftTimeDialog.dismiss();
+                                Map<String, Object> params = new HashMap<>();
+                                params.put("uuid", device.uuid);
+                                DeviceTools.fireGlobalEvent("recharge", params);
+                                ClientController.handleControll(device.uuid, "close", null);
+                            }
+                        });
+                mLeftTimeDialog.show();
+                mHasShowLeftTime = true;
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
     private CustomDialog mTimeOutDialog;
 
-    public boolean showNoHandleTimeOut() {
+    private boolean showNoHandleTimeOut() {
+        if (mLeftTimeDialog != null && mLeftTimeDialog.isShowing()) {
+            return false;
+        }
         if (mTimeOutDialog != null && mTimeOutDialog.isShowing()) {
             return false;
         }
@@ -435,12 +508,12 @@ public class FullActivity extends Activity implements SensorEventListener {
                             .setTitleText(R.string.title_tips).setCancelText(R.string.device_exit)
                             .setConfirmText(R.string.reconnect_device).setOnClickListener(new CustomDialog.OnClickListener() {
                                 @Override
-                                public void onCancelClick() {
+                                public void onCancelClicked() {
                                     ClientController.handleControll(device.uuid, "close", null);
                                 }
 
                                 @Override
-                                public void onConfirmClick() {
+                                public void onConfirmClicked() {
                                     if (!DeviceTools.isNetConnected()) {
                                         ToastUtils.showToastNoRepeat(R.string.connect_net_error);
                                         return;

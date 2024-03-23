@@ -35,7 +35,7 @@ public class Device {
     public int smallLength = 800;
     public int miniY = 200;
 
-    public int leftTime;
+    public long leftTime;
     public int connectType;
     public static final int CONNECT_TYPE_NORMAL = 0;
     public static final int CONNECT_TYPE_CHANGE_RESOLUTION = 1;
