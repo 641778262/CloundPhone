@@ -187,13 +187,14 @@ public class ClientModule extends UniModule {
                 String address = params.getString("address");
                 String name = params.getString("name");
                 String uuid = params.getString("uuid");
+                int leftTime = params.getIntValue("leftTime");
                 if (TextUtils.isEmpty(address) || TextUtils.isEmpty(uuid)) {
                     data.put(CODE, CODE_FAIL);
                     data.put(MSG, "connectCloudPhone address or uuid param empty");
                 } else {
                     if (!CODE_SUCCESS.equals(code)) {
                         Client.dismissDialog();
-                        ToastUtils.showToastNoRepeat(R.string.connect_error);
+//                        ToastUtils.showToastNoRepeat(R.string.connect_error);
                         data.put(CODE, CODE_FAIL);
                         data.put(MSG, "connectCloudPhone open port error");
                     } else {
@@ -210,6 +211,7 @@ public class ClientModule extends UniModule {
                             Device device = new Device(uuid, Device.TYPE_NETWORK);
                             device.address = address;
                             device.name = name;
+                            device.leftTime = leftTime;
                             new Client(mUniSDKInstance.getContext(), device, ClientController.getExistClientController(uuid));
                             data.put(CODE, CODE_SUCCESS);
                             data.put(MSG, "connectCloudPhone success");

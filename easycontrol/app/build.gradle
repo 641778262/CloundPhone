@@ -25,7 +25,9 @@ android {
     debug {
       buildConfigField "boolean", "ENABLE_DEBUG_FEATURE", "true"
       manifestPlaceholders = [app_name: "@string/app_name_dev", app_icon: "@mipmap/ic_launcher_dev", app_icon_round: "@mipmap/ic_launcher_dev_round"]
-      debuggable true
+      debuggable false
+      minifyEnabled false
+      proguardFiles 'proguard-rules.pro'
     }
     release {
       buildConfigField "boolean", "ENABLE_DEBUG_FEATURE", "false"
@@ -54,6 +56,6 @@ android {
 
 dependencies {
   api(project(":cp"))
-  debugImplementation 'com.squareup.leakcanary:leakcanary-android:3.0-alpha-1'
+//  debugImplementation 'com.squareup.leakcanary:leakcanary-android:3.0-alpha-1'
   compileOnly fileTree(include: ['uniapp-v8-release.aar'], dir: '../app/libs')
 }

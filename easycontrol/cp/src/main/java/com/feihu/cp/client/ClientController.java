@@ -107,7 +107,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
             else if (action.equals("close")) clientController.close();
             else if (action.equals("disConnect")) clientController.disconnect();
             else if (action.equals("reConnect")) {
-                clientController.autoReConnect = false;
+                clientController.autoReConnect = true;
                 tryReConnect(clientController);
             } else if (action.equals("buttonPower"))
                 clientController.clientStream.writeToMain(ControlPacket.createPowerEvent(-1));
@@ -142,6 +142,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
         } catch (Exception ignored) {
             ignored.printStackTrace();
             if (!AppSettings.sPaused) {
+                clientController.autoReConnect = true;
                 clientController.device.connectType = Device.CONNECT_TYPE_AUTO_CONNECT;
                 tryReConnect(clientController);
             }
@@ -214,8 +215,8 @@ public class ClientController implements TextureView.SurfaceTextureListener {
         }
         clientController.handleException = true;
         clientController.handle.run(false);//主动断开连接
-        if (DeviceTools.isNetConnected() && !clientController.autoReConnect) {//自动重连
-            clientController.autoReConnect = true;
+        if (DeviceTools.isNetConnected() && clientController.autoReConnect) {//自动重连
+            clientController.autoReConnect = false;
             Client.showDialog(clientController.fullView, clientController.device, clientController);
         } else {
             if(!AppSettings.sPaused || !DeviceTools.isNetConnected()) {
@@ -226,12 +227,10 @@ public class ClientController implements TextureView.SurfaceTextureListener {
 
     public static void showConnectDialog(ClientController clientController) {
         try {
-            clientController.autoReConnect = false;
-
             CustomDialog customDialog = new CustomDialog(clientController.fullView);
             customDialog.setMessageText(DeviceTools.isNetConnected() ?
                             R.string.connect_net_tips : R.string.connect_net_error).setTitleText(R.string.title_tips).
-                    setCancelText(R.string.exit_device).setConfirmText(R.string.reconnect_device).
+                    setCancelText(R.string.device_exit).setConfirmText(R.string.reconnect_device).
                     setOnClickListener(new CustomDialog.OnClickListener() {
                         @Override
                         public void onCancelClick() {

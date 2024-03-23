@@ -392,7 +392,7 @@ public class FullActivity extends Activity implements SensorEventListener {
     private void showBackConfirmDialog() {
         try {
             CustomDialog customDialog = new CustomDialog(this);
-            customDialog.setMessageText(R.string.exit_device_tips).setCheckBoxVisible().setOnClickListener(new CustomDialog.OnClickListener() {
+            customDialog.setMessageText(R.string.device_exit_dialog_tips).setCheckBoxVisible().setOnClickListener(new CustomDialog.OnClickListener() {
                 @Override
                 public void onCancelClick() {
 
@@ -432,7 +432,7 @@ public class FullActivity extends Activity implements SensorEventListener {
             if (!AppSettings.sPaused) {
                 if (mTimeOutDialog == null) {
                     mTimeOutDialog = new CustomDialog(this).setMessageText(R.string.disconnect_tips)
-                            .setTitleText(R.string.title_tips).setCancelText(R.string.exit_device)
+                            .setTitleText(R.string.title_tips).setCancelText(R.string.device_exit)
                             .setConfirmText(R.string.reconnect_device).setOnClickListener(new CustomDialog.OnClickListener() {
                                 @Override
                                 public void onCancelClick() {

@@ -19,4 +19,7 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-optimizationpasses 7
 -keep public class * extends io.dcloud.feature.uniapp.common.UniModule{*;}
+-dontwarn com.alibaba.fastjson.JSONObject
