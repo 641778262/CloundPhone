@@ -2,6 +2,7 @@ package com.feihu.cp.helper;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -25,11 +26,40 @@ import com.feihu.cp.entity.MyInterface;
 import com.taobao.weex.WXSDKInstance;
 import com.taobao.weex.WXSDKManager;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class DeviceTools {
+
+    public static boolean hasShowRechargeTips(String uuid) {
+        if (TextUtils.isEmpty(uuid)) {
+            return false;
+        }
+        SharedPreferences sp = AppData.applicationContext.getSharedPreferences("device_id", Context.MODE_PRIVATE);
+        long lastShowTime = sp.getLong(uuid, 0);
+        if (lastShowTime > 0) {
+            return isSameDay(System.currentTimeMillis(), lastShowTime);
+        }
+        return false;
+    }
+
+    public static boolean isSameDay(long current, long last) {
+        Date currentDate = new Date(current);
+        Date lastDate = new Date(last);
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
+        return fmt.format(currentDate).equals(fmt.format(lastDate));
+    }
+
+    public static void saveShowRechargeTipsTime(String uuid) {
+        if (TextUtils.isEmpty(uuid)) {
+            return;
+        }
+        SharedPreferences sp = AppData.applicationContext.getSharedPreferences("device_id", Context.MODE_PRIVATE);
+        sp.edit().putLong(uuid, System.currentTimeMillis()).apply();
+    }
 
     public static void fireGlobalEvent(String eventName, Map<String, Object> params) {
         if (AppSettings.sUniApp) {

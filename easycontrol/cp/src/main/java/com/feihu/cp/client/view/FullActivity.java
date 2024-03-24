@@ -59,7 +59,7 @@ public class FullActivity extends Activity implements SensorEventListener {
     private static final int MSG_CHECK_TOUCH_TIME = 1001;
     private static final int MSG_CHECK_LEFT_TIME = 1002;
     private static final long CHECK_TOUCH_TIME_INTERVAL = 5 * 1000;
-    private static final long CHECK_LEFT_TIME_INTERVAL = 10 * 1000;
+    private static final long CHECK_LEFT_TIME_INTERVAL = 5 * 1000;
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {
@@ -109,7 +109,9 @@ public class FullActivity extends Activity implements SensorEventListener {
         sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
         mInitTime = SystemClock.elapsedRealtime();
         mHandler.sendEmptyMessageDelayed(MSG_CHECK_TOUCH_TIME, CHECK_TOUCH_TIME_INTERVAL);
-        mHandler.sendEmptyMessageDelayed(MSG_CHECK_LEFT_TIME, CHECK_LEFT_TIME_INTERVAL);
+        if (device.leftTime < TimeUnit.DAYS.toMillis(1)) {
+            mHandler.sendEmptyMessageDelayed(MSG_CHECK_LEFT_TIME, CHECK_LEFT_TIME_INTERVAL);
+        }
 
     }
 
@@ -428,7 +430,6 @@ public class FullActivity extends Activity implements SensorEventListener {
     }
 
     private CustomDialog mLeftTimeDialog;
-    private boolean mHasShowLeftTime = false;
 
     private boolean showLeftTimeDialog() {
         try {
@@ -443,6 +444,7 @@ public class FullActivity extends Activity implements SensorEventListener {
                 if (mLeftTimeDialog == null) {
                     mLeftTimeDialog = new CustomDialog(this);
                 }
+                ClientController.handleControll(device.uuid, "disConnect", null);
                 mLeftTimeDialog.setMessageText(R.string.device_expire_tips).setConfirmText(R.string.device_exit)
                         .setCancelVisibility(View.GONE).setOnClickListener(new CustomDialog.OnClickListener() {
                             @Override
@@ -451,9 +453,10 @@ public class FullActivity extends Activity implements SensorEventListener {
                             }
                         });
                 mLeftTimeDialog.show();
+                mHandler.removeCallbacksAndMessages(MSG_CHECK_LEFT_TIME);
                 return true;
-            } else if (!mHasShowLeftTime && leftTime <= TimeUnit.MINUTES.toMillis(30) && leftTime >= TimeUnit.MINUTES.
-                    toMillis(10)) {//10-30分钟之间提示用户去续费
+            } else if (leftTime <= TimeUnit.MINUTES.toMillis(60) && leftTime >= TimeUnit.MINUTES.
+                    toMillis(5) && !DeviceTools.hasShowRechargeTips(device.uuid)) {//5-60分钟之间提示用户去续费
                 if (mLeftTimeDialog == null) {
                     mLeftTimeDialog = new CustomDialog(this);
                 }
@@ -476,7 +479,7 @@ public class FullActivity extends Activity implements SensorEventListener {
                             }
                         });
                 mLeftTimeDialog.show();
-                mHasShowLeftTime = true;
+                DeviceTools.saveShowRechargeTipsTime(device.uuid);
                 return true;
             }
         } catch (Exception e) {
