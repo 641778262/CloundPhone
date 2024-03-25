@@ -203,7 +203,7 @@ public class DeviceTools {
         ConnectivityManager cm = (ConnectivityManager) AppData.applicationContext
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
         final NetworkInfo info = cm.getActiveNetworkInfo();
-        if (info == null || !info.isConnectedOrConnecting()) {
+        if (info == null || !info.isAvailable()) {
             return -1;
         }
         return info.getType();

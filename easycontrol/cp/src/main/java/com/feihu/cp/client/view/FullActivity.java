@@ -1,7 +1,10 @@
 package com.feihu.cp.client.view;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -10,6 +13,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.ConnectivityManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -79,6 +84,29 @@ public class FullActivity extends Activity implements SensorEventListener {
         }
     };
 
+    private class NetworkChangeReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
+                int currentState = DeviceTools.getNetworkType();
+                if (currentState < 0) {
+                    mNetworkState = currentState;
+                    return;
+                }
+                if (currentState == mNetworkState) {
+                    return;
+                }
+                mNetworkState = currentState;
+                ClientController.handleControll(device.uuid, "disConnect", null);
+                device.connectType = Device.CONNECT_TYPE_CHANGE_NETWORK;
+                ClientController.handleControll(device.uuid, "reConnect", null);
+            }
+        }
+    }
+
+    private NetworkChangeReceiver mNetworkChangeReceiver;
+    private int mNetworkState;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,9 +136,16 @@ public class FullActivity extends Activity implements SensorEventListener {
         // 页面自动旋转
         sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
         mInitTime = SystemClock.elapsedRealtime();
+        mNetworkState = DeviceTools.getNetworkType();
         mHandler.sendEmptyMessageDelayed(MSG_CHECK_TOUCH_TIME, CHECK_TOUCH_TIME_INTERVAL);
         if (device.leftTime < TimeUnit.DAYS.toMillis(1)) {
             mHandler.sendEmptyMessageDelayed(MSG_CHECK_LEFT_TIME, CHECK_LEFT_TIME_INTERVAL);
+        }
+        mNetworkChangeReceiver = new NetworkChangeReceiver();
+        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)) {
+            registerReceiver(mNetworkChangeReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION), Context.RECEIVER_EXPORTED);
+        } else {
+            registerReceiver(mNetworkChangeReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         }
 
     }
@@ -278,6 +313,7 @@ public class FullActivity extends Activity implements SensorEventListener {
                 mTimeOutDialog.dismiss();
             }
             mPingUtils.destroy();
+            unregisterReceiver(mNetworkChangeReceiver);
         } catch (Exception e) {
             e.printStackTrace();
         }

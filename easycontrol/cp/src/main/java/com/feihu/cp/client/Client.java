@@ -47,6 +47,9 @@ public class Client {
                     case Device.CONNECT_TYPE_CHANGE_RESOLUTION:
                         messageTv.setText(R.string.connect_resolution);
                         break;
+                    case Device.CONNECT_TYPE_CHANGE_NETWORK:
+                        messageTv.setText(R.string.connect_change_network);
+                        break;
                 }
                 dialog.setContentView(contentView);
                 dialog.setCancelable(false);
@@ -129,6 +132,16 @@ public class Client {
                             break;
                     }
 
+                } else if(device.connectType == Device.CONNECT_TYPE_CHANGE_NETWORK) {
+                    if(DeviceTools.isWiFiNet()) {
+                        ToastUtils.showToastNoRepeat(R.string.connect_wifi_tips);
+                    } else if(DeviceTools.isMobileNet()) {
+                        ToastUtils.showToastNoRepeat(R.string.connect_mobile_tips);
+                    }
+                } else if(device.connectType != Device.CONNECT_TYPE_NORMAL){
+                    if(DeviceTools.isMobileNet()) {
+                        ToastUtils.showToastNoRepeat(R.string.connect_mobile_tips);
+                    }
                 }
                 AppSettings.resetLastTouchTime();
                 // 控制器
