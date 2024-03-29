@@ -83,6 +83,10 @@ public class DeviceTools {
                 customDialog.setMessageText(R.string.connect_mobile_net).setCheckBoxVisible().setOnClickListener(new CustomDialog.OnClickListener() {
                     @Override
                     public void onConfirmClicked() {
+                        if(!DeviceTools.isNetConnected()) {
+                            ToastUtils.showToastNoRepeat(R.string.connect_net_error);
+                            return;
+                        }
                         customDialog.dismiss();
                         Client.showDialog(context, device, null);
                         if (customDialog.isChecked()) {

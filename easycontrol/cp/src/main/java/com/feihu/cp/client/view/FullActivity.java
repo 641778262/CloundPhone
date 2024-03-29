@@ -25,6 +25,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.RadioButton;
@@ -42,6 +43,7 @@ import com.feihu.cp.helper.AppSettings;
 import com.feihu.cp.helper.CustomOnClickListener;
 import com.feihu.cp.helper.DeviceTools;
 import com.feihu.cp.helper.PingUtils;
+import com.feihu.cp.helper.StatusBarUtil;
 import com.feihu.cp.helper.ToastUtils;
 
 import java.nio.ByteBuffer;
@@ -111,10 +113,9 @@ public class FullActivity extends Activity implements SensorEventListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try {
-            if (AppSettings.isFullScreen()) {
-                DeviceTools.setFullScreen(this);
-            } else {
-                DeviceTools.setStatusAndNavBar(this);
+            if (!AppSettings.isFullScreen()) {
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                StatusBarUtil.transparencyBar(this);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -414,7 +415,24 @@ public class FullActivity extends Activity implements SensorEventListener {
 
                         }
                     } else if (viewId == R.id.ll_reboot) {
-
+                        popupWindow.dismiss();
+                        try {
+                            CountDownDialog countDownDialog = new CountDownDialog(FullActivity.this);
+                            countDownDialog.setMessageText(R.string.device_reboot_dialog_tips);
+                            countDownDialog.setOnClickListener(new CustomDialog.OnClickListener() {
+                                @Override
+                                public void onConfirmClicked() {
+                                    Map<String, Object> params = new HashMap<>();
+                                    params.put("uuid", device.uuid);
+                                    params.put("sourceId",device.sourceId);
+                                    DeviceTools.fireGlobalEvent("reboot", params);
+                                    ClientController.handleControll(device.uuid, "close", null);
+                                }
+                            });
+                            countDownDialog.show();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     } else if (viewId == R.id.ll_exit) {
                         popupWindow.dismiss();
                         ClientController.handleControll(device.uuid, "close", null);

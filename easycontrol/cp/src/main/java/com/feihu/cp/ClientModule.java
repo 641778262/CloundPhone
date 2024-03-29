@@ -189,6 +189,7 @@ public class ClientModule extends UniModule {
                 String address = params.getString("address");
                 String name = params.getString("name");
                 String uuid = params.getString("uuid");
+                String sourceId = params.getString("sourceId");
                 int leftTime = params.getIntValue("leftTime");
                 if (TextUtils.isEmpty(address) || TextUtils.isEmpty(uuid)) {
                     data.put(CODE, CODE_FAIL);
@@ -210,11 +211,15 @@ public class ClientModule extends UniModule {
                             data.put(CODE, CODE_FAIL);
                             data.put(MSG, "connectCloudPhone address param error");
                         } else {
-                            Device device = new Device(uuid, Device.TYPE_NETWORK);
-                            device.address = address;
-                            device.name = name;
-                            device.leftTime = TimeUnit.MINUTES.toMillis(leftTime);
-                            new Client(mUniSDKInstance.getContext(), device, ClientController.getExistClientController(uuid));
+                            Device existDevice = ClientController.getDevice(uuid);
+                            if(existDevice == null) {
+                                existDevice =  new Device(uuid, Device.TYPE_NETWORK);
+                            }
+                            existDevice.address = address;
+                            existDevice.name = name;
+                            existDevice.leftTime = TimeUnit.MINUTES.toMillis(leftTime);
+                            existDevice.sourceId = sourceId;
+                            new Client(mUniSDKInstance.getContext(), existDevice, ClientController.getExistClientController(uuid));
                             data.put(CODE, CODE_SUCCESS);
                             data.put(MSG, "connectCloudPhone success leftTime="+leftTime+" minutes");
                         }

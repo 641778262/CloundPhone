@@ -14,12 +14,14 @@
   <string name="device_reboot">重启云机</string>
   <string name="device_exit">退出云机</string>
   <string name="device_exit_msg">退出云手机后APP将继续正常运行</string>
-  <string name="device_exit_dialog_tips">是否退出云手机?\n退出后APP将继续正常运行</string>
+  <string name="device_exit_dialog_tips">是否退出云手机?退出后APP将继续正常运行</string>
+  <string name="device_reboot_dialog_tips">云手机重启预计需要1-3分钟，期间无法对云手机进行操作,是否重启？</string>
   <string name="device_left_time_tips">云手机即将在%d分钟后到期，到期后设备数据将被清除，为了不影响您的正常使用，请尽快续费</string>
   <string name="device_expire_tips">云手机已到期，已为您自动断开</string>
   <string name="device_recharge">续费</string>
   <string name="cancel">取消</string>
   <string name="confirm">确定</string>
+  <string name="confirm_count">确定 (%d)</string>
   <string name="title_tips">温馨提示</string>
   <string name="disconnect_tips">因您长时间未操作，已为您自动断开连接</string>
   <string name="reconnect_device">重新连接</string>

@@ -37,6 +37,7 @@ public class Device {
 
     public long leftTime;
     public int connectType;
+    public String sourceId;
     public static final int CONNECT_TYPE_NORMAL = 0;
     public static final int CONNECT_TYPE_CHANGE_RESOLUTION = 1;
     public static final int CONNECT_TYPE_RECONNECT = 2;

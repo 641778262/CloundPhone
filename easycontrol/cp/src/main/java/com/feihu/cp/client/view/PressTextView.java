@@ -15,6 +15,8 @@ import android.widget.TextView;
  */
 
 public class PressTextView extends TextView {
+    private boolean handleTouch = true;
+
     public PressTextView(Context context) {
         super(context);
     }
@@ -26,21 +28,27 @@ public class PressTextView extends TextView {
     public PressTextView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
+    public void setHandleTouch(boolean handleTouch) {
+        this.handleTouch = handleTouch;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        Drawable drawable = getBackground();
-        if(drawable != null) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                case MotionEvent.ACTION_MOVE:
-                    drawable.setColorFilter(new PorterDuffColorFilter(Color.argb(50, 0, 0, 0), PorterDuff.Mode.SRC_ATOP));
-                    break;
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_CANCEL:
-                    drawable.setColorFilter(new PorterDuffColorFilter(Color.argb(0, 0, 0, 0), PorterDuff.Mode.SRC_ATOP));
-                    break;
-                default:
-                    break;
+        if (handleTouch) {
+            Drawable drawable = getBackground();
+            if (drawable != null) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                    case MotionEvent.ACTION_MOVE:
+                        drawable.setColorFilter(new PorterDuffColorFilter(Color.argb(50, 0, 0, 0), PorterDuff.Mode.SRC_ATOP));
+                        break;
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_CANCEL:
+                        drawable.setColorFilter(new PorterDuffColorFilter(Color.argb(0, 0, 0, 0), PorterDuff.Mode.SRC_ATOP));
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 

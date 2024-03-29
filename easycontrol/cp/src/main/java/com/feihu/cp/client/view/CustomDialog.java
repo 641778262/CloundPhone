@@ -20,7 +20,7 @@ public class CustomDialog extends AlertDialog {
     private OnClickListener listener;
 
     private TextView tvCancel;
-    private TextView tvConfirm;
+    protected PressTextView tvConfirm;
 
     private TextView tvTitle;
     private TextView tvContent;

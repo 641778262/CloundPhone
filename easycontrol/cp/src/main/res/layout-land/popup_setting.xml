@@ -21,8 +21,8 @@
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="20dp"
             android:layout_weight="1"
-            android:maxLines="1"
             android:ellipsize="end"
+            android:maxLines="1"
             android:text="@string/device_cloud_phone"
             android:textColor="@color/white"
             android:textSize="18sp" />
@@ -275,8 +275,7 @@
             android:gravity="center"
             android:orientation="horizontal"
             android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:visibility="gone">
+            android:paddingBottom="10dp">
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -290,44 +289,39 @@
                 android:gravity="center"
                 android:text="@string/device_reboot"
                 android:textColor="@color/white"
-                android:textSize="20sp" />
+                android:textSize="16sp" />
         </com.feihu.cp.client.view.PressLinearLayout>
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="0.15"
+            />
 
         <com.feihu.cp.client.view.PressLinearLayout
             android:id="@+id/ll_exit"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="30dp"
-            android:layout_marginRight="30dp"
             android:layout_weight="1"
             android:background="@drawable/popup_resolution_bg"
             android:gravity="center"
-            android:orientation="vertical"
-            android:paddingTop="6dp"
-            android:paddingBottom="6dp">
+            android:orientation="horizontal"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp">
 
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/setting_exit"
-                android:visibility="gone" />
+                android:src="@drawable/setting_exit" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="30dp"
                 android:gravity="center"
                 android:text="@string/device_exit"
                 android:textColor="@color/white"
                 android:textSize="16sp" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:alpha="0.8"
-                android:gravity="center"
-                android:text="@string/device_exit_msg"
-                android:textColor="@color/blue"
-                android:textSize="10sp" />
         </com.feihu.cp.client.view.PressLinearLayout>
     </LinearLayout>
 </LinearLayout>

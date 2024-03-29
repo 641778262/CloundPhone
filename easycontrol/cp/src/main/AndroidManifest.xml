@@ -3,20 +3,22 @@
 
     <uses-permission android:name="android.permission.INTERNET" /> <!-- 网络 -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-<!--    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" /> &lt;!&ndash; 悬浮窗 &ndash;&gt;-->
-<!--    <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />-->
+    <!--    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" /> &lt;!&ndash; 悬浮窗 &ndash;&gt;-->
+    <!--    <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />-->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-<!--    <uses-permission android:name="android.permission.USB_PERMISSION" /> &lt;!&ndash; USB &ndash;&gt;-->
-<!--    <uses-feature android:name="android.hardware.usb.host" />-->
+    <!--    <uses-permission android:name="android.permission.USB_PERMISSION" /> &lt;!&ndash; USB &ndash;&gt;-->
+    <!--    <uses-feature android:name="android.hardware.usb.host" />-->
 
     <application
         android:allowBackup="true"
         android:supportsRtl="true">
         <activity
             android:name="com.feihu.cp.client.view.FullActivity"
-            android:exported="false"/>
-            <!--android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar.Fullscreen"/>-->
+            android:exported="false"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
+
 
     </application>
+
 
 </manifest>

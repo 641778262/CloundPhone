@@ -35,7 +35,6 @@ import java.util.HashMap;
 import java.util.Objects;
 
 
-
 public class ClientController implements TextureView.SurfaceTextureListener {
     private static final HashMap<String, ClientController> allController = new HashMap<>();
 
@@ -219,7 +218,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
             clientController.autoReConnect = false;
             Client.showDialog(clientController.fullView, clientController.device, clientController);
         } else {
-            if(!AppSettings.sPaused || !DeviceTools.isNetConnected()) {
+            if (!AppSettings.sPaused || !DeviceTools.isNetConnected()) {
                 showConnectDialog(clientController);
             }
         }
@@ -347,20 +346,24 @@ public class ClientController implements TextureView.SurfaceTextureListener {
         });
     }
 
-    private final int[] pointerList = new int[20];
+    private final float[] pointerList = new float[20];
     private final long[] pointerDownTime = new long[10];
 
     private void createTouchPacket(MotionEvent event, int action, int i) {
         int offsetTime = (int) (event.getEventTime() - pointerDownTime[i]);
-        int x = (int) event.getX(i);
-        int y = (int) event.getY(i);
+        float x = event.getX(i);
+        float y = event.getY(i);
         int p = event.getPointerId(i);
         if (action == MotionEvent.ACTION_MOVE) {
             // 减少发送小范围移动(小于4的圆内不做处理)
-            int flipY = pointerList[10 + p] - y;
-            if (flipY > -4 && flipY < 4) {
-                int flipX = pointerList[p] - x;
-                if (flipX > -4 && flipX < 4) return;
+            float flipY = pointerList[10 + p] - y;
+//            if (flipY > -4 && flipY < 4) {
+//                int flipX = pointerList[p] - x;
+//                if (flipX > -4 && flipX < 4) return;
+//            }
+            if (Math.abs(flipY) < 1.5) {
+                float flipX = pointerList[p] - x;
+                if (Math.abs(flipX) < 1.5) return;
             }
         }
         pointerList[p] = x;

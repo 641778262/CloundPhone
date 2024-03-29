@@ -65,6 +65,7 @@ public class DeviceListAdapter extends BaseAdapter {
     }
     // 获取设备
     Device device = devicesList.get(i);
+    device.connectType = Device.CONNECT_TYPE_NORMAL;
     ItemDevicesItemBinding devicesItemBinding = (ItemDevicesItemBinding) view.getTag();
     // 设置卡片值
     devicesItemBinding.deviceIconBackground.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(colors[random.nextInt(8)])));
