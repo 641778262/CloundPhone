@@ -55,7 +55,7 @@ public class ToastUtils {
         textView.setGravity(Gravity.CENTER);
         textView.setMinimumWidth(DeviceTools.getScreenWidth() / 4);
         textView.setTextColor(context.getResources().getColor(R.color.white));
-        textView.setBackgroundResource(R.drawable.toast_bg);
+        textView.setBackgroundResource(R.drawable.loading_toast_bg);
         toast.setView(textView);
         int padding = DeviceTools.dp2px(20);
         textView.setPadding(padding, padding / 2, padding, padding / 2);

@@ -340,8 +340,19 @@ public class ClientController implements TextureView.SurfaceTextureListener {
                 createTouchPacket(event, MotionEvent.ACTION_DOWN, i);
             } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_POINTER_UP)
                 createTouchPacket(event, MotionEvent.ACTION_UP, event.getActionIndex());
-            else for (int i = 0; i < event.getPointerCount(); i++)
+            else {
+                for (int i = 0; i < event.getPointerCount(); i++) {
                     createTouchPacket(event, MotionEvent.ACTION_MOVE, i);
+                }
+            }
+            if (event.getPointerCount() == 3) {//通过重连的方式解决截屏后滑动异常的bug
+                if (AppSettings.sConnected) {
+                    ClientController.handleControll(device.uuid, "disConnect", null);
+                }
+                autoReConnect = true;
+                device.connectType = Device.CONNECT_TYPE_AUTO_CONNECT;
+                tryReConnect(this);
+            }
             return true;
         });
     }
