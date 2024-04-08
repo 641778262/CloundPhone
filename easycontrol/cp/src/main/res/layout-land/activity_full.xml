@@ -52,38 +52,59 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <ImageView
+        <LinearLayout
             android:id="@+id/button_back"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:paddingLeft="15dp"
-            android:paddingRight="15dp"
-            android:rotation="-90"
-            android:src="@drawable/setting_back" />
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="@drawable/vk_bg">
 
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:rotation="-90"
+                android:src="@drawable/setting_back" />
+        </LinearLayout>
 
-        <ImageView
+        <LinearLayout
             android:id="@+id/button_home"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:rotation="-90"
-            android:src="@drawable/setting_home" />
+            android:background="@drawable/vk_bg">
 
-        <ImageView
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:rotation="-90"
+                android:src="@drawable/setting_home" />
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/button_switch"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginTop="20dp"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:rotation="90"
-            android:src="@drawable/setting_switch" />
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="@drawable/vk_bg">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:rotation="90"
+                android:src="@drawable/setting_switch" />
+        </LinearLayout>
+
+
     </LinearLayout>
 </LinearLayout>

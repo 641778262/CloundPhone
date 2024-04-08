@@ -112,14 +112,14 @@ public class FullActivity extends Activity implements SensorEventListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        try {
-            if (!AppSettings.isFullScreen()) {
-                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-                StatusBarUtil.transparencyBar(this);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            if (!DeviceTools.isLandscape() && !AppSettings.isFullScreen()) {
+//                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+//                StatusBarUtil.transparencyBar(this);
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
         setContentView(R.layout.activity_full);
         textureViewLayout = findViewById(R.id.texture_view_layout);

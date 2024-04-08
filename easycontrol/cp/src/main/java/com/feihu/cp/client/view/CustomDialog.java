@@ -100,6 +100,11 @@ public class CustomDialog extends AlertDialog {
             tvTitle.setText(title);
         }
         if (!TextUtils.isEmpty(message)) {
+            if (message.length() < 15 || DeviceTools.isLandscape()) {
+                tvContent.setGravity(Gravity.CENTER);
+            } else {
+                tvContent.setGravity(Gravity.START);
+            }
             tvContent.setText(message);
         }
         if (!TextUtils.isEmpty(cancelText)) {
@@ -134,17 +139,21 @@ public class CustomDialog extends AlertDialog {
     public CustomDialog setMessageText(String message) {
         this.message = message;
         if (tvContent != null) {
-            tvContent.setText(message);
+            if (!TextUtils.isEmpty(message)) {
+                if (message.length() < 15 || DeviceTools.isLandscape()) {
+                    tvContent.setGravity(Gravity.CENTER);
+                } else {
+                    tvContent.setGravity(Gravity.START);
+                }
+                tvContent.setText(message);
+            }
+
         }
         return this;
     }
 
     public CustomDialog setMessageText(int message) {
-        this.message = getContext().getString(message);
-        if (tvContent != null) {
-            tvContent.setText(message);
-        }
-        return this;
+        return setMessageText(getContext().getResources().getString(message));
     }
 
     public CustomDialog setCancelText(String cancelText) {
@@ -181,7 +190,7 @@ public class CustomDialog extends AlertDialog {
 
     public CustomDialog setCancelVisibility(int visibility) {
         this.cancelVisibility = visibility;
-        if(tvCancel != null) {
+        if (tvCancel != null) {
             tvCancel.setVisibility(visibility);
         }
         return this;
