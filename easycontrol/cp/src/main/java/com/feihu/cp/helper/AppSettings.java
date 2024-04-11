@@ -10,6 +10,7 @@ public class AppSettings {
     private static final String KEY_MOBILE_NET_TIPS = "key_mobile_net_tips";
     private static final String KEY_FULL_SCREEN = "key_full_screen";
     private static final String KEY_BACK_CONFIRM = "key_back_confirm";
+    private static final String KEY_CONTROL_MODE = "key_control_mode";
 
     public static final long AUTO_DISCONNECT_TIME = 10 * 60 * 1000;//无操作自动断开时间
     public static final long BACK_DISCONNECT_TIME = 10 * 1000;//退到后台自动断开时间
@@ -23,6 +24,8 @@ public class AppSettings {
     private static final int FPS_COMMON = 90;
     private static final int FPS_HIGH = 90;
     private static final int FPS_SUPER = 90;
+    public static final int CONTROL_MODE_DEFAULT = 1;
+    public static final int CONTROL_MODE_PROFESSIONAL = 2;
 
     public static boolean sPaused;//退出到桌面
     public static boolean sConnected;//是否已经连接成功
@@ -34,6 +37,7 @@ public class AppSettings {
 
     private static boolean sFullScreen;
     private static boolean sBackConfirm;
+    private static int sControlMode;
     public static boolean sUniApp;//是否通过uniApp访问
 
 
@@ -44,6 +48,16 @@ public class AppSettings {
         sShowMobileNetTips = SharedPreferencesUtils.getBooleanParam(KEY_MOBILE_NET_TIPS, true);
         sFullScreen = SharedPreferencesUtils.getBooleanParam(KEY_FULL_SCREEN, true);
         sBackConfirm = SharedPreferencesUtils.getBooleanParam(KEY_BACK_CONFIRM, true);
+        sControlMode = SharedPreferencesUtils.getIntParam(KEY_CONTROL_MODE, CONTROL_MODE_DEFAULT);
+    }
+
+    public static boolean isDefaultControlMode() {
+        return sControlMode == CONTROL_MODE_DEFAULT;
+    }
+
+    public static void setControlMode(int controlMode) {
+        sControlMode = controlMode;
+        SharedPreferencesUtils.setParam(KEY_CONTROL_MODE, controlMode);
     }
 
     public static boolean isFullScreen() {

@@ -2,14 +2,17 @@
 <resources>
   <string name="device_cloud_phone">云手机</string>
   <string name="device_resolution">清晰度</string>
+  <string name="device_default_mode">默认模式</string>
+  <string name="device_professional_mode">专业模式</string>
+  <string name="device_resolution_super_top">超清(慢)</string>
+  <string name="device_resolution_high_top">高清(中)</string>
+  <string name="device_resolution_common_top">普清(快)</string>
   <string name="device_resolution_super">超清(慢)\n720p</string>
   <string name="device_resolution_high">高清(中)\n540p</string>
   <string name="device_resolution_common">普清(快)\n360p</string>
   <string name="device_resolution_auto">智能\n自动选择</string>
-  <string name="device_voice_on">开启声音</string>
-  <string name="device_voice_off">关闭声音</string>
-  <string name="device_show_keys">显示虚拟键</string>
-  <string name="device_hide_keys">隐藏虚拟键</string>
+  <string name="device_voice">云机声音</string>
+  <string name="device_virtual_keys">虚拟按键</string>
   <string name="device_exit_tips">再按一次退出云手机</string>
   <string name="device_reboot">重启云机</string>
   <string name="device_exit">退出云机</string>

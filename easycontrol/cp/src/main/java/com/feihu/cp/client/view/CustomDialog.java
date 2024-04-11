@@ -12,6 +12,7 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.feihu.cp.R;
+import com.feihu.cp.helper.CustomOnClickListener;
 import com.feihu.cp.helper.DeviceTools;
 
 
@@ -75,9 +76,9 @@ public class CustomDialog extends AlertDialog {
     }
 
     private void initEvent() {
-        tvCancel.setOnClickListener(new View.OnClickListener() {
+        tvCancel.setOnClickListener(new CustomOnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClickView(View view) {
                 dismiss();
                 if (listener != null) {
                     listener.onCancelClicked();
@@ -85,9 +86,9 @@ public class CustomDialog extends AlertDialog {
             }
         });
 
-        tvConfirm.setOnClickListener(new View.OnClickListener() {
+        tvConfirm.setOnClickListener(new CustomOnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClickView(View view) {
                 if (listener != null) {
                     listener.onConfirmClicked();
                 }

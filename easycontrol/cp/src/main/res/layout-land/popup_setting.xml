@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginLeft="20dp"
@@ -13,13 +14,18 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal">
-
+        <ImageView
+            android:id="@+id/iv_vip"
+            tools:src="@drawable/vip"
+            android:layout_marginLeft="20dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp"/>
         <TextView
             android:id="@+id/tv_phone"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_marginLeft="20dp"
+            android:layout_marginLeft="5dp"
             android:layout_weight="1"
             android:ellipsize="end"
             android:maxLines="1"
@@ -27,23 +33,37 @@
             android:textColor="@color/white"
             android:textSize="18sp" />
 
+        <TextView
+            android:id="@+id/tv_professional_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableEnd="@drawable/setting_change_control_mode"
+            android:drawablePadding="10dp"
+            android:paddingLeft="10dp"
+            android:paddingTop="15dp"
+            android:paddingRight="10dp"
+            android:paddingBottom="10dp"
+            android:text="@string/device_professional_mode"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+
         <LinearLayout
             android:id="@+id/ll_voice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="horizontal"
-            android:paddingLeft="20dp"
+            android:paddingLeft="10dp"
             android:paddingTop="15dp"
-            android:paddingRight="20dp"
+            android:paddingRight="10dp"
             android:paddingBottom="10dp">
 
             <TextView
                 android:id="@+id/tv_voice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="15dp"
-                android:text="@string/device_voice_off"
+                android:layout_marginRight="10dp"
+                android:text="@string/device_voice"
                 android:textColor="@color/white"
                 android:textSize="16sp" />
 
@@ -70,8 +90,8 @@
                 android:id="@+id/tv_key"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="15dp"
-                android:text="@string/device_hide_keys"
+                android:layout_marginRight="10dp"
+                android:text="@string/device_virtual_keys"
                 android:textColor="@color/white"
                 android:textSize="16sp" />
 
@@ -215,7 +235,7 @@
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="0.6" />
 
         <com.feihu.cp.client.view.PressImageView
             android:id="@+id/iv_switch"
@@ -254,7 +274,7 @@
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="0.6" />
     </LinearLayout>
 
     <LinearLayout
@@ -291,11 +311,11 @@
                 android:textColor="@color/white"
                 android:textSize="16sp" />
         </com.feihu.cp.client.view.PressLinearLayout>
+
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_weight="0.15"
-            />
+            android:layout_weight="0.15" />
 
         <com.feihu.cp.client.view.PressLinearLayout
             android:id="@+id/ll_exit"

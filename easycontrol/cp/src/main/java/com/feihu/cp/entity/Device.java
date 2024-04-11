@@ -1,5 +1,7 @@
 package com.feihu.cp.entity;
 
+import com.feihu.cp.R;
+
 public class Device {
     public static final int TYPE_NETWORK = 1;
     public static final int TYPE_LINK = 2;
@@ -38,11 +40,16 @@ public class Device {
     public long leftTime;
     public int connectType;
     public String sourceId;
+    public String vipType;
     public static final int CONNECT_TYPE_NORMAL = 0;
     public static final int CONNECT_TYPE_CHANGE_RESOLUTION = 1;
     public static final int CONNECT_TYPE_RECONNECT = 2;
     public static final int CONNECT_TYPE_AUTO_CONNECT = 3;
     public static final int CONNECT_TYPE_CHANGE_NETWORK = 4;
+
+    public static final String VIP = "vip";
+    public static final String SVIP = "svip";
+    public static final String XVIP = "xvip";
 
     public Device(String uuid, int type) {
         this.uuid = uuid;
@@ -56,6 +63,15 @@ public class Device {
 
     public boolean isLinkDevice() {
         return type == TYPE_LINK;
+    }
+
+    public int getVipResourceId() {
+        if (SVIP.equals(vipType)) {
+            return R.drawable.svip;
+        } else if (XVIP.equals(vipType)) {
+            return R.drawable.xvip;
+        }
+        return R.drawable.vip;
     }
 
 }

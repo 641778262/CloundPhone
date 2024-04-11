@@ -142,23 +142,12 @@ public class ClientModule extends UniModule {
                     data.put(CODE, CODE_FAIL);
                     data.put(MSG, "openCloudPhonePort address or uuid param empty");
                 } else {
-                    Pair<String, Integer> pair = null;
-                    try {
-                        pair = PublicTools.getIpAndPort(address);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    if (pair == null) {
-                        data.put(CODE, CODE_FAIL);
-                        data.put(MSG, "openCloudPhonePort address param error");
-                    } else {
-                        Device device = new Device(uuid, Device.TYPE_NETWORK);
-                        device.address = address;
-                        device.name = name;
-                        DeviceTools.connectCloudPhone(mUniSDKInstance.getContext(), device);
-                        data.put(CODE, CODE_SUCCESS);
-                        data.put(MSG, "openCloudPhonePort success");
-                    }
+                    Device device = new Device(uuid, Device.TYPE_NETWORK);
+                    device.address = address;
+                    device.name = name;
+                    DeviceTools.connectCloudPhone(mUniSDKInstance.getContext(), device);
+                    data.put(CODE, CODE_SUCCESS);
+                    data.put(MSG, "openCloudPhonePort success");
                 }
             }
         } catch (Exception e) {
@@ -189,7 +178,7 @@ public class ClientModule extends UniModule {
                 String address = params.getString("address");
                 String name = params.getString("name");
                 String uuid = params.getString("uuid");
-                String sourceId = params.getString("sourceId");
+                String sourceId = params.getString("machineCode");
                 int leftTime = params.getIntValue("leftTime");
                 if (TextUtils.isEmpty(address) || TextUtils.isEmpty(uuid)) {
                     data.put(CODE, CODE_FAIL);
@@ -201,28 +190,17 @@ public class ClientModule extends UniModule {
                         data.put(CODE, CODE_FAIL);
                         data.put(MSG, "connectCloudPhone open port error");
                     } else {
-                        Pair<String, Integer> pair = null;
-                        try {
-                            pair = PublicTools.getIpAndPort(address);
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                        Device existDevice = ClientController.getDevice(uuid);
+                        if (existDevice == null) {
+                            existDevice = new Device(uuid, Device.TYPE_NETWORK);
                         }
-                        if (pair == null) {
-                            data.put(CODE, CODE_FAIL);
-                            data.put(MSG, "connectCloudPhone address param error");
-                        } else {
-                            Device existDevice = ClientController.getDevice(uuid);
-                            if(existDevice == null) {
-                                existDevice =  new Device(uuid, Device.TYPE_NETWORK);
-                            }
-                            existDevice.address = address;
-                            existDevice.name = name;
-                            existDevice.leftTime = TimeUnit.MINUTES.toMillis(leftTime);
-                            existDevice.sourceId = sourceId;
-                            new Client(mUniSDKInstance.getContext(), existDevice, ClientController.getExistClientController(uuid));
-                            data.put(CODE, CODE_SUCCESS);
-                            data.put(MSG, "connectCloudPhone success leftTime="+leftTime+" minutes");
-                        }
+                        existDevice.address = address;
+                        existDevice.name = name;
+                        existDevice.leftTime = TimeUnit.MINUTES.toMillis(leftTime);
+                        existDevice.sourceId = sourceId;
+                        new Client(mUniSDKInstance.getContext(), existDevice, ClientController.getExistClientController(uuid));
+                        data.put(CODE, CODE_SUCCESS);
+                        data.put(MSG, "connectCloudPhone success leftTime=" + leftTime + " minutes");
                     }
 
                 }

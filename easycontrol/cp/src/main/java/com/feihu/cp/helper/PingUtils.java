@@ -19,20 +19,15 @@ public class PingUtils {
     }
 
     public void checkPings(String address, OnGetTimeListener listener) {
-        String url = null;
-        try {
-            url = PublicTools.getIpAndPort(address).first;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (TextUtils.isEmpty(url)) {
-            return;
-        }
-        final String phoneUrl = url;
+
         if (checkPingThread == null) {
             checkPingThread = new Thread(() -> {
                 try {
-                    String command = "/system/bin/ping -i " + TIME_INTERVAL + " " + phoneUrl;
+                    String url = PublicTools.getIpAndPort(address).first;
+                    if (TextUtils.isEmpty(url)) {
+                        return;
+                    }
+                    String command = "/system/bin/ping -i " + TIME_INTERVAL + " " + url;
                     process = Runtime.getRuntime().exec(command);       //执行ping指令
                     InputStream is = process.getInputStream();
                     BufferedReader reader = new BufferedReader(new InputStreamReader(is));
