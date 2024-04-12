@@ -215,7 +215,7 @@ public class FullActivity extends Activity implements SensorEventListener {
                 } else if (id == R.id.button_switch) {
                     ClientController.handleControll(device.uuid, "buttonSwitch", null);
                 } else if (id == R.id.ll_setting) {
-                    showPopupWindow();
+                    showSettingPopupWindow();
                 }
             }
         };
@@ -329,8 +329,8 @@ public class FullActivity extends Activity implements SensorEventListener {
             params.put("voice", true);
             DeviceTools.fireGlobalEvent("refreshSettings", params);
         }
-        if (popupWindow != null && popupWindow.isShowing()) {
-            ImageView voiceIv = popupWindow.getContentView().findViewById(R.id.iv_voice);
+        if (mSettingPopupWindow != null && mSettingPopupWindow.isShowing()) {
+            ImageView voiceIv = mSettingPopupWindow.getContentView().findViewById(R.id.iv_voice);
             voiceIv.setImageResource(AppSettings.showVoice() ? R.drawable.setting_voice_on : R.drawable.setting_voice_off);
 
         }
@@ -355,62 +355,77 @@ public class FullActivity extends Activity implements SensorEventListener {
 
     }
 
-    private PopupWindow popupWindow;
+    private void showResolutionPopupWindow() {
+        View view = View.inflate(this, R.layout.popup_resolution, null);
+        view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        CustomPopupWindow popupWindow = new CustomPopupWindow(view, view.getMeasuredWidth(), view
+                .getMeasuredHeight(), true);
+        popupWindow.setOutsideTouchable(true);
+        popupWindow.setTouchable(true);
+        popupWindow.showAtLocation(getWindow().getDecorView(), Gravity.CENTER, 0, 0);
+        changeResolution(view, popupWindow);
+    }
 
-    private void showPopupWindow() {
+    private void changeResolution(View view, PopupWindow popupWindow) {
+        RadioGroup radioGroup = view.findViewById(R.id.rg_resolution);
+        RadioButton radioButton = null;
+        switch (AppSettings.getResolutionType()) {
+            case AppSettings.RESOLUTION_HIGH:
+                radioButton = view.findViewById(R.id.rb_high);
+                break;
+            case AppSettings.RESOLUTION_SUPER:
+                radioButton = view.findViewById(R.id.rb_super);
+                break;
+            default:
+                radioButton = view.findViewById(R.id.rb_common);
+                break;
+        }
+        radioButton.setChecked(true);
+        radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.rb_high) {
+                AppSettings.setResolutionType(AppSettings.RESOLUTION_HIGH);
+            } else if (checkedId == R.id.rb_super) {
+                AppSettings.setResolutionType(AppSettings.RESOLUTION_SUPER);
+            } else {
+                AppSettings.setResolutionType(AppSettings.RESOLUTION_COMMON);
+            }
+            if (AppSettings.sConnected) {
+                ClientController.handleControll(device.uuid, "disConnect", null);
+            }
+            device.connectType = Device.CONNECT_TYPE_CHANGE_RESOLUTION;
+            ClientController.handleControll(device.uuid, "reConnect", null);
+            if (popupWindow != mSettingPopupWindow) {
+                initTopResolutionTv();
+            }
+            try {
+                popupWindow.dismiss();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private CustomPopupWindow mSettingPopupWindow;
+
+    private void showSettingPopupWindow() {
         try {
             View view = View.inflate(this, R.layout.popup_setting, null);
             view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
             boolean isLandscape = getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                     || getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
             int width = isLandscape ? DeviceTools.getScreenWidth() * 4 / 5 : DeviceTools.getScreenWidth() * 5 / 6;
-            popupWindow = new PopupWindow(view, width, view
+            mSettingPopupWindow = new CustomPopupWindow(view, width, view
                     .getMeasuredHeight(), true);
-            popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            popupWindow.setOutsideTouchable(true);
-            popupWindow.setTouchable(true);
+            mSettingPopupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            mSettingPopupWindow.setOutsideTouchable(true);
+            mSettingPopupWindow.setTouchable(true);
             TextView phoneTv = view.findViewById(R.id.tv_phone);
             if (!TextUtils.isEmpty(device.name)) {
                 phoneTv.setText(device.name);
             }
             ImageView vipIv = view.findViewById(R.id.iv_vip);
             vipIv.setImageResource(device.getVipResourceId());
-            RadioGroup radioGroup = view.findViewById(R.id.rg_resolution);
-            RadioButton radioButton = null;
-            switch (AppSettings.getResolutionType()) {
-                case AppSettings.RESOLUTION_HIGH:
-                    radioButton = view.findViewById(R.id.rb_high);
-                    break;
-                case AppSettings.RESOLUTION_SUPER:
-                    radioButton = view.findViewById(R.id.rb_super);
-                    break;
-                default:
-                    radioButton = view.findViewById(R.id.rb_common);
-                    break;
-            }
-            radioButton.setChecked(true);
-            radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(RadioGroup group, int checkedId) {
-                    if (checkedId == R.id.rb_high) {
-                        AppSettings.setResolutionType(AppSettings.RESOLUTION_HIGH);
-                    } else if (checkedId == R.id.rb_super) {
-                        AppSettings.setResolutionType(AppSettings.RESOLUTION_SUPER);
-                    } else {
-                        AppSettings.setResolutionType(AppSettings.RESOLUTION_COMMON);
-                    }
-                    if (AppSettings.sConnected) {
-                        ClientController.handleControll(device.uuid, "disConnect", null);
-                    }
-                    device.connectType = Device.CONNECT_TYPE_CHANGE_RESOLUTION;
-                    ClientController.handleControll(device.uuid, "reConnect", null);
-                    try {
-                        popupWindow.dismiss();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
+            changeResolution(view, mSettingPopupWindow);
             ImageView voiceIv = view.findViewById(R.id.iv_voice);
             voiceIv.setImageResource(AppSettings.showVoice() ? R.drawable.setting_voice_on : R.drawable.setting_voice_off);
             ImageView keyIv = view.findViewById(R.id.iv_key);
@@ -424,10 +439,10 @@ public class FullActivity extends Activity implements SensorEventListener {
                     } else if (viewId == R.id.ll_key) {
                         handleVk(keyIv, R.drawable.setting_vk_off, R.drawable.setting_vk_on);
                     } else if (viewId == R.id.ll_reboot) {
-                        popupWindow.dismiss();
+                        mSettingPopupWindow.dismiss();
                         rebootDevice();
                     } else if (viewId == R.id.ll_exit) {
-                        popupWindow.dismiss();
+                        mSettingPopupWindow.dismiss();
                         exit();
                     } else if (viewId == R.id.iv_home) {
                         ClientController.handleControll(device.uuid, "buttonHome", null);
@@ -436,7 +451,7 @@ public class FullActivity extends Activity implements SensorEventListener {
                     } else if (viewId == R.id.iv_back) {
                         ClientController.handleControll(device.uuid, "buttonBack", null);
                     } else if (viewId == R.id.tv_professional_mode) {
-                        popupWindow.dismiss();
+                        mSettingPopupWindow.dismiss();
                         initControlMode(AppSettings.CONTROL_MODE_PROFESSIONAL);
                     }
                 }
@@ -460,7 +475,7 @@ public class FullActivity extends Activity implements SensorEventListener {
                     return false;
                 }
             });
-            popupWindow.showAtLocation(getWindow().getDecorView(), Gravity.CENTER, 0, 0);
+            mSettingPopupWindow.showAtLocation(getWindow().getDecorView(), Gravity.CENTER, 0, 0);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -674,7 +689,7 @@ public class FullActivity extends Activity implements SensorEventListener {
                 public void onClickView(View view) {
                     int id = view.getId();
                     if (id == R.id.tv_resolution_top) {
-
+                        showResolutionPopupWindow();
                     } else if (id == R.id.ll_switch_mode_right) {
                         initControlMode(AppSettings.CONTROL_MODE_DEFAULT);
                     } else if (id == R.id.ll_voice_right) {
@@ -707,6 +722,9 @@ public class FullActivity extends Activity implements SensorEventListener {
         }
         if (mode > 0) {
             AppSettings.setControlMode(mode);
+            Map<String, Object> params = new HashMap<>();
+            params.put("fullScreen", mode == AppSettings.CONTROL_MODE_DEFAULT);
+            DeviceTools.fireGlobalEvent("refreshSettings", params);
         }
         if (AppSettings.isDefaultControlMode()) {
             mSettingLayout.setVisibility(View.VISIBLE);

@@ -2,7 +2,6 @@ package com.feihu.cp;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Pair;
 
 import com.alibaba.fastjson.JSONObject;
 import com.feihu.cp.client.Client;
@@ -11,7 +10,6 @@ import com.feihu.cp.entity.AppData;
 import com.feihu.cp.entity.Device;
 import com.feihu.cp.helper.AppSettings;
 import com.feihu.cp.helper.DeviceTools;
-import com.feihu.cp.helper.PublicTools;
 import com.feihu.cp.helper.ToastUtils;
 
 import java.util.concurrent.TimeUnit;
@@ -104,7 +102,8 @@ public class ClientModule extends UniModule {
                     boolean voice = params.getBoolean("voice");
                     AppSettings.setShowVoice(voice);
                     boolean fullScreen = params.getBoolean("fullScreen");
-                    AppSettings.setFullScreen(fullScreen);
+//                    AppSettings.setFullScreen(fullScreen);
+                    AppSettings.setControlMode(fullScreen?AppSettings.CONTROL_MODE_DEFAULT:AppSettings.CONTROL_MODE_PROFESSIONAL);
                     boolean backConfirm = params.getBoolean("backConfirm");
                     AppSettings.setBackConfirm(backConfirm);
                     boolean mobileNetTips = params.getBoolean("mobileNetTips");
