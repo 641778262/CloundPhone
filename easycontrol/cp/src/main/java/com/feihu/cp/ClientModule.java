@@ -178,6 +178,7 @@ public class ClientModule extends UniModule {
                 String name = params.getString("name");
                 String uuid = params.getString("uuid");
                 String sourceId = params.getString("machineCode");
+                String vipType = params.getString("vipType");
                 int leftTime = params.getIntValue("leftTime");
                 if (TextUtils.isEmpty(address) || TextUtils.isEmpty(uuid)) {
                     data.put(CODE, CODE_FAIL);
@@ -197,6 +198,7 @@ public class ClientModule extends UniModule {
                         existDevice.name = name;
                         existDevice.leftTime = TimeUnit.MINUTES.toMillis(leftTime);
                         existDevice.sourceId = sourceId;
+                        existDevice.vipType = vipType;
                         new Client(mUniSDKInstance.getContext(), existDevice, ClientController.getExistClientController(uuid));
                         data.put(CODE, CODE_SUCCESS);
                         data.put(MSG, "connectCloudPhone success leftTime=" + leftTime + " minutes");

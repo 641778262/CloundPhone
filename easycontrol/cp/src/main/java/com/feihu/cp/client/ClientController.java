@@ -142,7 +142,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
             ignored.printStackTrace();
             if (!AppSettings.sPaused) {
                 clientController.autoReConnect = true;
-                clientController.device.connectType = Device.CONNECT_TYPE_AUTO_CONNECT;
+                clientController.device.connectType = Device.CONNECT_TYPE_RECONNECT;
                 tryReConnect(clientController);
             }
 //      clientController.close(AppData.applicationContext.getString(R.string.toast_stream_closed));

@@ -156,7 +156,7 @@ public class FullActivity extends Activity implements SensorEventListener {
     protected void onResume() {
         super.onResume();
         if (AppSettings.sPaused && !AppSettings.sConnected) {
-            device.connectType = Device.CONNECT_TYPE_AUTO_CONNECT;
+            device.connectType = Device.CONNECT_TYPE_RECONNECT;
             ClientController.handleControll(device.uuid, "reConnect", null);
         }
         AppSettings.resetLastTouchTime();
