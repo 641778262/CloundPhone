@@ -48,6 +48,35 @@
             android:text="@string/device_professional_mode"
             android:textColor="@color/white"
             android:textSize="16sp" />
+        <LinearLayout
+            android:id="@+id/ll_full"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginStart="10dp"
+            android:orientation="horizontal"
+            android:paddingLeft="10dp"
+            android:paddingTop="15dp"
+            android:paddingRight="10dp"
+            android:paddingBottom="10dp">
+
+            <TextView
+                android:id="@+id/tv_full"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:text="@string/device_full"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:id="@+id/iv_full"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginTop="1dp"
+                android:src="@drawable/setting_full_off" />
+        </LinearLayout>
+
 
         <LinearLayout
             android:id="@+id/ll_voice"

@@ -11,8 +11,9 @@
   <string name="device_resolution_high">高清(中)\n540p</string>
   <string name="device_resolution_common">普清(快)\n360p</string>
   <string name="device_resolution_auto">智能\n自动选择</string>
-  <string name="device_voice">云机声音</string>
-  <string name="device_virtual_keys">虚拟按键</string>
+  <string name="device_voice">声音</string>
+  <string name="device_virtual_keys">按键</string>
+  <string name="device_full">满屏</string>
   <string name="device_exit_tips">再按一次退出云手机</string>
   <string name="device_reboot">重启云机</string>
   <string name="device_exit">退出云机</string>

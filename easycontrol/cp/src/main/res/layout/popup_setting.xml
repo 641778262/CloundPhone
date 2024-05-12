@@ -173,16 +173,49 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:orientation="horizontal">
 
-        <LinearLayout
+        <com.feihu.cp.client.view.PressLinearLayout
+            android:id="@+id/ll_full"
+            android:layout_width="0dp"
+            android:layout_marginStart="20dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/popup_set_bg"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:layout_marginEnd="10dp"
+            >
+
+            <TextView
+                android:id="@+id/tv_full"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="12dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="@string/device_full"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:id="@+id/iv_full"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:src="@drawable/setting_full_off" />
+        </com.feihu.cp.client.view.PressLinearLayout>
+
+        <com.feihu.cp.client.view.PressLinearLayout
             android:id="@+id/ll_voice"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="center_vertical"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/popup_set_bg"
+            android:gravity="center"
             android:orientation="horizontal"
-            android:paddingLeft="20dp">
+           >
 
             <TextView
                 android:id="@+id/tv_voice"
@@ -199,18 +232,18 @@
                 android:id="@+id/iv_voice"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
-                android:layout_marginTop="3dp"
                 android:src="@drawable/setting_voice_off" />
-        </LinearLayout>
+        </com.feihu.cp.client.view.PressLinearLayout>
 
         <LinearLayout
             android:id="@+id/ll_key"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="center_vertical|right"
+            android:background="@drawable/popup_set_bg"
+            android:gravity="center"
             android:orientation="horizontal"
-            android:paddingRight="20dp">
+            android:layout_marginEnd="20dp">
 
             <TextView
                 android:id="@+id/tv_key"
@@ -227,7 +260,6 @@
                 android:id="@+id/iv_key"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:layout_marginTop="2dp"
                 android:src="@drawable/setting_vk_off" />
         </LinearLayout>
 

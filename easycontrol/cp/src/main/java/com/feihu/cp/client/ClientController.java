@@ -225,6 +225,9 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     }
 
     public static void showConnectDialog(ClientController clientController) {
+        if(AppSettings.sConnected) {
+            return;
+        }
         try {
             CustomDialog customDialog = new CustomDialog(clientController.fullView);
             customDialog.setMessageText(DeviceTools.isNetConnected() ?
@@ -243,6 +246,9 @@ public class ClientController implements TextureView.SurfaceTextureListener {
                                 return;
                             }
                             customDialog.dismiss();
+                            if(AppSettings.sConnected) {
+                                return;
+                            }
                             clientController.device.connectType = Device.CONNECT_TYPE_RECONNECT;
                             Client.showDialog(clientController.fullView, clientController.device, clientController);
                         }
@@ -296,7 +302,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     // 重新计算TextureView大小
     private void reCalculateTextureViewSize() {
         if (maxSize == null || videoSize == null) return;
-        // 根据原画面大小videoSize计算在maxSize空间内的最大缩放大小
+        // 根据原画面大小videoSize计算在maxSize空间内的最大缩放大小，first为宽，second为高
         int tmp1 = videoSize.second * maxSize.first / videoSize.first;
         // 横向最大不会超出
         if (maxSize.second > tmp1) surfaceSize = new Pair<>(maxSize.first, tmp1);
@@ -305,11 +311,12 @@ public class ClientController implements TextureView.SurfaceTextureListener {
             surfaceSize = new Pair<>(videoSize.first * maxSize.second / videoSize.second, maxSize.second);
         // 更新大小
         ViewGroup.LayoutParams layoutParams = textureView.getLayoutParams();
-        layoutParams.width = surfaceSize.first;
-        layoutParams.height = surfaceSize.second;
+        layoutParams.width = getRealShownSize().first;
+        layoutParams.height = getRealShownSize().second;
+        boolean landscape = videoSize.first > videoSize.second;
         textureView.setLayoutParams(layoutParams);
         if (fullView != null) {
-            if (layoutParams.width >= layoutParams.height) {
+            if (landscape) {
                 if (fullView.getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
                     fullView.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 }
@@ -319,6 +326,10 @@ public class ClientController implements TextureView.SurfaceTextureListener {
                 }
             }
         }
+    }
+
+    private Pair<Integer, Integer> getRealShownSize() {
+        return AppSettings.isDeviceMatchParent() ? maxSize : surfaceSize;
     }
 
     // 检查画面是否超出
@@ -379,7 +390,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
         }
         pointerList[p] = x;
         pointerList[10 + p] = y;
-        handleControll(device.uuid, "writeByteBuffer", ControlPacket.createTouchEvent(action, p, (float) x / surfaceSize.first, (float) y / surfaceSize.second, offsetTime));
+        handleControll(device.uuid, "writeByteBuffer", ControlPacket.createTouchEvent(action, p, (float) x / getRealShownSize().first, (float) y / getRealShownSize().second, offsetTime));
     }
 
     // 剪切板

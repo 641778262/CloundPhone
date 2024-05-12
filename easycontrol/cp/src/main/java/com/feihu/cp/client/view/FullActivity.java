@@ -133,7 +133,7 @@ public class FullActivity extends Activity implements SensorEventListener {
         initControlMode(0);
         // 更新textureView
         textureViewLayout.addView(ClientController.getTextureView(device.uuid), 0);
-        mHandler.post(this::updateMaxSize);
+        updateMaxSize(100);
         sensorManager = (SensorManager) getApplication().getSystemService(Context.SENSOR_SERVICE);
         // 页面自动旋转
         sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
@@ -176,20 +176,22 @@ public class FullActivity extends Activity implements SensorEventListener {
 
     @Override
     public void onMultiWindowModeChanged(boolean isInMultiWindowMode, Configuration newConfig) {
-        mHandler.post(this::updateMaxSize);
+        updateMaxSize(0);
         super.onMultiWindowModeChanged(isInMultiWindowMode, newConfig);
     }
 
-    private void updateMaxSize() {
-        int width = textureViewLayout.getMeasuredWidth();
-        int height = textureViewLayout.getMeasuredHeight();
-        ByteBuffer byteBuffer = ByteBuffer.allocate(8);
-        byteBuffer.putInt(width);
-        byteBuffer.putInt(height);
-        byteBuffer.flip();
-        ClientController.handleControll(device.uuid, "updateMaxSize", byteBuffer);
-        if (!device.customResolutionOnConnect && device.changeResolutionOnRunning)
-            ClientController.handleControll(device.uuid, "writeByteBuffer", ControlPacket.createChangeResolutionEvent((float) width / height));
+    private void updateMaxSize(int delay) {
+        mHandler.postDelayed(() -> {
+            int width = textureViewLayout.getMeasuredWidth();
+            int height = textureViewLayout.getMeasuredHeight();
+            ByteBuffer byteBuffer = ByteBuffer.allocate(8);
+            byteBuffer.putInt(width);
+            byteBuffer.putInt(height);
+            byteBuffer.flip();
+            ClientController.handleControll(device.uuid, "updateMaxSize", byteBuffer);
+            if (!device.customResolutionOnConnect && device.changeResolutionOnRunning)
+                ClientController.handleControll(device.uuid, "writeByteBuffer", ControlPacket.createChangeResolutionEvent((float) width / height));
+        }, delay);
     }
 
     public void hide() {
@@ -266,7 +268,7 @@ public class FullActivity extends Activity implements SensorEventListener {
     // 导航栏隐藏
     private void setNavBarHide(boolean isShow) {
         findViewById(R.id.nav_bar).setVisibility(isShow ? View.VISIBLE : View.GONE);
-        textureViewLayout.post(this::updateMaxSize);
+        updateMaxSize(0);
     }
 
     @Override
@@ -413,7 +415,7 @@ public class FullActivity extends Activity implements SensorEventListener {
             view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
             boolean isLandscape = getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                     || getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-            int width = isLandscape ? DeviceTools.getScreenWidth() * 4 / 5 : DeviceTools.getScreenWidth() * 5 / 6;
+            int width = isLandscape ? DeviceTools.getScreenWidth() * 4 / 5 : DeviceTools.getScreenWidth() * 8 / 9;
             mSettingPopupWindow = new CustomPopupWindow(view, width, view
                     .getMeasuredHeight(), true);
             mSettingPopupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -426,15 +428,19 @@ public class FullActivity extends Activity implements SensorEventListener {
             ImageView vipIv = view.findViewById(R.id.iv_vip);
             vipIv.setImageResource(device.getVipResourceId());
             changeResolution(view, mSettingPopupWindow);
+            ImageView fullIv = view.findViewById(R.id.iv_full);
+            fullIv.setImageResource(AppSettings.isDeviceMatchParent() ? R.drawable.setting_full_off : R.drawable.setting_full_on);
             ImageView voiceIv = view.findViewById(R.id.iv_voice);
-            voiceIv.setImageResource(AppSettings.showVoice() ? R.drawable.setting_voice_on : R.drawable.setting_voice_off);
+            voiceIv.setImageResource(AppSettings.showVoice() ? R.drawable.setting_voice_off : R.drawable.setting_voice_on);
             ImageView keyIv = view.findViewById(R.id.iv_key);
-            keyIv.setImageResource(AppSettings.showVirtualKeys() ? R.drawable.setting_vk_on : R.drawable.setting_vk_off);
+            keyIv.setImageResource(AppSettings.showVirtualKeys() ? R.drawable.setting_vk_off : R.drawable.setting_vk_on);
             CustomOnClickListener listener = new CustomOnClickListener() {
                 @Override
                 public void onClickView(View view) {
                     int viewId = view.getId();
-                    if (viewId == R.id.ll_voice) {
+                    if (viewId == R.id.ll_full) {
+                        handleFull(fullIv, R.drawable.setting_full_off, R.drawable.setting_full_on);
+                    } else if (viewId == R.id.ll_voice) {
                         handleVoice(voiceIv, R.drawable.setting_voice_off, R.drawable.setting_voice_on);
                     } else if (viewId == R.id.ll_key) {
                         handleVk(keyIv, R.drawable.setting_vk_off, R.drawable.setting_vk_on);
@@ -457,6 +463,7 @@ public class FullActivity extends Activity implements SensorEventListener {
                 }
             };
 
+            view.findViewById(R.id.ll_full).setOnClickListener(listener);
             view.findViewById(R.id.ll_voice).setOnClickListener(listener);
             view.findViewById(R.id.ll_key).setOnClickListener(listener);
             view.findViewById(R.id.ll_reboot).setOnClickListener(listener);
@@ -485,26 +492,36 @@ public class FullActivity extends Activity implements SensorEventListener {
     private void handleVk(ImageView keyIv, int vkOffResId, int vkOnResId) {
         if (AppSettings.showVirtualKeys()) {
             AppSettings.setShowVirtualKeys(false);
-            keyIv.setImageResource(vkOffResId);
+            keyIv.setImageResource(vkOnResId);
             setNavBarHide(false);
         } else {
             AppSettings.setShowVirtualKeys(true);
-            keyIv.setImageResource(vkOnResId);
+            keyIv.setImageResource(vkOffResId);
             setNavBarHide(true);
 
         }
     }
 
+    private void handleFull(ImageView fullIv, int fullOffResId, int fullOnResId) {
+        if (AppSettings.isDeviceMatchParent()) {
+            AppSettings.setDeviceMatchParent(false);
+            fullIv.setImageResource(fullOnResId);
+        } else {
+            AppSettings.setDeviceMatchParent(true);
+            fullIv.setImageResource(fullOffResId);
+        }
+        updateMaxSize(0);
+    }
     private void handleVoice(ImageView voiceIv, int voiceOffResId, int voiceOnResId) {
         if (AppSettings.showVoice()) {
             AppSettings.setShowVoice(false);
-            voiceIv.setImageResource(voiceOffResId);
+            voiceIv.setImageResource(voiceOnResId);
             Map<String, Object> params = new HashMap<>();
             params.put("voice", false);
             DeviceTools.fireGlobalEvent("refreshSettings", params);
         } else {
             AppSettings.setShowVoice(true);
-            voiceIv.setImageResource(voiceOnResId);
+            voiceIv.setImageResource(voiceOffResId);
             Map<String, Object> params = new HashMap<>();
             params.put("voice", true);
             DeviceTools.fireGlobalEvent("refreshSettings", params);
@@ -672,6 +689,7 @@ public class FullActivity extends Activity implements SensorEventListener {
     private LinearLayout mSettingLayout;
     private ImageView mRightVoiceIv;
     private ImageView mRightVkIv;
+    private ImageView mFullIv;
 
     private void initControlMode(int mode) {
         if (mSettingLayout == null || mTopLayout == null || mRightLayout == null) {
@@ -680,6 +698,7 @@ public class FullActivity extends Activity implements SensorEventListener {
             mRightLayout = findViewById(R.id.ll_right);
             mRightVoiceIv = findViewById(R.id.iv_voice_right);
             mRightVkIv = findViewById(R.id.iv_vk_right);
+            mFullIv = findViewById(R.id.iv_full);
             TextView nameTv = findViewById(R.id.tv_name_top);
             nameTv.setText(device.name);
             ImageView vipIv = findViewById(R.id.iv_vip_top);
@@ -692,7 +711,9 @@ public class FullActivity extends Activity implements SensorEventListener {
                         showResolutionPopupWindow();
                     } else if (id == R.id.ll_switch_mode_right) {
                         initControlMode(AppSettings.CONTROL_MODE_DEFAULT);
-                    } else if (id == R.id.ll_voice_right) {
+                    } else if(id == R.id.ll_full) {
+                        handleFull(mFullIv,R.drawable.setting_full_off,R.drawable.setting_full_on);
+                    }else if (id == R.id.ll_voice_right) {
                         handleVoice(mRightVoiceIv, R.drawable.setting_voice_off, R.drawable.setting_voice_on);
                     } else if (id == R.id.ll_vk_right) {
                         handleVk(mRightVkIv, R.drawable.setting_vk_off, R.drawable.setting_vk_on);
@@ -706,6 +727,7 @@ public class FullActivity extends Activity implements SensorEventListener {
             findViewById(R.id.tv_resolution_top).setOnClickListener(listener);
             findViewById(R.id.ll_switch_mode_right).setOnClickListener(listener);
             findViewById(R.id.ll_voice_right).setOnClickListener(listener);
+            findViewById(R.id.ll_full).setOnClickListener(listener);
             findViewById(R.id.ll_vk_right).setOnClickListener(listener);
             findViewById(R.id.ll_reboot_right).setOnClickListener(listener);
             findViewById(R.id.ll_exit_right).setOnClickListener(listener);
@@ -735,13 +757,14 @@ public class FullActivity extends Activity implements SensorEventListener {
             mTopLayout.setVisibility(View.VISIBLE);
             mRightLayout.setVisibility(View.VISIBLE);
             initTopResolutionTv();
-            mRightVoiceIv.setImageResource(AppSettings.showVoice() ? R.drawable.setting_voice_on : R.drawable.setting_voice_off);
-            mRightVkIv.setImageResource(AppSettings.showVirtualKeys() ? R.drawable.setting_vk_on : R.drawable.setting_vk_off);
+            mRightVoiceIv.setImageResource(!AppSettings.showVoice() ? R.drawable.setting_voice_on : R.drawable.setting_voice_off);
+            mRightVkIv.setImageResource(!AppSettings.showVirtualKeys() ? R.drawable.setting_vk_on : R.drawable.setting_vk_off);
+            mFullIv.setImageResource(!AppSettings.isDeviceMatchParent()?R.drawable.setting_full_on:R.drawable.setting_full_off);
             setNavBarHide(true);
         }
 
         if (mode > 0) {
-            textureViewLayout.post(this::updateMaxSize);
+            updateMaxSize(100);
         }
     }
 

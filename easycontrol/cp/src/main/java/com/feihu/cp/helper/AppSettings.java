@@ -11,6 +11,7 @@ public class AppSettings {
     private static final String KEY_FULL_SCREEN = "key_full_screen";
     private static final String KEY_BACK_CONFIRM = "key_back_confirm";
     private static final String KEY_CONTROL_MODE = "key_control_mode";
+    private static final String KEY_DEVICE_MATCH_PARENT = "key_device_match_parent";
 
     public static final long AUTO_DISCONNECT_TIME = 10 * 60 * 1000;//无操作自动断开时间
     public static final long BACK_DISCONNECT_TIME = 90 * 1000;//退到后台自动断开时间
@@ -35,9 +36,10 @@ public class AppSettings {
     private static int sResolutionType;
     private static boolean sShowMobileNetTips;
 
-    private static boolean sFullScreen;
+//    private static boolean sFullScreen;
     private static boolean sBackConfirm;
     private static int sControlMode;
+    private static boolean sDeviceMatchParent;//是否满屏拉伸显示云手机
     public static boolean sUniApp;//是否通过uniApp访问
 
 
@@ -46,10 +48,21 @@ public class AppSettings {
         sShowVirtualKeys = SharedPreferencesUtils.getBooleanParam(KEY_VIRTUAL_KEYS, true);
         sResolutionType = SharedPreferencesUtils.getIntParam(KEY_RESOLUTION, RESOLUTION_COMMON);
         sShowMobileNetTips = SharedPreferencesUtils.getBooleanParam(KEY_MOBILE_NET_TIPS, true);
-        sFullScreen = SharedPreferencesUtils.getBooleanParam(KEY_FULL_SCREEN, true);
+//        sFullScreen = SharedPreferencesUtils.getBooleanParam(KEY_FULL_SCREEN, true);
         sBackConfirm = SharedPreferencesUtils.getBooleanParam(KEY_BACK_CONFIRM, true);
         sControlMode = SharedPreferencesUtils.getIntParam(KEY_CONTROL_MODE, CONTROL_MODE_DEFAULT);
+        sDeviceMatchParent = SharedPreferencesUtils.getBooleanParam(KEY_DEVICE_MATCH_PARENT, true);
     }
+
+    public static boolean isDeviceMatchParent() {
+        return sDeviceMatchParent;
+    }
+
+    public static void setDeviceMatchParent(boolean deviceMatchParent) {
+        sDeviceMatchParent = deviceMatchParent;
+        SharedPreferencesUtils.setParam(KEY_DEVICE_MATCH_PARENT, deviceMatchParent);
+    }
+
 
     public static boolean isDefaultControlMode() {
         return sControlMode == CONTROL_MODE_DEFAULT;
@@ -60,14 +73,14 @@ public class AppSettings {
         SharedPreferencesUtils.setParam(KEY_CONTROL_MODE, controlMode);
     }
 
-    public static boolean isFullScreen() {
-        return sFullScreen;
-    }
-
-    public static void setFullScreen(boolean fullScreen) {
-        sFullScreen = fullScreen;
-        SharedPreferencesUtils.setParam(KEY_FULL_SCREEN, fullScreen);
-    }
+//    public static boolean isFullScreen() {
+//        return sFullScreen;
+//    }
+//
+//    public static void setFullScreen(boolean fullScreen) {
+//        sFullScreen = fullScreen;
+//        SharedPreferencesUtils.setParam(KEY_FULL_SCREEN, fullScreen);
+//    }
 
     public static boolean isBackConfirm() {
         return sBackConfirm;

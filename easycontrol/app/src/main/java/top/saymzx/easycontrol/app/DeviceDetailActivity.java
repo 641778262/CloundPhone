@@ -5,6 +5,7 @@ import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
@@ -34,6 +35,9 @@ public class DeviceDetailActivity extends Activity {
     isNew = uuid == null;
     if (isNew) device = new Device(UUID.randomUUID().toString(), Device.TYPE_NETWORK);
     else device = AppData.dbHelper.getByUUID(uuid);
+    if(TextUtils.isEmpty(device.address)) {
+      device.address = "58.252.217.15:9002";
+    }
     // 绘制UI
     drawUI();
     // 设置监听
