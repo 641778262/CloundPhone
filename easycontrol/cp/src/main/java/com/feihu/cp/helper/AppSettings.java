@@ -14,7 +14,7 @@ public class AppSettings {
     private static final String KEY_DEVICE_MATCH_PARENT = "key_device_match_parent";
 
     public static final long AUTO_DISCONNECT_TIME = 10 * 60 * 1000;//无操作自动断开时间
-    public static final long BACK_DISCONNECT_TIME = 90 * 1000;//退到后台自动断开时间
+    public static final long BACK_DISCONNECT_TIME = 120 * 1000;//退到后台自动断开时间
 
     public static final int RESOLUTION_SUPER = 3;
     public static final int RESOLUTION_HIGH = 2;
@@ -101,7 +101,7 @@ public class AppSettings {
     }
 
     public static boolean showVoice() {
-        return sShowVoice && !AppSettings.sPaused;
+        return sShowVoice;
     }
 
     public static void setShowVoice(boolean showVoice) {

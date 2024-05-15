@@ -30,6 +30,9 @@ public class Client {
     private static SoftReference<Dialog> dialogReference;
 
     public static void showDialog(Context context, Device device, ClientController existClientController) {
+        if(AppSettings.sConnected) {
+            return;
+        }
         if (!(context instanceof Activity) || device == null || TextUtils.isEmpty(device.address)) {
             return;
         }

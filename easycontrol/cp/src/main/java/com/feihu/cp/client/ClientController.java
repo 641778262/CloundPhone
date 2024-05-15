@@ -213,7 +213,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
             return;
         }
         clientController.handleException = true;
-        clientController.handle.run(false);//主动断开连接
+        clientController.disconnect();//主动断开连接
         if (DeviceTools.isNetConnected() && clientController.autoReConnect) {//自动重连
             clientController.autoReConnect = false;
             Client.showDialog(clientController.fullView, clientController.device, clientController);
@@ -224,8 +224,13 @@ public class ClientController implements TextureView.SurfaceTextureListener {
         }
     }
 
+    private int dialogCount;
+
     public static void showConnectDialog(ClientController clientController) {
         try {
+            if (clientController.dialogCount > 0) {
+                return;
+            }
             CustomDialog customDialog = new CustomDialog(clientController.fullView);
             customDialog.setMessageText(DeviceTools.isNetConnected() ?
                             R.string.connect_net_tips : R.string.connect_net_error).setTitleText(R.string.title_tips).
@@ -234,6 +239,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
                         @Override
                         public void onCancelClicked() {
                             ClientController.handleControll(clientController.device.uuid, "close", null);
+                            clientController.dialogCount--;
                         }
 
                         @Override
@@ -243,14 +249,13 @@ public class ClientController implements TextureView.SurfaceTextureListener {
                                 return;
                             }
                             customDialog.dismiss();
-                            if(AppSettings.sConnected) {
-                                return;
-                            }
+                            clientController.dialogCount--;
                             clientController.device.connectType = Device.CONNECT_TYPE_RECONNECT;
                             Client.showDialog(clientController.fullView, clientController.device, clientController);
                         }
                     });
             customDialog.show();
+            clientController.dialogCount++;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -276,7 +281,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
         handlerThread.interrupt();
         allController.remove(device.uuid);
         if (surfaceTexture != null) surfaceTexture.release();
-        handle.run(false);
+        disconnect();
     }
 
     private static final int minLength = DeviceTools.dp2px(200f);
