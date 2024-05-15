@@ -7,9 +7,9 @@
   <string name="device_resolution_super_top">超清(慢)</string>
   <string name="device_resolution_high_top">高清(中)</string>
   <string name="device_resolution_common_top">普清(快)</string>
-  <string name="device_resolution_super">超清(慢)\n720p</string>
-  <string name="device_resolution_high">高清(中)\n540p</string>
-  <string name="device_resolution_common">普清(快)\n360p</string>
+  <string name="device_resolution_super">超清\n( 慢 )</string>
+  <string name="device_resolution_high">高清\n( 中 )</string>
+  <string name="device_resolution_common">普清\n( 快 )</string>
   <string name="device_resolution_auto">智能\n自动选择</string>
   <string name="device_voice">声音</string>
   <string name="device_virtual_keys">按键</string>

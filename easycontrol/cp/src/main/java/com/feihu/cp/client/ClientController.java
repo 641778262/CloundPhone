@@ -225,9 +225,6 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     }
 
     public static void showConnectDialog(ClientController clientController) {
-        if(AppSettings.sConnected) {
-            return;
-        }
         try {
             CustomDialog customDialog = new CustomDialog(clientController.fullView);
             customDialog.setMessageText(DeviceTools.isNetConnected() ?
