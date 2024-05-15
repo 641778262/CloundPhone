@@ -1,6 +1,5 @@
 package com.feihu.cp.client.decode;
 
-import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -13,7 +12,6 @@ import android.os.Handler;
 
 import androidx.annotation.NonNull;
 
-import com.feihu.cp.entity.AppData;
 import com.feihu.cp.helper.AppSettings;
 
 import java.io.IOException;
@@ -80,41 +78,15 @@ public class AudioDecode {
     private final LinkedBlockingQueue<Integer> intputBufferQueue = new LinkedBlockingQueue<>();
 
     public void decodeIn(ByteBuffer data) throws InterruptedException {
-        if (!AppSettings.showVoice() && !AppSettings.sPaused) {
+        if (!AppSettings.showVoice()) {
             return;
         }
-        setMuteState();
         try {
             int inIndex = intputBufferQueue.take();
             decodec.getInputBuffer(inIndex).put(data);
             decodec.queueInputBuffer(inIndex, 0, data.capacity(), 0, 0);
         } catch (IllegalStateException ignored) {
             ignored.printStackTrace();
-        }
-    }
-
-    private int currentVolume;
-
-    private void setMuteState() {
-        try {
-            if (audioTrack == null) {
-                return;
-            }
-            if (AppSettings.sPaused) {
-                if (currentVolume != 0) {
-                    currentVolume = 0;
-                    audioTrack.setVolume(currentVolume);
-                }
-            } else {
-                if (currentVolume == 0 && AppSettings.showVoice()) {
-                    AudioManager audioManager = (AudioManager) AppData.applicationContext.getSystemService(Context.AUDIO_SERVICE);
-                    currentVolume = audioManager.
-                            getStreamVolume(AudioManager.STREAM_MUSIC);
-                    audioTrack.setVolume(currentVolume);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -166,9 +138,8 @@ public class AudioDecode {
                     .setBufferSizeInBytes(bufferSize);
             // 4
             audioTrack = audioTrackBuild.build();
-        } else {
+        } else
             audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, SAMPLE_RATE, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT, bufferSize, AudioTrack.MODE_STREAM);
-        }
         audioTrack.play();
     }
 

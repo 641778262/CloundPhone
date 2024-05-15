@@ -101,7 +101,7 @@ public class AppSettings {
     }
 
     public static boolean showVoice() {
-        return sShowVoice;
+        return sShowVoice && !AppSettings.sPaused;
     }
 
     public static void setShowVoice(boolean showVoice) {
