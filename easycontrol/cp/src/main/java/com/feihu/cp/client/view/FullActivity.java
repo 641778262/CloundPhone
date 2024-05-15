@@ -100,6 +100,9 @@ public class FullActivity extends Activity implements SensorEventListener {
                 }
                 mNetworkState = currentState;
                 ClientController.handleControll(device.uuid, "disConnect", null);
+                if(AppSettings.sPaused) {
+                    return;
+                }
                 device.connectType = Device.CONNECT_TYPE_CHANGE_NETWORK;
                 ClientController.handleControll(device.uuid, "reConnect", null);
             }
