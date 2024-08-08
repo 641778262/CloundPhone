@@ -1,17 +1,38 @@
 package com.feihu.cp;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.os.Environment;
 import android.text.TextUtils;
+import android.util.Base64;
+
+import androidx.annotation.NonNull;
 
 import com.alibaba.fastjson.JSONObject;
 import com.feihu.cp.client.Client;
 import com.feihu.cp.client.ClientController;
 import com.feihu.cp.entity.AppData;
+import com.feihu.cp.entity.AppInformation;
 import com.feihu.cp.entity.Device;
 import com.feihu.cp.helper.AppSettings;
 import com.feihu.cp.helper.DeviceTools;
 import com.feihu.cp.helper.ToastUtils;
 
+import org.json.JSONArray;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import io.dcloud.feature.uniapp.annotation.UniJSMethod;
@@ -103,7 +124,7 @@ public class ClientModule extends UniModule {
                     AppSettings.setShowVoice(voice);
                     boolean fullScreen = params.getBoolean("fullScreen");
 //                    AppSettings.setFullScreen(fullScreen);
-                    AppSettings.setControlMode(fullScreen?AppSettings.CONTROL_MODE_DEFAULT:AppSettings.CONTROL_MODE_PROFESSIONAL);
+                    AppSettings.setControlMode(fullScreen ? AppSettings.CONTROL_MODE_DEFAULT : AppSettings.CONTROL_MODE_PROFESSIONAL);
                     boolean backConfirm = params.getBoolean("backConfirm");
                     AppSettings.setBackConfirm(backConfirm);
                     boolean mobileNetTips = params.getBoolean("mobileNetTips");
@@ -253,4 +274,458 @@ public class ClientModule extends UniModule {
             callback.invoke(data);
         }
     }
+
+    @UniJSMethod(uiThread = true)
+    public void getAppInfoListByPath(JSONObject params, UniJSCallback callback) {
+        JSONObject data = new JSONObject();
+        try {
+            com.alibaba.fastjson.JSONArray paths;
+            if (params == null) {
+                data.put(CODE, CODE_FAIL);
+                data.put(MSG, "getAppInfoListByPath params null");
+                if (callback != null) {
+                    callback.invoke(data);
+                }
+            } else {
+                paths = params.getJSONArray("paths");
+//                if (object instanceof String[]) {
+//                    paths = (String[]) params.get("paths");
+//                } else {
+//                    data.put(CODE, CODE_FAIL);
+//                    data.put(MSG, "getAppInfoListByPath paths class not match:"+object.getClass().toString());
+//                    if (callback != null) {
+//                        callback.invoke(data);
+//                    }
+//                    return;
+//                }
+                if (paths == null || paths.size() == 0) {
+                    data.put(CODE, CODE_FAIL);
+                    data.put(MSG, "getAppInfoListByPath paths empty");
+                    if (callback != null) {
+                        callback.invoke(data);
+                    }
+                } else {
+                    Executors.newCachedThreadPool().execute(() -> {
+                        try {
+                            int quality = params.getIntValue("quality");
+                            if (quality == 0) {
+                                quality = 50;
+                            }
+                            List<AppInformation> list = new ArrayList<>();
+                            for (int i = 0; i < paths.size(); i++) {
+                                String path = paths.getString(i);
+                                if (TextUtils.isEmpty(path)) {
+                                    continue;
+                                }
+                                File file = new File(path);
+                                if (!file.exists() || !file.isFile()) {
+                                    continue;
+                                }
+                                PackageManager pm = AppData.applicationContext.getPackageManager();
+                                PackageInfo info = pm.getPackageArchiveInfo(path,
+                                        PackageManager.GET_ACTIVITIES);
+                                if (info != null) {
+                                    ApplicationInfo appInfo = info.applicationInfo;
+                                    appInfo.sourceDir = path;
+                                    appInfo.publicSourceDir = path;
+                                    Drawable drawable = appInfo.loadIcon(pm);
+                                    Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+                                    String str = bitmap2Base64(bitmap, quality, Bitmap.CompressFormat.PNG);
+                                    AppInformation appInformation = new AppInformation();
+                                    appInformation.setIcon("data:image/png;base64," + str);
+                                    appInformation.setAppName(pm.getApplicationLabel(appInfo).toString());
+                                    appInformation.setPackageName(info.packageName);
+                                    appInformation.setVersionName(info.versionName);
+                                    appInformation.setVersionCode(info.versionCode);
+                                    appInformation.setSize(file.length());
+                                    appInformation.setPath(path);
+                                    try {
+                                        PackageInfo packageInfo = AppData.applicationContext.getPackageManager().getPackageInfo(info.packageName, 0);
+                                        appInformation.setInstalled(packageInfo != null);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                    list.add(appInformation);
+                                }
+                            }
+                            if (list.size() == 0) {
+                                data.put(CODE, CODE_FAIL);
+                                data.put(MSG, "getAppInfoListByPath no valid path");
+                            } else {
+                                data.put(CODE, CODE_SUCCESS);
+                                data.put(MSG, "getAppInfoListByPath success");
+                                data.put("array", list.toArray(new AppInformation[0]));
+                            }
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            data.put(CODE, CODE_FAIL);
+                            data.put(MSG, "getAppInfoListByPath exception" + e.getMessage());
+                        }
+                        if (callback != null) {
+                            callback.invoke(data);
+                        }
+                    });
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            data.put(CODE, CODE_FAIL);
+            data.put(MSG, "getAppInfoListByPath exception" + e.getMessage());
+            if (callback != null) {
+                callback.invoke(data);
+            }
+        }
+
+    }
+
+    @UniJSMethod(uiThread = true)
+    public void getAppInfoByPath(JSONObject params, UniJSCallback callback) {
+        JSONObject data = new JSONObject();
+        try {
+            if (params == null) {
+                data.put(CODE, CODE_FAIL);
+                data.put(MSG, "getAppInfoByPath params null");
+            } else {
+                String path = params.getString("path");
+                int quality = params.getIntValue("quality");
+                if (quality == 0) {
+                    quality = 50;
+                }
+                if (TextUtils.isEmpty(path)) {
+                    data.put(CODE, CODE_FAIL);
+                    data.put(MSG, "getAppInfoByPath path param empty");
+                } else {
+                    File file = new File(path);
+                    if (!file.exists() || !file.isFile()) {
+                        data.put(CODE, CODE_FAIL);
+                        data.put(MSG, "getAppInfoByPath file not exists or not a file");
+                    } else {
+                        PackageManager pm = AppData.applicationContext.getPackageManager();
+                        PackageInfo info = pm.getPackageArchiveInfo(path,
+                                PackageManager.GET_ACTIVITIES);
+                        if (info != null) {
+                            ApplicationInfo appInfo = info.applicationInfo;
+                            appInfo.sourceDir = path;
+                            appInfo.publicSourceDir = path;
+                            Drawable drawable = appInfo.loadIcon(pm);
+                            Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+                            String str = bitmap2Base64(bitmap, quality, Bitmap.CompressFormat.PNG);
+                            data.put(CODE, CODE_SUCCESS);
+                            data.put(MSG, "getAppInfoByPath success");
+                            data.put("icon", "data:image/png;base64," + str);
+                            data.put("name", pm.getApplicationLabel(appInfo).toString());
+                            data.put("pn", info.packageName);
+                            data.put("vn", info.versionName);
+                            data.put("vc", info.versionCode);
+                            data.put("size", file.length());
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                data.put(CODE, CODE_FAIL);
+                data.put(MSG, "getAppInfoByPath exception" + e.getMessage());
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        }
+        if (callback != null) {
+            callback.invoke(data);
+        }
+    }
+
+    private static Bitmap getBitmapFromDrawable(@NonNull Drawable drawable) {
+        final Bitmap bmp = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        final Canvas canvas = new Canvas(bmp);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bmp;
+    }
+
+    public static String bitmap2Base64(Bitmap bitmap, int compress, Bitmap.CompressFormat format) {
+        if (bitmap == null) {
+            return null;
+        }
+
+        String result = null;
+        ByteArrayOutputStream baos = null;
+        try {
+            baos = new ByteArrayOutputStream();
+            bitmap.compress(format != null ? format : Bitmap.CompressFormat.JPEG, compress, baos);
+
+            baos.flush();
+            baos.close();
+
+            byte[] bitmapBytes = baos.toByteArray();
+            result = Base64.encodeToString(bitmapBytes, Base64.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (baos != null) {
+                    baos.flush();
+                    baos.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
+    }
+
+//    @UniJSMethod(uiThread = true)
+//    public void readFileByPath(JSONObject params, UniJSCallback callback) {
+//        JSONObject data = new JSONObject();
+//        try {
+//            if (params == null) {
+//                data.put(CODE, CODE_FAIL);
+//                data.put(MSG, "getAppInfoByPath params null");
+//            } else {
+//                String path = params.getString("path");
+//                int quality = params.getIntValue("quality");
+//                if (quality == 0) {
+//                    quality = 50;
+//                }
+//                if (TextUtils.isEmpty(path)) {
+//                    data.put(CODE, CODE_FAIL);
+//                    data.put(MSG, "getAppInfoByPath path param empty");
+//                } else {
+//                    File file = new File(path);
+//                    if (!file.exists() || !file.isFile()) {
+//                        data.put(CODE, CODE_FAIL);
+//                        data.put(MSG, "getAppInfoByPath file not exists or not a file");
+//                    } else {
+//                        PackageManager pm = AppData.applicationContext.getPackageManager();
+//                        PackageInfo info = pm.getPackageArchiveInfo(path,
+//                                PackageManager.GET_ACTIVITIES);
+//                        if (info != null) {
+//                            ApplicationInfo appInfo = info.applicationInfo;
+//                            appInfo.sourceDir = path;
+//                            appInfo.publicSourceDir = path;
+//                            Drawable drawable = appInfo.loadIcon(pm);
+//                            Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+//                            String str = bitmap2Base64(bitmap, quality, Bitmap.CompressFormat.PNG);
+//                            data.put(CODE, CODE_SUCCESS);
+//                            data.put(MSG, "getAppInfoByPath success");
+//                            data.put("icon", "data:image/png;base64," + str);
+//                            data.put("name", pm.getApplicationLabel(appInfo).toString());
+//                            data.put("pn", info.packageName);
+//                            data.put("vn", info.versionName);
+//                            data.put("vc", info.versionCode);
+//                            data.put("size", file.length());
+//                        }
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            try {
+//                data.put(CODE, CODE_FAIL);
+//                data.put(MSG, "getAppInfoByPath exception" + e.getMessage());
+//            } catch (Exception exception) {
+//                exception.printStackTrace();
+//            }
+//        }
+//        if (callback != null) {
+//            callback.invoke(data);
+//        }
+//    }
+
+    @UniJSMethod(uiThread = true)
+    public void readFileToString(JSONObject params, UniJSCallback callback) {
+        JSONObject data = new JSONObject();
+        try {
+            if (params == null) {
+                data.put(CODE, CODE_FAIL);
+                data.put(MSG, "readFileToString params null");
+                if (callback != null) {
+                    callback.invoke(data);
+                }
+            } else {
+                String path = params.getString("path");
+                long start = params.getLong("start");
+                long end = params.getLong("end");
+                if (TextUtils.isEmpty(path) || start < 0 || end <= 0) {
+                    data.put(CODE, CODE_FAIL);
+                    data.put(MSG, "readFileToString params invalid");
+                    if (callback != null) {
+                        callback.invoke(data);
+                    }
+                } else {
+                    File file = new File(path);
+                    if (!file.exists() || !file.isFile()) {
+                        data.put(CODE, CODE_FAIL);
+                        data.put(MSG, "readFileToString file not exists or not a file");
+                        if (callback != null) {
+                            callback.invoke(data);
+                        }
+                    } else {
+                        Executors.newCachedThreadPool().execute(() -> {
+                            FileInputStream fis = null;
+                            try {
+                                fis = new FileInputStream(file);
+                                int capacity = (int) (end - start + 1);
+                                fis.skip(start);
+                                byte[] buffer = new byte[capacity];
+                                fis.read(buffer, 0, buffer.length);
+                                String str = Base64.encodeToString(buffer, Base64.NO_WRAP);
+                                data.put(CODE, CODE_SUCCESS);
+                                data.put(MSG, "readFileToString success");
+                                data.put("str", str);
+                                if (callback != null) {
+                                    callback.invoke(data);
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                try {
+                                    data.put(CODE, CODE_FAIL);
+                                    data.put(MSG, "readFileToString exception" + e.getMessage());
+                                    if (callback != null) {
+                                        callback.invoke(data);
+                                    }
+                                } catch (Exception exception) {
+                                    exception.printStackTrace();
+                                }
+                            } finally {
+                                try {
+                                    if (fis != null) {
+                                        fis.close();
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                data.put(CODE, CODE_FAIL);
+                data.put(MSG, "readFileToString exception" + e.getMessage());
+                if (callback != null) {
+                    callback.invoke(data);
+                }
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        }
+    }
+
+    @UniJSMethod(uiThread = true)
+    public void getAppList(JSONObject params, UniJSCallback callback) {
+        int quality = 0;
+        if (params != null) {
+            quality = params.getIntValue("quality");
+        }
+        if (quality == 0) {
+            quality = 50;
+        }
+        final int copy = quality;
+        JSONObject data = new JSONObject();
+        try {
+            Executors.newCachedThreadPool().execute(() -> {
+                try {
+                    PackageManager packageManager = AppData.applicationContext.getPackageManager();
+                    //获取到所有的安装包
+                    List<PackageInfo> installedPackages = packageManager.getInstalledPackages(0);
+                    JSONArray jsonArray = new JSONArray();
+                    for (PackageInfo installedPackage : installedPackages) {
+                        //判断当前是否是系统app
+                        if ((installedPackage.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                            continue;
+                        }
+                        //程序包名
+                        org.json.JSONObject jsonObject = new org.json.JSONObject();
+                        try {
+                            String appName = installedPackage.applicationInfo.loadLabel(packageManager).toString();
+                            jsonObject.put("name", appName);
+                            jsonObject.put("package", installedPackage.packageName);
+                            jsonObject.put("version", installedPackage.versionName);
+                            jsonObject.put("versionCode", installedPackage.packageName);
+                            Drawable icon = installedPackage.applicationInfo.loadIcon(packageManager);
+                            Bitmap bitmap = getBitmapFromDrawable(icon);
+                            String str = bitmap2Base64(bitmap, copy, android.graphics.Bitmap.CompressFormat.PNG);
+                            jsonObject.put("icon", "data:image/png;base64," + str);
+                            String sourceDir = installedPackage.applicationInfo.sourceDir;
+                            jsonObject.put("path", sourceDir);
+                            File file = new File(sourceDir);
+                            jsonObject.put("size", file.length());
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        jsonArray.put(jsonObject);
+
+                    }
+                    data.put(CODE, CODE_SUCCESS);
+                    data.put(MSG, "getAppList success");
+                    data.put("str", jsonArray.toString());
+                    if (callback != null) {
+                        callback.invoke(data);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    try {
+                        data.put(CODE, CODE_FAIL);
+                        data.put(MSG, "getAppList exception" + e.getMessage());
+                        if (callback != null) {
+                            callback.invoke(data);
+                        }
+                    } catch (Exception exception) {
+                        exception.printStackTrace();
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                data.put(CODE, CODE_FAIL);
+                data.put(MSG, "getAppList exception" + e.getMessage());
+                if (callback != null) {
+                    callback.invoke(data);
+                }
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        }
+    }
+
+    @UniJSMethod(uiThread = true)
+    public void getSDCardRootPath(JSONObject params, UniJSCallback callback) {
+        JSONObject data = new JSONObject();
+        try {
+            boolean sdcardExists = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
+            if (sdcardExists) {
+                String path = Environment.getExternalStorageDirectory().getAbsolutePath();
+                if (TextUtils.isEmpty(path)) {
+                    data.put(CODE, CODE_FAIL);
+                    data.put(MSG, "getSDCardRootPath path empty");
+                } else {
+                    data.put(CODE, CODE_SUCCESS);
+                    data.put(MSG, "getSDCardRootPath success");
+                    data.put("path", path);
+                }
+            } else {
+                data.put(CODE, CODE_FAIL);
+                data.put(MSG, "getSDCardRootPath sdCard not exists");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                data.put(CODE, CODE_FAIL);
+                data.put(MSG, "getSDCardRootPath exception" + e.getMessage());
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        }
+        if (callback != null) {
+            callback.invoke(data);
+        }
+    }
+
 }
