@@ -13,13 +13,14 @@ import android.text.TextUtils;
 import android.util.Base64;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
 
 import com.alibaba.fastjson.JSONObject;
 import com.feihu.cp.client.Client;
 import com.feihu.cp.client.ClientController;
 import com.feihu.cp.entity.AppData;
-import com.feihu.cp.entity.AppInformation;
 import com.feihu.cp.entity.Device;
+import com.feihu.cp.file.MediaStoreHelper;
 import com.feihu.cp.helper.AppSettings;
 import com.feihu.cp.helper.DeviceTools;
 import com.feihu.cp.helper.ToastUtils;
@@ -30,7 +31,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -311,7 +311,7 @@ public class ClientModule extends UniModule {
                             if (quality == 0) {
                                 quality = 50;
                             }
-                            List<AppInformation> list = new ArrayList<>();
+                            JSONArray jsonArray = new JSONArray();
                             for (int i = 0; i < paths.size(); i++) {
                                 String path = paths.getString(i);
                                 if (TextUtils.isEmpty(path)) {
@@ -331,30 +331,30 @@ public class ClientModule extends UniModule {
                                     Drawable drawable = appInfo.loadIcon(pm);
                                     Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
                                     String str = bitmap2Base64(bitmap, quality, Bitmap.CompressFormat.PNG);
-                                    AppInformation appInformation = new AppInformation();
-                                    appInformation.setIcon("data:image/png;base64," + str);
-                                    appInformation.setAppName(pm.getApplicationLabel(appInfo).toString());
-                                    appInformation.setPackageName(info.packageName);
-                                    appInformation.setVersionName(info.versionName);
-                                    appInformation.setVersionCode(info.versionCode);
-                                    appInformation.setSize(file.length());
-                                    appInformation.setPath(path);
+                                    org.json.JSONObject jsonObject = new org.json.JSONObject();
+                                    jsonObject.put("icon", "data:image/png;base64," + str);
+                                    jsonObject.put("appName", pm.getApplicationLabel(appInfo).toString());
+                                    jsonObject.put("packageName", info.packageName);
+                                    jsonObject.put("versionName", info.versionName);
+                                    jsonObject.put("versionCode", info.versionCode);
+                                    jsonObject.put("size", file.length());
+                                    jsonObject.put("path", path);
                                     try {
                                         PackageInfo packageInfo = AppData.applicationContext.getPackageManager().getPackageInfo(info.packageName, 0);
-                                        appInformation.setInstalled(packageInfo != null);
+                                        jsonObject.put("isInstalled", packageInfo != null);
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
-                                    list.add(appInformation);
+                                    jsonArray.put(jsonObject);
                                 }
                             }
-                            if (list.size() == 0) {
+                            if (jsonArray.length() == 0) {
                                 data.put(CODE, CODE_FAIL);
                                 data.put(MSG, "getAppInfoListByPath no valid path");
                             } else {
                                 data.put(CODE, CODE_SUCCESS);
                                 data.put(MSG, "getAppInfoListByPath success");
-                                data.put("array", list.toArray(new AppInformation[0]));
+                                data.put("array", jsonArray.toString());
                             }
 
                         } catch (Exception e) {
@@ -414,11 +414,18 @@ public class ClientModule extends UniModule {
                             data.put(CODE, CODE_SUCCESS);
                             data.put(MSG, "getAppInfoByPath success");
                             data.put("icon", "data:image/png;base64," + str);
-                            data.put("name", pm.getApplicationLabel(appInfo).toString());
-                            data.put("pn", info.packageName);
-                            data.put("vn", info.versionName);
-                            data.put("vc", info.versionCode);
+                            data.put("appName", pm.getApplicationLabel(appInfo).toString());
+                            data.put("packageName", info.packageName);
+                            data.put("versionName", info.versionName);
+                            data.put("versionCode", info.versionCode);
                             data.put("size", file.length());
+                            data.put("path", path);
+                            try {
+                                PackageInfo packageInfo = AppData.applicationContext.getPackageManager().getPackageInfo(info.packageName, 0);
+                                data.put("isInstalled", packageInfo != null);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                 }
@@ -615,6 +622,75 @@ public class ClientModule extends UniModule {
             }
         }
     }
+
+    @UniJSMethod(uiThread = true)
+    public void searchFiles(JSONObject params, UniJSCallback callback) {
+        JSONObject data = new JSONObject();
+        if (params == null || TextUtils.isEmpty(params.getString("keyWords"))) {
+            data.put(CODE, CODE_FAIL);
+            data.put(MSG, "searchFiles params null or keyWords null");
+            if (callback != null) {
+                callback.invoke(data);
+            }
+            return;
+        }
+        String keyWords = params.getString("keyWords");
+        try {
+            FragmentActivity activity = (FragmentActivity) mUniSDKInstance.getContext();
+            MediaStoreHelper.getAllBookFile(activity, keyWords, (MediaStoreHelper.MediaResultCallback) files -> {
+                if (files == null || files.size() == 0) {
+                    data.put(CODE, CODE_SUCCESS);
+                    data.put(MSG, "searchFiles file empty");
+                    if (callback != null) {
+                        callback.invoke(data);
+                    }
+                } else {
+                    JSONArray jsonArray = new JSONArray();
+                    for (int i = 0; i < files.size(); i++) {
+                        File file = files.get(i);
+                        org.json.JSONObject jsonObject = new org.json.JSONObject();
+                        try {
+                            String path = file.getAbsolutePath();
+                            jsonObject.put("filePath", path);
+                            jsonObject.put("fileSize", file.length());
+                            int index = path.lastIndexOf("/");
+                            String fileName = path.substring(index + 1);
+                            jsonObject.put("fileName", fileName);
+                            if (fileName.contains(".")) {
+                                int typeIndex = fileName.lastIndexOf(".");
+                                String type = fileName.substring(typeIndex + 1);
+                                jsonObject.put("fileType", type);
+                            } else {
+                                jsonObject.put("fileType", fileName);
+                            }
+                            jsonArray.put(jsonObject);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    data.put(CODE, CODE_SUCCESS);
+                    data.put(MSG, "searchFiles success");
+                    data.put("str", jsonArray.toString());
+                    if (callback != null) {
+                        callback.invoke(data);
+                    }
+                }
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                data.put(CODE, CODE_FAIL);
+                data.put(MSG, "searchFiles exception" + e.getMessage());
+                if (callback != null) {
+                    callback.invoke(data);
+                }
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        }
+    }
+
 
     @UniJSMethod(uiThread = true)
     public void getAppList(JSONObject params, UniJSCallback callback) {
