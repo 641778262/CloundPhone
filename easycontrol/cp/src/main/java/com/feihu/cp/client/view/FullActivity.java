@@ -45,6 +45,7 @@ import com.feihu.cp.helper.CustomOnClickListener;
 import com.feihu.cp.helper.DeviceTools;
 import com.feihu.cp.helper.PingUtils;
 import com.feihu.cp.helper.ToastUtils;
+import com.feihu.cp.notchlib.NotchScreenManager;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -100,7 +101,7 @@ public class FullActivity extends Activity implements SensorEventListener {
                 }
                 mNetworkState = currentState;
                 ClientController.handleControll(device.uuid, "disConnect", null);
-                if(AppSettings.sPaused) {
+                if (AppSettings.sPaused) {
                     return;
                 }
                 device.connectType = Device.CONNECT_TYPE_CHANGE_NETWORK;
@@ -123,8 +124,14 @@ public class FullActivity extends Activity implements SensorEventListener {
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
+
         AppSettings.sPaused = false;
         setContentView(R.layout.activity_full);
+        try {
+            NotchScreenManager.getInstance().setDisplayInNotch(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         textureViewLayout = findViewById(R.id.texture_view_layout);
         device = ClientController.getDevice(getIntent().getStringExtra("uuid"));
         if (device == null) return;
@@ -515,6 +522,7 @@ public class FullActivity extends Activity implements SensorEventListener {
         }
         updateMaxSize(0);
     }
+
     private void handleVoice(ImageView voiceIv, int voiceOffResId, int voiceOnResId) {
         if (AppSettings.showVoice()) {
             AppSettings.setShowVoice(false);
@@ -714,9 +722,9 @@ public class FullActivity extends Activity implements SensorEventListener {
                         showResolutionPopupWindow();
                     } else if (id == R.id.ll_switch_mode_right) {
                         initControlMode(AppSettings.CONTROL_MODE_DEFAULT);
-                    } else if(id == R.id.ll_full) {
-                        handleFull(mFullIv,R.drawable.setting_full_off,R.drawable.setting_full_on);
-                    }else if (id == R.id.ll_voice_right) {
+                    } else if (id == R.id.ll_full) {
+                        handleFull(mFullIv, R.drawable.setting_full_off, R.drawable.setting_full_on);
+                    } else if (id == R.id.ll_voice_right) {
                         handleVoice(mRightVoiceIv, R.drawable.setting_voice_off, R.drawable.setting_voice_on);
                     } else if (id == R.id.ll_vk_right) {
                         handleVk(mRightVkIv, R.drawable.setting_vk_off, R.drawable.setting_vk_on);
@@ -762,7 +770,7 @@ public class FullActivity extends Activity implements SensorEventListener {
             initTopResolutionTv();
             mRightVoiceIv.setImageResource(!AppSettings.showVoice() ? R.drawable.setting_voice_on : R.drawable.setting_voice_off);
             mRightVkIv.setImageResource(!AppSettings.showVirtualKeys() ? R.drawable.setting_vk_on : R.drawable.setting_vk_off);
-            mFullIv.setImageResource(!AppSettings.isDeviceMatchParent()?R.drawable.setting_full_on:R.drawable.setting_full_off);
+            mFullIv.setImageResource(!AppSettings.isDeviceMatchParent() ? R.drawable.setting_full_on : R.drawable.setting_full_off);
             setNavBarHide(true);
         }
 

@@ -313,40 +313,42 @@ public class ClientModule extends UniModule {
                             }
                             JSONArray jsonArray = new JSONArray();
                             for (int i = 0; i < paths.size(); i++) {
-                                String path = paths.getString(i);
-                                if (TextUtils.isEmpty(path)) {
-                                    continue;
-                                }
-                                File file = new File(path);
-                                if (!file.exists() || !file.isFile()) {
-                                    continue;
-                                }
-                                PackageManager pm = AppData.applicationContext.getPackageManager();
-                                PackageInfo info = pm.getPackageArchiveInfo(path,
-                                        PackageManager.GET_ACTIVITIES);
-                                if (info != null) {
-                                    ApplicationInfo appInfo = info.applicationInfo;
-                                    appInfo.sourceDir = path;
-                                    appInfo.publicSourceDir = path;
-                                    Drawable drawable = appInfo.loadIcon(pm);
-                                    Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
-                                    String str = bitmap2Base64(bitmap, quality, Bitmap.CompressFormat.PNG);
-                                    org.json.JSONObject jsonObject = new org.json.JSONObject();
-                                    jsonObject.put("icon", "data:image/png;base64," + str);
-                                    jsonObject.put("appName", pm.getApplicationLabel(appInfo).toString());
-                                    jsonObject.put("packageName", info.packageName);
-                                    jsonObject.put("versionName", info.versionName);
-                                    jsonObject.put("versionCode", info.versionCode);
-                                    jsonObject.put("size", file.length());
-                                    jsonObject.put("path", path);
-                                    try {
+                                try {
+                                    String path = paths.getString(i);
+                                    if (TextUtils.isEmpty(path)) {
+                                        continue;
+                                    }
+                                    File file = new File(path);
+                                    if (!file.exists() || !file.isFile()) {
+                                        continue;
+                                    }
+
+                                    PackageManager pm = AppData.applicationContext.getPackageManager();
+                                    PackageInfo info = pm.getPackageArchiveInfo(path,
+                                            PackageManager.GET_ACTIVITIES);
+                                    if (info != null) {
+                                        ApplicationInfo appInfo = info.applicationInfo;
+                                        appInfo.sourceDir = path;
+                                        appInfo.publicSourceDir = path;
+                                        Drawable drawable = appInfo.loadIcon(pm);
+                                        Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+                                        String str = bitmap2Base64(bitmap, quality, Bitmap.CompressFormat.PNG);
+                                        org.json.JSONObject jsonObject = new org.json.JSONObject();
+                                        jsonObject.put("icon", "data:image/png;base64," + str);
+                                        jsonObject.put("appName", pm.getApplicationLabel(appInfo).toString());
+                                        jsonObject.put("packageName", info.packageName);
+                                        jsonObject.put("versionName", info.versionName);
+                                        jsonObject.put("versionCode", info.versionCode);
+                                        jsonObject.put("size", file.length());
+                                        jsonObject.put("path", path);
                                         PackageInfo packageInfo = AppData.applicationContext.getPackageManager().getPackageInfo(info.packageName, 0);
                                         jsonObject.put("isInstalled", packageInfo != null);
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
+                                        jsonArray.put(jsonObject);
                                     }
-                                    jsonArray.put(jsonObject);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
+
                             }
                             if (jsonArray.length() == 0) {
                                 data.put(CODE, CODE_FAIL);
@@ -712,12 +714,12 @@ public class ClientModule extends UniModule {
                     JSONArray jsonArray = new JSONArray();
                     for (PackageInfo installedPackage : installedPackages) {
                         //判断当前是否是系统app
-                        if ((installedPackage.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                            continue;
-                        }
-                        //程序包名
-                        org.json.JSONObject jsonObject = new org.json.JSONObject();
                         try {
+                            if ((installedPackage.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                                continue;
+                            }
+                            //程序包名
+                            org.json.JSONObject jsonObject = new org.json.JSONObject();
                             String appName = installedPackage.applicationInfo.loadLabel(packageManager).toString();
                             jsonObject.put("name", appName);
                             jsonObject.put("package", installedPackage.packageName);
@@ -731,12 +733,10 @@ public class ClientModule extends UniModule {
                             jsonObject.put("path", sourceDir);
                             File file = new File(sourceDir);
                             jsonObject.put("size", file.length());
-
+                            jsonArray.put(jsonObject);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        jsonArray.put(jsonObject);
-
                     }
                     data.put(CODE, CODE_SUCCESS);
                     data.put(MSG, "getAppList success");
