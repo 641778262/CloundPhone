@@ -284,9 +284,8 @@ public class ClientController implements TextureView.SurfaceTextureListener {
         disconnect();
     }
 
-    private static final int minLength = DeviceTools.dp2px(200f);
-
     private void updateMaxSize(ByteBuffer byteBuffer) {
+        int minLength = DeviceTools.dp2px(200f);
         int width = Math.max(byteBuffer.getInt(), minLength);
         int height = Math.max(byteBuffer.getInt(), minLength);
         this.maxSize = new Pair<>(width, height);
@@ -298,7 +297,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
         int height = byteBuffer.getInt();
         if (width <= 100 || height <= 100) return;
         this.videoSize = new Pair<>(width, height);
-        AppData.uiHandler.post(this::reCalculateTextureViewSize);
+        AppData.uiHandler.postDelayed(this::reCalculateTextureViewSize,100);
     }
 
     // 重新计算TextureView大小

@@ -763,6 +763,7 @@ public class FullActivity extends Activity implements SensorEventListener {
             mSettingLayout.setVisibility(View.VISIBLE);
             mTopLayout.setVisibility(View.GONE);
             mRightLayout.setVisibility(View.GONE);
+            setNavBarHide(AppSettings.showVirtualKeys());
         } else {
             mSettingLayout.setVisibility(View.GONE);
             mTopLayout.setVisibility(View.VISIBLE);

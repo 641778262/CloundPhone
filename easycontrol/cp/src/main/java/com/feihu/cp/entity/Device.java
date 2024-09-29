@@ -41,6 +41,7 @@ public class Device {
     public int connectType;
     public String sourceId;
     public String vipType;
+    public String system;
     public static final int CONNECT_TYPE_NORMAL = 0;
     public static final int CONNECT_TYPE_CHANGE_RESOLUTION = 1;
     public static final int CONNECT_TYPE_RECONNECT = 2;
@@ -50,6 +51,8 @@ public class Device {
     public static final String VIP = "vip";
     public static final String SVIP = "svip";
     public static final String XVIP = "xvip";
+    public static final String SYSTEM_12 = "12";
+    public static final String SYSTEM_12_1 = "12.1";
 
     public Device(String uuid, int type) {
         this.uuid = uuid;
@@ -67,11 +70,11 @@ public class Device {
 
     public int getVipResourceId() {
         if (SVIP.equals(vipType)) {
-            return R.drawable.svip;
+            return SYSTEM_12.equals(system)?R.drawable.svip12:R.drawable.svip12_1;
         } else if (XVIP.equals(vipType)) {
-            return R.drawable.xvip;
+            return SYSTEM_12.equals(system)?R.drawable.xvip12:R.drawable.xvip12_1;
         }
-        return R.drawable.vip;
+        return SYSTEM_12.equals(system)?R.drawable.vip12:R.drawable.vip12_1;
     }
 
 }
