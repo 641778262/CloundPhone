@@ -23,15 +23,22 @@ import com.feihu.cp.entity.Device;
 import com.feihu.cp.file.MediaStoreHelper;
 import com.feihu.cp.helper.AppSettings;
 import com.feihu.cp.helper.DeviceTools;
+import com.feihu.cp.helper.PingUtils;
 import com.feihu.cp.helper.ToastUtils;
 
 import org.json.JSONArray;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -806,4 +813,105 @@ public class ClientModule extends UniModule {
         }
     }
 
+
+    @UniJSMethod(uiThread = true)
+    public void getBestIp(JSONObject params, UniJSCallback callback) {
+        JSONObject data = new JSONObject();
+        if (params == null || TextUtils.isEmpty(params.getString("ips")) || !DeviceTools.isNetConnected()) {
+            data.put(CODE, CODE_FAIL);
+            data.put(MSG, "getBestIp ips params null or no net error");
+            if (callback != null) {
+                callback.invoke(data);
+            }
+            return;
+        }
+
+        try {
+            String addresses = params.getString("ips");
+            final String[] strs = addresses.split(";");
+            if (strs == null || strs.length == 0) {
+                data.put(CODE, CODE_FAIL);
+                data.put(MSG, "getBestIp ips params error");
+                if (callback != null) {
+                    callback.invoke(data);
+                }
+                return;
+            }
+            int pingCount = 0;
+            if (params.containsKey("count")) {
+                pingCount = params.getIntValue("count");
+            }
+            if (pingCount <= 0) {
+                pingCount = 4;
+            }
+            final int copyCount = pingCount;
+            Map<String, Integer> map = new HashMap<>();
+            CountDownLatch countDownLatch = new CountDownLatch(strs.length);
+            for (int i = 0; i < strs.length; i++) {
+                final int index = i;
+                Thread thread = new Thread(() -> {
+                    InputStream is = null;
+                    BufferedReader reader = null;
+                    try {
+                        String url = strs[index].trim();
+                        String command = "/system/bin/ping -i " + 1 + " " + url;
+                        Process process = Runtime.getRuntime().exec(command);       //执行ping指令
+                        is = process.getInputStream();
+                        reader = new BufferedReader(new InputStreamReader(is));
+                        String line;
+                        int count = 0;
+                        int times = 0;
+
+                        while ((line = reader.readLine()) != null && count < copyCount) {
+                            count++;
+                            times = times + PingUtils.getTimeMs(line);
+                        }
+
+                        map.put(url, times);
+                        countDownLatch.countDown();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        try {
+                            if (is != null) {
+                                is.close();
+                            }
+                            if (reader != null) {
+                                reader.close();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                });
+                thread.start();
+            }
+            countDownLatch.await();
+            String ip = null;
+            int min = 0;
+            for (Map.Entry<String, Integer> entry : map.entrySet()) {
+                String key = entry.getKey();
+                int value = entry.getValue();
+                if (value < min || min == 0) {
+                    min = value;
+                    ip = key;
+                }
+            }
+            data.put(CODE, CODE_SUCCESS);
+            data.put(MSG, "getBestIp success");
+            data.put("ip", ip);
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                data.put(CODE, CODE_FAIL);
+                data.put(MSG, "getBestIp exception" + e.getMessage());
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        }
+        if (callback != null) {
+            callback.invoke(data);
+        }
+    }
 }

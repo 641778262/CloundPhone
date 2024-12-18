@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 
 
@@ -58,11 +59,24 @@ public class ClientStream {
         // 连接
         connectThread = new Thread(() -> {
             try {
-                Pair<String, Integer> address = null;
-                if (!connectByUsb) address = PublicTools.getIpAndPort(device.address);
-                adb = connectADB(address, usbDevice);
-                startServer(device);
-                connectServer(address);
+                int count = 0;
+                for (int i = 0; i < 10; i++) {
+                    try {
+                        Pair<String, Integer> address = null;
+                        if (!connectByUsb) address = PublicTools.getIpAndPort(device.address);
+                        adb = connectADB(address, usbDevice);
+                        startServer(device);
+                        connectServer(address);
+                        break;
+                    } catch (Exception e) {
+                        count++;
+                        e.printStackTrace();
+                        if(count == 9) {
+                            throw  new SocketException();
+                        }
+                    }
+
+                }
                 AppData.uiHandler.post(() -> {
                     handle.run(true);
                 });
@@ -270,10 +284,10 @@ public class ClientStream {
             e.printStackTrace();
         }
         try {
-            if(connectThread != null) {
+            if (connectThread != null) {
                 connectThread.interrupt();
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

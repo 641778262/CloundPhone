@@ -22,7 +22,7 @@
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_marginTop="5dp"
-            tools:src="@drawable/vip" />
+            tools:src="@drawable/vip12" />
 
         <TextView
             android:id="@+id/tv_name_top"
